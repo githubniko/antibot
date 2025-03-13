@@ -111,7 +111,7 @@ function whitelistIP($client_ip)
 	if ($client_ip == $_SERVER['SERVER_ADDR'])
 		return true;
 
-	$whilelistipFilePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/whileiplist';
+	$whilelistipFilePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/whilelist';
 
 	$file = fopen($whilelistipFilePath, 'r');
 	if (!$file) return false;
@@ -148,7 +148,7 @@ function blacklistIP($client_ip)
 	if ($client_ip == $_SERVER['SERVER_ADDR'])
 		return true;
 
-	$whilelistipFilePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/balckiplist';
+	$whilelistipFilePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/blacklist';
 
 	$file = fopen($whilelistipFilePath, 'r');
 	if (!$file) return false;
@@ -188,7 +188,7 @@ function addToBlacklist($client_ip, $comment)
 	if(blacklistIP($client_ip))
 		return;
 
-	$blackListFilePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/balckiplist';
+	$blackListFilePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/blacklist';
 
 	if (is_file($blackListFilePath) && !is_writable($blackListFilePath)) {
 		error_log("The file is not writable.: " . $blackListFilePath);
@@ -294,7 +294,7 @@ function isAllow()
 		logMessage("IP-адрес найден в черном списке");
 		eval(DISPLAY_BLOCK_FORM_EXIT);
 	}
-	
+
 	# Проверка, является ли пользовательский агент исключением
 	//if (isExcludedBotLegal($_SERVER['HTTP_USER_AGENT'])) {
 	//	logMessage("UserAgent содержит фразу-исключение $bot");
