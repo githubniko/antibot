@@ -196,7 +196,7 @@ function addToBlacklist($client_ip, $comment)
 	}
 
 	// Формируем строку для записи
-	$mess = $client_ip ." ". getRayID() . (!empty($comment) ? ' #'.$comment:'') . PHP_EOL;
+	$mess = $client_ip ." ". getRayID() . (!empty($comment) ? ' # '.$comment:'') . PHP_EOL;
 
 	// Открываем файл для записи (если файл не существует, он будет создан)
 	$fileHandle = fopen($blackListFilePath, 'a');
@@ -209,6 +209,44 @@ function addToBlacklist($client_ip, $comment)
 
 	// Закрываем файл
 	fclose($fileHandle);
+	logMessage("IP-адрес добавлен в blacklist");
+}
+
+# Добавляет айпи-адрес в белый список
+function addToWhilelist($client_ip, $comment) 
+{
+	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
+
+	# ip адрес сервера выполнения скрипта, нужен для сron и т.п.
+	if ($client_ip == $_SERVER['SERVER_ADDR'])
+		return;
+
+	if(whitelistIP($client_ip))
+		return;
+
+	$filePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/whilelist';
+
+	if (is_file($filePath) && !is_writable($filePath)) {
+		error_log("The file is not writable.: " . $filePath);
+		return;
+	}
+
+	// Формируем строку для записи
+	$mess = $client_ip .(!empty($comment) ? ' # '.$comment:'') . PHP_EOL;
+
+	// Открываем файл для записи (если файл не существует, он будет создан)
+	$fileHandle = fopen($filePath, 'a');
+
+	// Записываем сообщение в файл
+	if (flock($fileHandle, LOCK_EX)) {
+		fwrite($fileHandle, $mess);
+		flock($fileHandle, LOCK_UN);
+	}
+
+	// Закрываем файл
+	fclose($fileHandle);
+
+	logMessage("IP-адрес добавлен в whilelist");
 }
 
 # Функция для проверки, является ли пользовательский агент исключением
@@ -267,7 +305,7 @@ function isIndexbot($client_ip)
 # Разрешающие фильтры
 function isAllow()
 {
-	logMessage("-- Вход " . $_SERVER['HTTP_USER_AGENT']);
+	logMessage("" . $_SERVER['HTTP_USER_AGENT']);
 
 	# Проверка на установленную метку
 	if (isMarker()) {
@@ -277,14 +315,17 @@ function isAllow()
 
 	# Проверка IP на белый лист
 	if (whitelistIP($_SERVER['REMOTE_ADDR'])) {
-		logMessage("Находится в белом списке");
+		logMessage("IP-адрес найден в белом списке");
 		return true;
 	}
 
 	# Проверяем является ли пользователь индексирующим ботом Яндек, Гугл
 	if (isIndexbot($_SERVER['REMOTE_ADDR'])) {
 		logMessage("Индексирующий робот");
-		### ТУТ МОЖНО СДЕЛАТЬ ДОБАВЛЕНИЕ АЙПИ В БЕЛЫЙ ЛИСТ ДЛЯ ОПТИМИЗАЦИИ СКОРОСТИ ОБРАБОТКИ
+		
+		# Добавляем айпи в белый список для производительности
+		addToWhilelist($_SERVER['REMOTE_ADDR'], 'indexbot');
+
 		return true;
 	}
 
