@@ -290,16 +290,18 @@ function isAllow()
 		return true;
 	}
 
+	if(blacklistIP($_SERVER['REMOTE_ADDR'])) {
+		logMessage("IP-адрес найден в черном списке");
+		eval(DISPLAY_BLOCK_FORM_EXIT);
+	}
+	
 	# Проверка, является ли пользовательский агент исключением
 	//if (isExcludedBotLegal($_SERVER['HTTP_USER_AGENT'])) {
 	//	logMessage("UserAgent содержит фразу-исключение $bot");
 	//	return true;
 	//} 
 
-	if(blacklistIP($_SERVER['REMOTE_ADDR'])) {
-		logMessage("IP-адрес найден в черном списке");
-		eval(DISPLAY_BLOCK_FORM_EXIT);
-	}
+	
 
 	return false;
 }
