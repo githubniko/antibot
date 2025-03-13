@@ -268,7 +268,7 @@ function isIndexbot($client_ip)
 
 	// Выполняем обратный DNS-запрос
 	$hostname = gethostbyaddr($client_ip);
-	logMessage($hostname);
+	logMessage('PTR: '.$hostname);
 
 	$regList = [
 		'\.googlebot\.com$',

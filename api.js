@@ -37,7 +37,7 @@ function startBanchmark() {
 	}
 }
 
-function checkBot(setMarker=false) {
+function checkBot(func) {
 	fetch(HTTP_ANTIBOT_PATH + 'check_bot.php', {
         method: 'POST',
         headers: {
@@ -49,7 +49,7 @@ function checkBot(setMarker=false) {
             pixelRatio: window.devicePixelRatio || 1,
 			referrer: document.referrer,
 			mainFrame: window.top === window.self,
-			func: setMarker ? 'set-marker':'check',
+			func: func == undefined ? 'check':func,
 			keyID: KEY_ID,
         })
     })
@@ -92,9 +92,12 @@ function displayCaptcha()
 		if (this.checked) {
 			blockInput.style.display = "none";
 			blockVerifying.style.display = "";
-			checkBot(true);
+			checkBot('set-marker');
 		}
 	});
+	window.onbeforeunload = function(e) {
+		checkBot('win-close');
+	  };
 }
 
 checkBot();
