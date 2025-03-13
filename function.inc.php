@@ -282,9 +282,7 @@ function isAllow()
 	}
 
 	# Проверяем является ли пользователь индексирующим ботом Яндек, Гугл
-	if (((stripos($_SERVER['HTTP_USER_AGENT'], 'bot') !== false) || (stripos($_SERVER['HTTP_USER_AGENT'], 'spider') !== false))
-		&& isIndexbot($_SERVER['REMOTE_ADDR'])
-	) {
+	if (isIndexbot($_SERVER['REMOTE_ADDR'])) {
 		logMessage("Индексирующий робот");
 		### ТУТ МОЖНО СДЕЛАТЬ ДОБАВЛЕНИЕ АЙПИ В БЕЛЫЙ ЛИСТ ДЛЯ ОПТИМИЗАЦИИ СКОРОСТИ ОБРАБОТКИ
 		return true;
