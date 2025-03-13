@@ -121,19 +121,18 @@ function whitelistIP($client_ip)
 		if (empty($line)) continue;
 
 		$isFind = preg_match('/([0-9a-z\.\:]+)\s*.*/i', $line, $match);
-		if($isFind > 0) {
+		if ($isFind > 0) {
 			$ip = $match[1];
 
 			if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6) === false) {
 				continue;
 			}
-			
+
 			if ($ip == $client_ip) {
 				fclose($file);
 				return true;
 			}
 		}
-		
 	}
 	fclose($file);
 	return false;
@@ -158,26 +157,25 @@ function blacklistIP($client_ip)
 		if (empty($line)) continue;
 
 		$isFind = preg_match('/([0-9a-z\.\:]+)\s*.*/i', $line, $match);
-		if($isFind > 0) {
+		if ($isFind > 0) {
 			$ip = $match[1];
 
 			if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6) === false) {
 				continue;
 			}
-			
+
 			if ($ip == $client_ip) {
 				fclose($file);
 				return true;
 			}
 		}
-		
 	}
 	fclose($file);
 	return false;
 }
 
 # Добавляет айпи-адрес в черный список
-function addToBlacklist($client_ip, $comment) 
+function addToBlacklist($client_ip, $comment)
 {
 	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
 
@@ -185,7 +183,7 @@ function addToBlacklist($client_ip, $comment)
 	if ($client_ip == $_SERVER['SERVER_ADDR'])
 		return;
 
-	if(blacklistIP($client_ip))
+	if (blacklistIP($client_ip))
 		return;
 
 	$blackListFilePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/blacklist';
@@ -196,7 +194,7 @@ function addToBlacklist($client_ip, $comment)
 	}
 
 	// Формируем строку для записи
-	$mess = $client_ip ." ". getRayID() . (!empty($comment) ? ' # '.$comment:'') . PHP_EOL;
+	$mess = $client_ip . " " . getRayID() . (!empty($comment) ? ' # ' . $comment : '') . PHP_EOL;
 
 	// Открываем файл для записи (если файл не существует, он будет создан)
 	$fileHandle = fopen($blackListFilePath, 'a');
@@ -213,7 +211,7 @@ function addToBlacklist($client_ip, $comment)
 }
 
 # Добавляет айпи-адрес в белый список
-function addToWhilelist($client_ip, $comment) 
+function addToWhilelist($client_ip, $comment)
 {
 	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
 
@@ -221,7 +219,7 @@ function addToWhilelist($client_ip, $comment)
 	if ($client_ip == $_SERVER['SERVER_ADDR'])
 		return;
 
-	if(whitelistIP($client_ip))
+	if (whitelistIP($client_ip))
 		return;
 
 	$filePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/whilelist';
@@ -232,7 +230,7 @@ function addToWhilelist($client_ip, $comment)
 	}
 
 	// Формируем строку для записи
-	$mess = $client_ip .(!empty($comment) ? ' # '.$comment:'') . PHP_EOL;
+	$mess = $client_ip . (!empty($comment) ? ' # ' . $comment : '') . PHP_EOL;
 
 	// Открываем файл для записи (если файл не существует, он будет создан)
 	$fileHandle = fopen($filePath, 'a');
@@ -266,6 +264,8 @@ function isExcludedBotLegal($userAgent)
 # Фнкуция проверяет ip на индексирующего бота
 function isIndexbot($client_ip)
 {
+	$isIPv6 = filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+
 	// Выполняем обратный DNS-запрос
 	$hostname = gethostbyaddr($client_ip);
 	logMessage($hostname);
@@ -290,11 +290,22 @@ function isIndexbot($client_ip)
 	{
 		$count = preg_match("/$reg/i", $hostname, $match);   //поиск подстрок в строке pValue
 		if ($count > 0) {
-			# тут можно выполняем прямой DNS-запрос для проверки
-			# например : $resolvedIps = gethostbynamel($hostname);
-			#if ($resolvedIps && in_array($client_ip, $resolvedIps)) {
-			#	return true;
-			#}
+			// Выполняем прямой DNS-запрос в зависимости от типа IP
+			$resolvedRecords = dns_get_record($hostname, $isIPv6 ? DNS_AAAA:DNS_A);
+
+			// Проверяем, совпадает ли исходный IP с одним из разрешенных
+			if ($resolvedRecords) {
+				foreach ($resolvedRecords as $record) {
+					if ($isIPv6) {
+						if (isset($record['ipv6']) && $record['ipv6'] === $client_ip)
+							return true;
+					} else {
+						if (isset($record['ip']) && $record['ip'] === $client_ip)
+							return true;
+					}
+				}
+			}
+
 			return true;
 		}
 	}
@@ -322,14 +333,14 @@ function isAllow()
 	# Проверяем является ли пользователь индексирующим ботом Яндек, Гугл
 	if (isIndexbot($_SERVER['REMOTE_ADDR'])) {
 		logMessage("Индексирующий робот");
-		
+
 		# Добавляем айпи в белый список для производительности
 		addToWhilelist($_SERVER['REMOTE_ADDR'], 'indexbot');
 
 		return true;
 	}
 
-	if(blacklistIP($_SERVER['REMOTE_ADDR'])) {
+	if (blacklistIP($_SERVER['REMOTE_ADDR'])) {
 		logMessage("IP-адрес найден в черном списке");
 		eval(DISPLAY_BLOCK_FORM_EXIT);
 	}
@@ -340,7 +351,7 @@ function isAllow()
 	//	return true;
 	//} 
 
-	
+
 
 	return false;
 }
