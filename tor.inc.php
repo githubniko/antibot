@@ -73,9 +73,7 @@ function checkViaDns($ip, $timeout)
         $dnsQuery = $reversedIp . '.dnsel.torproject.org';
 
         try {
-            echo $dnsQuery. " ";
             $records = dns_get_record($dnsQuery, DNS_A);
-            var_dump($records);
             
             if (!empty($records) && isset($records[0]['ip']) && $records[0]['ip'] === '127.0.0.2') {
                 return true;
