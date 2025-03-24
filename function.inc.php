@@ -264,6 +264,7 @@ function isExcludedBotLegal($userAgent)
 		if (empty($line)) continue;
 
 		$strSearch = trim(mb_eregi('(.*)(#.*)', $line, $match) ? $match[1] : $line);
+		if (empty($strSearch)) continue;
 		if(mb_eregi($strSearch, $userAgent)) {
 			logMessage("UserAgent содержит фразу-исключение: ".$strSearch);
 			fclose($file);
@@ -295,7 +296,6 @@ function isIndexbot($client_ip)
 		if (empty($line)) continue;
 
 		$reg = trim(mb_eregi('(.*)(#.*)', $line, $match) ? $match[1] : $line);
-		
 		if (empty($reg)) continue;
 
 		if(!validateDomain($reg)) {
