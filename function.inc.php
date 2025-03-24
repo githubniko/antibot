@@ -262,6 +262,9 @@ function isExcludedBotLegal($userAgent)
 
 	$rulesPath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/useragent.rules';
 
+	if(!is_file($rulesPath))
+		return false;
+	
 	$file = fopen($rulesPath, 'r');
 	if (!$file) return false;
 
