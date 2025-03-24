@@ -12,7 +12,7 @@
  * @return bool
  * @throws RuntimeException Если проверка невозможна
  */
-function isTor(string $ip, array $options = [])
+function isTor($ip, $options = [])
 {
     // Нормализация параметров
     $options = array_merge([
@@ -58,7 +58,7 @@ function isTor(string $ip, array $options = [])
 /**
  * Проверка через DNS (IPv4)
  */
-function checkViaDns(string $ip, int $timeout)
+function checkViaDns($ip, $timeout)
 {
     $isIPv6 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
     if($isIPv6)
@@ -93,7 +93,7 @@ function checkViaDns(string $ip, int $timeout)
 /**
  * Проверка через HTTP (fallback метод)
  */
-function checkViaHttp(string $ip, int $timeout)
+function checkViaHttp($ip, $timeout)
 {
     $url = 'https://www.dan.me.uk/torlist/?exit';
     $cacheFile = sys_get_temp_dir() . '/tor_exit_nodes.cache';
