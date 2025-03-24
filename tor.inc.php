@@ -38,7 +38,7 @@ function isTor($ip, $options = [])
     if (!$dnsMethodFailed) {
         try {
             $result = checkViaHttp($ip, $options['timeout']);
-        } catch (RuntimeException $e) {
+        } catch (Exception $e) {
             $dnsMethodFailed = true;
         }
     }
@@ -47,8 +47,8 @@ function isTor($ip, $options = [])
     if ($dnsMethodFailed && $options['fallback']) {
         try {
             $result = checkViaDns($ip, $options['timeout']);
-        } catch (RuntimeException $e) {
-            throw new RuntimeException("All Tor check methods failed: " . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception("All Tor check methods failed: (" . $e->getMessage() . ")");
         }
     }
 
@@ -62,7 +62,7 @@ function checkViaDns($ip, $timeout)
 {
     $isIPv6 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
     if($isIPv6)
-        throw "Error: Unable to check IPv6 via DNS method";
+        throw new Exception("Unable to check IPv6 via DNS method");
 
     // Настройка таймаута
     $originalTimeout = ini_get('default_socket_timeout');
@@ -114,9 +114,9 @@ function checkViaHttp($ip, $timeout)
         'ssl' => ['verify_peer' => true, 'verify_peer_name' => true]
     ]);
 
-    $torIps = file_get_contents($url, false, $ctx);
+    $torIps = @file_get_contents($url, false, $ctx);
     if ($torIps === false) {
-        throw new RuntimeException("Failed to fetch Tor exit node list");
+        throw new Exception("Failed to fetch Tor exit node list");
     }
 
     // Сохранение в кэш
