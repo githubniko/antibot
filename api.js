@@ -8,6 +8,7 @@ const blockInput = document.getElementById("ihOWn1");
 const blockVerifying = document.getElementById("verifying");
 const blockFail = document.getElementById("fail");
 let KEY_ID = "";
+let flagCloseWindow = true;
 
 /*
 function isWebWorkerSupported() {
@@ -40,6 +41,7 @@ function startBanchmark() {
 */
 
 function refresh() {
+	flagCloseWindow = false;
 	window.location.href = window.location.href;
 }
 
@@ -102,7 +104,9 @@ function displayCaptcha() {
 		}
 	});
 	window.onbeforeunload = function (e) {
-		checkBot('win-close');
+		if(flagCloseWindow) {
+			checkBot('win-close');
+		}
 	};
 }
 
