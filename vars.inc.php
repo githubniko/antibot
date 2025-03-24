@@ -1,5 +1,5 @@
 <?php
-$AB_DEBUGE = true;
+$AB_DEBUGE = false;
 $AB_SCREEN_WHIDTH = 1920; // px, минимальная ширина экрана
 $AB_EXPIRED_COOKIE = 14; // дней, действия метки
 
