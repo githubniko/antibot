@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 	endJSON('block');
 }
 $data = json_decode(file_get_contents('php://input'), true);
-//echo $data['referrer'];exit;
+//echo $data['referer'];exit;
 
 if(!isset($data['func'])) {
 	logMessage("Значение _data[func] не установлено");
@@ -72,7 +72,7 @@ if ($data['mainFrame'] != true) {
 	endJSON('block');
 }
 
-if (empty($data['referrer'])) {
+if (empty($data['referer']) || mb_eregi("^http(s*):\/\/".$_SERVER['HTTP_HOST'] , $data['referer']) === false) {
 	logMessage("Прямой заход");
 	endJSON('captcha');
 }

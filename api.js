@@ -50,7 +50,7 @@ function checkBot(func) {
 		screenWidth: window.screen.width,
 		screenHeight: window.screen.height,
 		pixelRatio: window.devicePixelRatio || 1,
-		referrer: document.referrer,
+		referer: document.referrer,
 		mainFrame: window.top === window.self,
 		func: func == undefined ? 'check' : func,
 		keyID: KEY_ID,
