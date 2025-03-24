@@ -72,7 +72,7 @@ if ($data['mainFrame'] != true) {
 	endJSON('block');
 }
 
-if (empty($data['referer']) || mb_eregi("^http(s*):\/\/".$_SERVER['HTTP_HOST'] , $data['referer']) === false) {
+if (empty($data['referer']) || mb_eregi("^http(s*):\/\/".$_SERVER['HTTP_HOST'] , $data['referer'])) {
 	logMessage("Прямой заход");
 	endJSON('captcha');
 }
