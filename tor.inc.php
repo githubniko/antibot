@@ -95,8 +95,10 @@ function checkViaDns($ip, $timeout)
  */
 function checkViaHttp($ip, $timeout)
 {
+    global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
+
     $url = 'https://www.dan.me.uk/torlist/?exit';
-    $cacheFile = sys_get_temp_dir() . '/tor_exit_nodes.cache';
+    $cacheFile = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'tor_exit_nodes.cache';
 
     // Проверка кэша
     if (file_exists($cacheFile))
