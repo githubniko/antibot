@@ -1,4 +1,6 @@
 <?php
+require_once "tor.inc.php";
+
 session_start();
 $RayID = ""; // ид для идентификации пользователя в лог-файле
 $RayIDSecret = ""; // секретный ид для названия куки
@@ -336,6 +338,8 @@ function isIndexbot($client_ip)
 # Разрешающие фильтры
 function isAllow()
 {
+	global $AB_TOREXIT_BLOCK;
+
 	logMessage("" . $_SERVER['HTTP_USER_AGENT']);
 
 	# Проверка на установленную метку
@@ -370,7 +374,16 @@ function isAllow()
 		eval(DISPLAY_BLOCK_FORM_EXIT);
 	}
 
-	
+	# Проверка на принадлежность к Tor-сети
+	try {
+		if ($AB_TOREXIT_BLOCK && isTor($_SERVER['REMOTE_ADDR'])) {
+			logMessage("IP-адрес является выходным узлом Tor");
+			addToBlacklist($_SERVER['REMOTE_ADDR'], 'tor');
+			eval(DISPLAY_BLOCK_FORM_EXIT);
+		}
+	} catch (Exception $e) {
+		logMessage ("Error: " . $e->getMessage());
+	}
 
 
 
