@@ -115,6 +115,9 @@ function whitelistIP($client_ip)
 
 	$whilelistipFilePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/whilelist';
 
+	if(!is_file($whilelistipFilePath))
+		return false;
+
 	$file = fopen($whilelistipFilePath, 'r');
 	if (!$file) return false;
 
@@ -150,6 +153,9 @@ function blacklistIP($client_ip)
 		return true;
 
 	$whilelistipFilePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/blacklist';
+
+	if(!is_file($whilelistipFilePath))
+		return false;
 
 	$file = fopen($whilelistipFilePath, 'r');
 	if (!$file) return false;
@@ -287,6 +293,9 @@ function isIndexbot($client_ip)
 	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
 
 	$rulesPath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/indexbot.rules';
+
+	if(!is_file($rulesPath))
+		return false;
 
 	$file = fopen($rulesPath, 'r');
 	if (!$file) return false;
