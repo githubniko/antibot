@@ -281,25 +281,31 @@ function isIndexbot($client_ip)
 	$hostname = gethostbyaddr($client_ip);
 	logMessage('PTR: '.$hostname);
 
-	$regList = [
-		'\.googlebot\.com$',
-		'\.google\.com$',
-		'\.yandex\.ru$',
-		'\.yandex\.net$',
-		'\.yandex\.com$',
-		'\.msn\.com$', // http://www.bing.com/bingbot.htm
-		'\.petalsearch\.com$', // для сервисов Huawei https://webmaster.petalsearch.com/site/petalbot
-		'\.apple\.com$', // http://www.apple.com/go/applebot
-		'\.baidu\.com$', // http://www.baidu.com/search/spider.html
-		'\.baidu\.jp$', // http://www.baidu.com/search/spider.html
-	];
+	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
 
-	mb_regex_encoding('UTF-8');   //кодировка строки
+	$rulesPath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/indexbot.rules';
 
-	// Проверяем, заканчивается ли доменное имя на .googlebot.com или .google.com
-	foreach ($regList as $reg) // перебираем регулярные выражения, пока не найдется хоть одно совпадение
-	{
-		$count = preg_match("/$reg/i", $hostname, $match);   //поиск подстрок в строке pValue
+	$file = fopen($rulesPath, 'r');
+	if (!$file) return false;
+
+	while (($line = fgets($file)) !== false) {
+		$line = trim($line);
+		if (empty($line)) continue;
+
+		$reg = trim(mb_eregi('(.*)(#.*)', $line, $match) ? $match[1] : $line);
+		
+		if (empty($reg)) continue;
+
+		if(!validateDomain($reg)) {
+			logMessage('Домен не валидный: '.$reg);
+			continue;
+		}
+		$reg = str_replace('.', '\.', $reg);
+
+		mb_regex_encoding('UTF-8');   //кодировка строки
+
+		// Проверяем, заканчивается ли доменное имя на .googlebot.com или .google.com
+		$count = preg_match("/\.$reg$/i", $hostname, $match);   //поиск подстрок в строке pValue
 		if ($count > 0) {
 			// Выполняем прямой DNS-запрос в зависимости от типа IP
 			$resolvedRecords = dns_get_record($hostname, $isIPv6 ? DNS_AAAA:DNS_A);
@@ -309,18 +315,21 @@ function isIndexbot($client_ip)
 				foreach ($resolvedRecords as $record) {
 					if ($isIPv6) {
 						if (isset($record['ipv6']) && $record['ipv6'] === $client_ip)
-							return true;
+						fclose($file);
+						return true;
 					} else {
 						if (isset($record['ip']) && $record['ip'] === $client_ip)
-							return true;
+						fclose($file);
+						return true;
 					}
 				}
 			}
-
+			fclose($file);
 			return true;
 		}
 	}
 
+	fclose($file);
 	return false;
 }
 
@@ -366,4 +375,9 @@ function isAllow()
 
 
 	return false;
+}
+
+function validateDomain($domain) {
+    $pattern = '/^(?!\-)(?:[a-zA-Z\d\-]{0,62}[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/';
+    return preg_match($pattern, $domain);
 }
