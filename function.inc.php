@@ -250,14 +250,25 @@ function addToWhilelist($client_ip, $comment)
 # Функция для проверки, является ли пользовательский агент исключением
 function isExcludedBotLegal($userAgent)
 {
-	# Список исключений (поисковые боты Яндекса и Google)
-	# !!! Не использовать для посторонних ботов, т.к. $userAgent можно подделать
-	$excludedBots = ['Googlebot', 'YandexBot'];
+	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
 
-	foreach ($excludedBots as $bot) {
-		if (strpos($userAgent, $bot) !== false)
+	$rulesPath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/useragent.rules';
+
+	$file = fopen($rulesPath, 'r');
+	if (!$file) return false;
+
+	while (($line = fgets($file)) !== false) {
+		$line = trim($line);
+		if (empty($line)) continue;
+
+		$strSearch = trim(mb_eregi('(.*)(#.*)', $line, $match) ? $match[1] : $line);
+		if(mb_eregi($strSearch, $userAgent)) {
+			logMessage("UserAgent содержит фразу-исключение: ".$strSearch);
+			fclose($file);
 			return true;
+		}
 	}
+	fclose($file);
 	return false;
 }
 
@@ -330,6 +341,11 @@ function isAllow()
 		return true;
 	}
 
+	# Проверка, является ли пользовательский агент исключением
+	if (isExcludedBotLegal($_SERVER['HTTP_USER_AGENT'])) {
+		return true;
+	} 
+
 	# Проверяем является ли пользователь индексирующим ботом Яндек, Гугл
 	if (isIndexbot($_SERVER['REMOTE_ADDR'])) {
 		logMessage("Индексирующий робот");
@@ -345,11 +361,7 @@ function isAllow()
 		eval(DISPLAY_BLOCK_FORM_EXIT);
 	}
 
-	# Проверка, является ли пользовательский агент исключением
-	//if (isExcludedBotLegal($_SERVER['HTTP_USER_AGENT'])) {
-	//	logMessage("UserAgent содержит фразу-исключение $bot");
-	//	return true;
-	//} 
+	
 
 
 
