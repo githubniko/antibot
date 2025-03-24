@@ -196,7 +196,7 @@ function addToBlacklist($client_ip, $comment)
 	}
 
 	// Формируем строку для записи
-	$mess = $client_ip . " " . getRayID() . (!empty($comment) ? ' # ' . $comment : '') . PHP_EOL;
+	$mess = $client_ip . " # " . getRayID() . (!empty($comment) ? ' ' . $comment : '') . PHP_EOL;
 
 	// Открываем файл для записи (если файл не существует, он будет создан)
 	$fileHandle = fopen($blackListFilePath, 'a');
