@@ -55,24 +55,24 @@ if($data['func'] == 'set-marker') {
 	endJSON('allow');
 }
 
-if (filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+if ($AB_IS_IPV6 && filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
 	logMessage("Тип ip-адреса IPv6");
 	endJSON('captcha');
 }
 
 # Проверка для мобильных девайсов
-if($data['screenWidth'] < $AB_SCREEN_WHIDTH) {
+if($AB_IS_MOBILE && $data['screenWidth'] < $AB_SCREEN_WHIDTH) {
 	logMessage("Разрешение экрана меньше {$AB_SCREEN_WHIDTH}px");
 	endJSON('captcha');
 }
 
-if ($data['mainFrame'] != true) {
+if ($AB_IS_IFRAME && $data['mainFrame'] != true) {
 	logMessage("Открытие во фрейме");
 	addToBlacklist($_SERVER['REMOTE_ADDR'], 'iframe');
 	endJSON('block');
 }
 
-if (empty($data['referer']) || mb_eregi("^http(s*):\/\/".$_SERVER['HTTP_HOST'] , $data['referer'])) {
+if ($AB_IS_DIRECT && (empty($data['referer']) || mb_eregi("^http(s*):\/\/".$_SERVER['HTTP_HOST'] , $data['referer']))) {
 	logMessage("Прямой заход");
 	endJSON('captcha');
 }

@@ -388,7 +388,7 @@ function isAllow()
 
 	# Проверка на принадлежность к Tor-сети
 	try {
-		if ($AB_TOREXIT_BLOCK && isTor($_SERVER['REMOTE_ADDR'])) {
+		if ($AB_IS_TOR && isTor($_SERVER['REMOTE_ADDR'])) {
 			logMessage("IP-адрес является выходным узлом Tor");
 			addToBlacklist($_SERVER['REMOTE_ADDR'], 'tor');
 			eval(DISPLAY_BLOCK_FORM_EXIT);
