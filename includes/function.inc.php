@@ -9,7 +9,7 @@ $RayIDSecret = ""; // секретный ид для названия куки
 define(
 	'DISPLAY_CAPTCHA_FORM_EXIT',
 	'logMessage("Отображение страницы проверки");
-    require "template.inc.php";
+    require "templates/template.inc.php";
 	exit;'
 );
 
@@ -17,7 +17,7 @@ define(
 define(
 	'DISPLAY_BLOCK_FORM_EXIT',
 	'logMessage("Отображение страницы блокировки");
-    require "template_block.inc.php";
+    require "templates/template_block.inc.php";
 	exit;'
 );
 
@@ -25,11 +25,11 @@ define(
 function isVarFile()
 {
 	$DOCUMENT_ROOT = rtrim( getenv("DOCUMENT_ROOT"), "/\\" );
-	if(!is_file(__DIR__."/vars.inc.php")) {
-		if(!is_file(__DIR__."/vars.inc.php.exemple")) {
+	if(!is_file(__DIR__."/../vars.inc.php")) {
+		if(!is_file(__DIR__."/../vars.inc.php.exemple")) {
 			die("Error: Not file vars.inc.php.exemple");
 		}
-		if(!copy(__DIR__."/vars.inc.php.exemple", __DIR__."/vars.inc.php")) {
+		if(!copy(__DIR__."/../vars.inc.php.exemple", __DIR__."/../vars.inc.php")) {
 			die("Error: Failed to copy vars.inc.php");
 		}
 		ob_clean();

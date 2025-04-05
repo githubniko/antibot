@@ -58,7 +58,7 @@ function checkBot(func) {
 		keyID: KEY_ID,
 	});
 
-	xhr.open('POST', HTTP_ANTIBOT_PATH + 'check_bot.php', true);
+	xhr.open('POST', HTTP_ANTIBOT_PATH + 'xhr.php', true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
 
 	xhr.onload = function () {

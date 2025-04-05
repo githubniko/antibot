@@ -1,6 +1,6 @@
 <?php
 @include "vars.inc.php";
-include "function.inc.php";
+include "includes/function.inc.php";
 
 isVarFile();
 

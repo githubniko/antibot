@@ -1,4 +1,3 @@
-<? if(basename($_SERVER['SCRIPT_NAME']) == basename(__FILE__)) {ob_end_clean(); header("HTTP/1.1 404 Not Found"); exit;};?><!DOCTYPE html>
 <html lang="en-US" dir="ltr">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
