@@ -2,3 +2,4 @@
 *.cache
 blacklist
 whilelist
+vars.inc.php

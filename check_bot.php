@@ -1,6 +1,7 @@
 <?php
-include "vars.inc.php";
+@include "vars.inc.php";
 include "function.inc.php";
+isVarFile();
 header('Content-type: application/json; charset=utf-8');
 
 

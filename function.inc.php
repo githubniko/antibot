@@ -21,6 +21,23 @@ define(
 	exit;'
 );
 
+# Функция проверяет наличие конфиг. файла и создает его в случае отсутствия
+function isVarFile()
+{
+	$DOCUMENT_ROOT = rtrim( getenv("DOCUMENT_ROOT"), "/\\" );
+	if(!is_file(__DIR__."/vars.inc.php")) {
+		if(!is_file(__DIR__."/vars.inc.php.exemple")) {
+			die("Error: Not file vars.inc.php.exemple");
+		}
+		if(!copy(__DIR__."/vars.inc.php.exemple", __DIR__."/vars.inc.php")) {
+			die("Error: Failed to copy vars.inc.php");
+		}
+		ob_clean();
+		header("Refresh:0");
+		exit;
+	}
+}
+
 function logMessage($message, $logFile = 'antibot.log')
 {
 	global $AB_DEBUGE, $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
