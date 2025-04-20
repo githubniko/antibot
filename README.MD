@@ -81,7 +81,15 @@ $AB_DEBUG=false;
 
 Для разблокировки, пользователь должен сообщить RayID, который отображается  внизу страницы. Используйте его, чтобы найти запись блокировки в blacklist и для поиска процесса обработки в лог-файле.
 
+## Для каких сайтов подходит данная защита
+
+* Wordpress, Joomla, 1С Битрикс, Opencart, Drupal, MODX, Netcat, самописная
+* Для любых сайтов на PHP 5.6.4 и старше (тестировался на PHP 5.6.4 и 7.1.33, 8.3.15)
+
 ## Автор ПО
 
 EgorNiKO
 GitHub: githubniko
+[https://github.com/githubniko/antibot](https://github.com/githubniko/antibot)
+
+[https://dzen.ru/a/Z_lToDqVzXV8-7Jt](https://dzen.ru/a/Z_lToDqVzXV8-7Jt) — статья о том как я защищал сайт от ПФ ботов.
