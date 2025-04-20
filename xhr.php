@@ -62,8 +62,8 @@ if ($AB_IS_IPV6 && filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTE
 }
 
 # Проверка для мобильных девайсов
-if($AB_IS_MOBILE && $data['screenWidth'] < $AB_SCREEN_WHIDTH) {
-	logMessage("Разрешение экрана меньше {$AB_SCREEN_WHIDTH}px");
+if($AB_IS_MOBILE && $data['screenWidth'] < $AB_SCREEN_WIDTH) {
+	logMessage("Разрешение экрана меньше {$AB_SCREEN_WIDTH}px");
 	endJSON('captcha');
 }
 

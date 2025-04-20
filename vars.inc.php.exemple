@@ -1,6 +1,6 @@
 <?php
 $AB_DEBUGE = TRUE;
-$AB_SCREEN_WHIDTH = 1920; // px, минимальная ширина экрана
+$AB_SCREEN_WIDTH = 1920; // px, минимальная ширина экрана
 $AB_EXPIRED_COOKIE = 14; // дней, действия метки
 $AB_IS_TOR = FALSE; // TRUE - блокировать вход с ip tor-сетей
 $AB_IS_MOBILE = TRUE; // TRUE - каптча для мобильных девайсов
