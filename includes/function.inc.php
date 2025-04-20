@@ -9,7 +9,7 @@ $RayIDSecret = ""; // секретный ид для названия куки
 define(
 	'DISPLAY_CAPTCHA_FORM_EXIT',
 	'logMessage("Отображение страницы проверки");
-    require "templates/template.inc.php";
+    require $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . "templates/template.inc.php";
 	exit;'
 );
 
@@ -17,7 +17,7 @@ define(
 define(
 	'DISPLAY_BLOCK_FORM_EXIT',
 	'logMessage("Отображение страницы блокировки");
-    require "templates/template_block.inc.php";
+    require $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . "templates/template_block.inc.php";
 	exit;'
 );
 
@@ -367,7 +367,7 @@ function isIndexbot($client_ip)
 # Разрешающие фильтры
 function isAllow()
 {
-	global $AB_TOREXIT_BLOCK;
+	global $DOCUMENT_ROOT, $AB_TOREXIT_BLOCK, $HTTP_ANTIBOT_PATH;
 
 	logMessage("" . $_SERVER['HTTP_USER_AGENT']);
 
