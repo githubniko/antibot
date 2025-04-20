@@ -90,6 +90,7 @@ $AB_DEBUG=false;
 
 EgorNiKO
 GitHub: githubniko
+
 [https://github.com/githubniko/antibot](https://github.com/githubniko/antibot)
 
-[https://dzen.ru/a/Z_lToDqVzXV8-7Jt](https://dzen.ru/a/Z_lToDqVzXV8-7Jt) — статья о том как я защищал сайт от ПФ ботов.
+[https://dzen.ru/a/Z_lToDqVzXV8-7Jt](https://dzen.ru/a/Z_lToDqVzXV8-7Jt) — статья о том, как я защищал сайт от ПФ ботов.
