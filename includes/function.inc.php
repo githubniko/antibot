@@ -367,7 +367,7 @@ function isIndexbot($client_ip)
 # Разрешающие фильтры
 function isAllow()
 {
-	global $DOCUMENT_ROOT, $AB_TOREXIT_BLOCK, $HTTP_ANTIBOT_PATH;
+	global $DOCUMENT_ROOT, $AB_TOREXIT_BLOCK, $HTTP_ANTIBOT_PATH, $AB_IS_TOR;
 
 	logMessage("" . $_SERVER['HTTP_USER_AGENT']);
 
