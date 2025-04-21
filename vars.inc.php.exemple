@@ -8,7 +8,5 @@ $AB_IS_IFRAME = FALSE; // TRUE - блокировать если открыти�
 $AB_IS_DIRECT = TRUE; // TRUE - каптча для прямого захода
 $AB_IS_IPV6 = TRUE; // TRUE - каптча для IPv6
 
-$DOCUMENT_ROOT = rtrim( getenv("DOCUMENT_ROOT"), "/\\" );
-$HTTP_HOST = getenv("HTTP_HOST");
 $HTTP_ANTIBOT_PATH = "/antibot/";
 ?>

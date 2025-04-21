@@ -1,4 +1,7 @@
 <?php
+$DOCUMENT_ROOT = rtrim( getenv("DOCUMENT_ROOT"), "/\\" );
+$HTTP_HOST = getenv("HTTP_HOST");
+
 require_once "tor.inc.php";
 
 session_start();
