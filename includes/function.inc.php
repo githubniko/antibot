@@ -1,6 +1,7 @@
 <?php
 $DOCUMENT_ROOT = rtrim( getenv("DOCUMENT_ROOT"), "/\\" );
 $HTTP_HOST = getenv("HTTP_HOST");
+$HTTP_USER_AGENT = isset($_SERVER['HTTP_USER_AGENT']) ?  $_SERVER['HTTP_USER_AGENT'] : '';
 
 require_once "tor.inc.php";
 
@@ -95,16 +96,16 @@ function genKey()
 # генерирует идентификатор пользователя для идентификации в лог-файле
 function getRayID()
 {
-	global $RayID;
-	$RayID = $RayID == "" ? substr(md5($_SERVER['HTTP_HOST'] . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']), 0, 16) : $RayID;
+	global $RayID, $HTTP_USER_AGENT;
+	$RayID = $RayID == "" ? substr(md5($_SERVER['HTTP_HOST'] . $_SERVER['REMOTE_ADDR'] . $HTTP_USER_AGENT), 0, 16) : $RayID;
 	return $RayID;
 }
 
 # генерирует идентификатор пользователя для маркера
 function getRayIDSecret()
 {
-	global $RayIDSecret;
-	$RayIDSecret = $RayIDSecret == "" ? substr(md5($_SERVER['HTTP_HOST'] . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']), 16) : $RayIDSecret;
+	global $RayIDSecret, $HTTP_USER_AGENT;
+	$RayIDSecret = $RayIDSecret == "" ? substr(md5($_SERVER['HTTP_HOST'] . $_SERVER['REMOTE_ADDR'] . $HTTP_USER_AGENT), 16) : $RayIDSecret;
 	return $RayIDSecret;
 }
 
@@ -372,9 +373,9 @@ function isIndexbot($client_ip)
 # Разрешающие фильтры
 function isAllow()
 {
-	global $DOCUMENT_ROOT, $AB_TOREXIT_BLOCK, $HTTP_ANTIBOT_PATH, $AB_IS_TOR;
+	global $DOCUMENT_ROOT, $AB_TOREXIT_BLOCK, $HTTP_ANTIBOT_PATH, $AB_IS_TOR, $HTTP_USER_AGENT;
 
-	logMessage("" . $_SERVER['HTTP_USER_AGENT']);
+	logMessage("" . $HTTP_USER_AGENT);
 
 	# Проверка на установленную метку
 	if (isMarker()) {
