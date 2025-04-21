@@ -1,5 +1,5 @@
 *.log
 *.cache
 blacklist
-whilelist
+whitelist
 vars.inc.php

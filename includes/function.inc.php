@@ -130,12 +130,12 @@ function whitelistIP($client_ip)
 	if ($client_ip == $_SERVER['SERVER_ADDR'])
 		return true;
 
-	$whilelistipFilePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/whilelist';
+	$filePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/whitelist';
 
-	if(!is_file($whilelistipFilePath))
+	if(!is_file($filePath))
 		return false;
 
-	$file = fopen($whilelistipFilePath, 'r');
+	$file = fopen($filePath, 'r');
 	if (!$file) return false;
 
 	while (($line = fgets($file)) !== false) {
@@ -169,12 +169,12 @@ function blacklistIP($client_ip)
 	if ($client_ip == $_SERVER['SERVER_ADDR'])
 		return true;
 
-	$whilelistipFilePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/blacklist';
+	$filePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/blacklist';
 
-	if(!is_file($whilelistipFilePath))
+	if(!is_file($filePath))
 		return false;
 
-	$file = fopen($whilelistipFilePath, 'r');
+	$file = fopen($filePath, 'r');
 	if (!$file) return false;
 
 	while (($line = fgets($file)) !== false) {
@@ -236,7 +236,7 @@ function addToBlacklist($client_ip, $comment)
 }
 
 # Добавляет айпи-адрес в белый список
-function addToWhilelist($client_ip, $comment)
+function addToWhitelist($client_ip, $comment)
 {
 	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
 
@@ -247,7 +247,7 @@ function addToWhilelist($client_ip, $comment)
 	if (whitelistIP($client_ip))
 		return;
 
-	$filePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/whilelist';
+	$filePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/whitelist';
 
 	if (is_file($filePath) && !is_writable($filePath)) {
 		error_log("The file is not writable.: " . $filePath);
@@ -269,7 +269,7 @@ function addToWhilelist($client_ip, $comment)
 	// Закрываем файл
 	fclose($fileHandle);
 
-	logMessage("IP-адрес добавлен в whilelist");
+	logMessage("IP-адрес добавлен в whitelist");
 }
 
 # Функция для проверки, является ли пользовательский агент исключением
@@ -393,7 +393,7 @@ function isAllow()
 		logMessage("Индексирующий робот");
 
 		# Добавляем айпи в белый список для производительности
-		addToWhilelist($_SERVER['REMOTE_ADDR'], 'indexbot');
+		addToWhitelist($_SERVER['REMOTE_ADDR'], 'indexbot');
 
 		return true;
 	}
