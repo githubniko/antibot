@@ -90,8 +90,11 @@ $AB_DEBUG=false;
 ## Автор ПО
 
 EgorNiKO
+
 GitHub: githubniko
 
 [https://github.com/githubniko/antibot](https://github.com/githubniko/antibot)
+
+Telegram [https://egorniko.ru/r/D5](https://egorniko.ru/r/D5)
 
 [https://dzen.ru/a/Z_lToDqVzXV8-7Jt](https://dzen.ru/a/Z_lToDqVzXV8-7Jt) — статья о том, как я защищал сайт от ПФ ботов.
