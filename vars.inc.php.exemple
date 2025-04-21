@@ -7,6 +7,7 @@ $AB_IS_MOBILE = TRUE; // TRUE - каптча для мобильных дева�
 $AB_IS_IFRAME = FALSE; // TRUE - блокировать если открытие во if-frame
 $AB_IS_DIRECT = TRUE; // TRUE - каптча для прямого захода
 $AB_IS_IPV6 = TRUE; // TRUE - каптча для IPv6
+$AB_IS_USERAGENT = TRUE; // TRUE - блокировка, если User-Agent отсутствуте или пустой
 
 $HTTP_ANTIBOT_PATH = "/antibot/";
 ?>

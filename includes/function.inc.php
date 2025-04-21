@@ -383,10 +383,21 @@ function isIndexbot($client_ip)
 	return false;
 }
 
+# Функция проверяет сущестование User-Agent
+function isUserAgent()
+{
+	global $HTTP_USER_AGENT;
+	if(empty($HTTP_USER_AGENT)) {
+		logMessage("Отсутствует или пустой User-Agent");
+		return false;
+	}
+	return true;
+}
+
 # Разрешающие фильтры
 function isAllow()
 {
-	global $DOCUMENT_ROOT, $AB_TOREXIT_BLOCK, $HTTP_ANTIBOT_PATH, $AB_IS_TOR, $HTTP_USER_AGENT;
+	global $HTTP_USER_AGENT, $AB_IS_TOR, $AB_IS_USERAGENT;
 
 	logMessage("" . mb_substr($HTTP_USER_AGENT, 0, 255));
 
@@ -400,6 +411,12 @@ function isAllow()
 	if (whitelistIP($_SERVER['REMOTE_ADDR'])) {
 		logMessage("IP-адрес найден в белом списке");
 		return true;
+	}
+
+	# Проверка на сущестование User-agent
+	if($AB_IS_USERAGENT && !isUserAgent()) {
+		addToBlacklist($_SERVER['REMOTE_ADDR'], 'not User-agent');
+		DISPLAY_BLOCK_FORM_EXIT();
 	}
 
 	# Проверка, является ли пользовательский агент исключением
@@ -432,8 +449,6 @@ function isAllow()
 	} catch (Exception $e) {
 		logMessage("Error: " . $e->getMessage());
 	}
-
-
 
 	return false;
 }
