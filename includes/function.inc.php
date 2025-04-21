@@ -345,7 +345,7 @@ function isIndexbot($client_ip)
 			$resolvedRecords = dns_get_record($hostname, $isIPv6 ? DNS_AAAA : DNS_A);
 
 			// Проверяем, совпадает ли исходный IP с одним из разрешенных
-			if ($resolvedRecords) {
+			if (!empty($resolvedRecords)) {
 				foreach ($resolvedRecords as $record) {
 					if ($isIPv6) {
 						if (isset($record['ipv6']) && $record['ipv6'] === $client_ip) {
