@@ -7,8 +7,8 @@ header('Content-type: application/json; charset=utf-8');
 
 # status [
 #	allow - прошел проверку
-#	block - хакер, попытка обойти каптчу
-#	capcha - проверить каптчей
+#	block - хакер, попытка обойти капчу
+#	capcha - проверить капчей
 #]
 
 # Важен приоритет проверки
@@ -50,7 +50,7 @@ if($data['func'] == 'set-marker') {
 		unset($_SESSION['keyID']);
 		endJSON('block');
 	}
-	logMessage("Успешно прошел каптчу");
+	logMessage("Успешно прошел капчу");
 	setMarker();
 	unset($_SESSION['keyID']);
 	endJSON('allow');

@@ -9,7 +9,7 @@ session_start();
 $RayID = ""; // ид для идентификации пользователя в лог-файле
 $RayIDSecret = ""; // секретный ид для названия куки
 
-# Функция для вывода страницы проверки и ввода каптчи
+# Функция для вывода страницы проверки и ввода капчи
 function DISPLAY_CAPTCHA_FORM_EXIT() {
 	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
 	logMessage("Отображение страницы проверки");
@@ -80,7 +80,7 @@ function endJSON($status)
 	if ($status == 'captcha') {
 		$_SESSION['keyID'] = genKey();
 		$res['keyID'] = $_SESSION['keyID'];
-		logMessage("Показ каптчи");
+		logMessage("Показ капчи");
 	}
 
 	echo json_encode($res);
