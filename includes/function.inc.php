@@ -345,13 +345,15 @@ function isIndexbot($client_ip)
 			if ($resolvedRecords) {
 				foreach ($resolvedRecords as $record) {
 					if ($isIPv6) {
-						if (isset($record['ipv6']) && $record['ipv6'] === $client_ip)
-						fclose($file);
-						return true;
+						if (isset($record['ipv6']) && $record['ipv6'] === $client_ip) {
+							fclose($file);
+							return true;
+						}
 					} else {
-						if (isset($record['ip']) && $record['ip'] === $client_ip)
-						fclose($file);
-						return true;
+						if (isset($record['ip']) && $record['ip'] === $client_ip) {
+							fclose($file);
+							return true;
+						}
 					}
 				}
 			}
