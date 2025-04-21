@@ -112,7 +112,20 @@ function getRayIDSecret()
 function setMarker()
 {
 	global $AB_EXPIRED_COOKIE;
-	setcookie(getRayIDSecret(), genKey(), time() + $AB_EXPIRED_COOKIE * 24 * 3600, "/");
+	
+	if (version_compare(PHP_VERSION, '7.3.0') >= 0) {
+		setcookie(getRayIDSecret(), genKey(), [
+			'expires' => time() + $AB_EXPIRED_COOKIE * 86400,
+			'path' => '/',
+			'httponly' => true,
+			'secure' => isset($_SERVER['HTTPS'])
+		]);
+	} else {
+		setcookie(getRayIDSecret(), genKey(), time() + $AB_EXPIRED_COOKIE * 24 * 3600, "/");
+	}
+	
+
+	
 	logMessage("Установлен маркер");
 }
 
