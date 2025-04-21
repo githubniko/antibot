@@ -401,6 +401,12 @@ function isAllow()
 
 	logMessage("" . mb_substr($HTTP_USER_AGENT, 0, 255));
 
+	# Проверка IP в черном списке
+	if (blacklistIP($_SERVER['REMOTE_ADDR'])) {
+		logMessage("IP-адрес найден в черном списке");
+		DISPLAY_BLOCK_FORM_EXIT();
+	}
+
 	# Проверка на установленную метку
 	if (isMarker()) {
 		logMessage("Найден маркер");
@@ -432,11 +438,6 @@ function isAllow()
 		addToWhitelist($_SERVER['REMOTE_ADDR'], 'indexbot');
 
 		return true;
-	}
-
-	if (blacklistIP($_SERVER['REMOTE_ADDR'])) {
-		logMessage("IP-адрес найден в черном списке");
-		DISPLAY_BLOCK_FORM_EXIT();
 	}
 
 	# Проверка на принадлежность к Tor-сети
