@@ -24,12 +24,12 @@ define(
 # Функция проверяет наличие конфиг. файла и создает его в случае отсутствия
 function isVarFile()
 {
-	$DOCUMENT_ROOT = rtrim( getenv("DOCUMENT_ROOT"), "/\\" );
-	if(!is_file(__DIR__."/../vars.inc.php")) {
-		if(!is_file(__DIR__."/../vars.inc.php.exemple")) {
+	$DOCUMENT_ROOT = rtrim(getenv("DOCUMENT_ROOT"), "/\\");
+	if (!is_file(__DIR__ . "/../vars.inc.php")) {
+		if (!is_file(__DIR__ . "/../vars.inc.php.exemple")) {
 			die("Error: Not file vars.inc.php.exemple");
 		}
-		if(!copy(__DIR__."/../vars.inc.php.exemple", __DIR__."/../vars.inc.php")) {
+		if (!copy(__DIR__ . "/../vars.inc.php.exemple", __DIR__ . "/../vars.inc.php")) {
 			die("Error: Failed to copy vars.inc.php");
 		}
 		ob_clean();
@@ -132,7 +132,7 @@ function whitelistIP($client_ip)
 
 	$filePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/whitelist';
 
-	if(!is_file($filePath))
+	if (!is_file($filePath))
 		return false;
 
 	$file = fopen($filePath, 'r');
@@ -171,7 +171,7 @@ function blacklistIP($client_ip)
 
 	$filePath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/blacklist';
 
-	if(!is_file($filePath))
+	if (!is_file($filePath))
 		return false;
 
 	$file = fopen($filePath, 'r');
@@ -279,9 +279,9 @@ function isExcludedBotLegal($userAgent)
 
 	$rulesPath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/useragent.rules';
 
-	if(!is_file($rulesPath))
+	if (!is_file($rulesPath))
 		return false;
-	
+
 	$file = fopen($rulesPath, 'r');
 	if (!$file) return false;
 
@@ -291,8 +291,8 @@ function isExcludedBotLegal($userAgent)
 
 		$strSearch = trim(mb_eregi('(.*)(#.*)', $line, $match) ? $match[1] : $line);
 		if (empty($strSearch)) continue;
-		if(mb_eregi($strSearch, $userAgent)) {
-			logMessage("UserAgent содержит фразу-исключение: ".$strSearch);
+		if (mb_eregi($strSearch, $userAgent)) {
+			logMessage("UserAgent содержит фразу-исключение: " . $strSearch);
 			fclose($file);
 			return true;
 		}
@@ -308,13 +308,13 @@ function isIndexbot($client_ip)
 
 	// Выполняем обратный DNS-запрос
 	$hostname = gethostbyaddr($client_ip);
-	logMessage('PTR: '.$hostname);
+	logMessage('PTR: ' . $hostname);
 
 	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
 
 	$rulesPath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/indexbot.rules';
 
-	if(!is_file($rulesPath))
+	if (!is_file($rulesPath))
 		return false;
 
 	$file = fopen($rulesPath, 'r');
@@ -327,8 +327,8 @@ function isIndexbot($client_ip)
 		$reg = trim(mb_eregi('(.*)(#.*)', $line, $match) ? $match[1] : $line);
 		if (empty($reg)) continue;
 
-		if(!validateDomain($reg)) {
-			logMessage('Домен не валидный: '.$reg);
+		if (!validateDomain($reg)) {
+			logMessage('Домен не валидный: ' . $reg);
 			continue;
 		}
 		$reg = str_replace('.', '\.', $reg);
@@ -339,7 +339,7 @@ function isIndexbot($client_ip)
 		$count = preg_match("/\.$reg$/i", $hostname, $match);   //поиск подстрок в строке pValue
 		if ($count > 0) {
 			// Выполняем прямой DNS-запрос в зависимости от типа IP
-			$resolvedRecords = dns_get_record($hostname, $isIPv6 ? DNS_AAAA:DNS_A);
+			$resolvedRecords = dns_get_record($hostname, $isIPv6 ? DNS_AAAA : DNS_A);
 
 			// Проверяем, совпадает ли исходный IP с одним из разрешенных
 			if ($resolvedRecords) {
@@ -388,7 +388,7 @@ function isAllow()
 	# Проверка, является ли пользовательский агент исключением
 	if (isExcludedBotLegal($_SERVER['HTTP_USER_AGENT'])) {
 		return true;
-	} 
+	}
 
 	# Проверяем является ли пользователь индексирующим ботом Яндек, Гугл
 	if (isIndexbot($_SERVER['REMOTE_ADDR'])) {
@@ -413,7 +413,7 @@ function isAllow()
 			eval(DISPLAY_BLOCK_FORM_EXIT);
 		}
 	} catch (Exception $e) {
-		logMessage ("Error: " . $e->getMessage());
+		logMessage("Error: " . $e->getMessage());
 	}
 
 
@@ -421,7 +421,8 @@ function isAllow()
 	return false;
 }
 
-function validateDomain($domain) {
-    $pattern = '/^(?!\-)(?:[a-zA-Z\d\-]{0,62}[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/';
-    return preg_match($pattern, $domain);
+function validateDomain($domain)
+{
+	$pattern = '/^(?!\-)(?:[a-zA-Z\d\-]{0,62}[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/';
+	return preg_match($pattern, $domain);
 }
