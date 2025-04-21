@@ -6,20 +6,20 @@ $RayID = ""; // ид для идентификации пользователя 
 $RayIDSecret = ""; // секретный ид для названия куки
 
 # Функция для вывода страницы проверки и ввода каптчи
-define(
-	'DISPLAY_CAPTCHA_FORM_EXIT',
-	'logMessage("Отображение страницы проверки");
+function DISPLAY_CAPTCHA_FORM_EXIT() {
+	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
+	logMessage("Отображение страницы проверки");
     require $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . "templates/template.inc.php";
-	exit;'
-);
+	exit;
+}
 
 # Функция для вывода страницы блокировки
-define(
-	'DISPLAY_BLOCK_FORM_EXIT',
-	'logMessage("Отображение страницы блокировки");
+function DISPLAY_BLOCK_FORM_EXIT() {
+	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
+	logMessage("Отображение страницы блокировки");
     require $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . "templates/template_block.inc.php";
-	exit;'
-);
+	exit;
+}
 
 # Функция проверяет наличие конфиг. файла и создает его в случае отсутствия
 function isVarFile()
@@ -402,7 +402,7 @@ function isAllow()
 
 	if (blacklistIP($_SERVER['REMOTE_ADDR'])) {
 		logMessage("IP-адрес найден в черном списке");
-		eval(DISPLAY_BLOCK_FORM_EXIT);
+		DISPLAY_BLOCK_FORM_EXIT();
 	}
 
 	# Проверка на принадлежность к Tor-сети
@@ -410,7 +410,7 @@ function isAllow()
 		if ($AB_IS_TOR && isTor($_SERVER['REMOTE_ADDR'])) {
 			logMessage("IP-адрес является выходным узлом Tor");
 			addToBlacklist($_SERVER['REMOTE_ADDR'], 'tor');
-			eval(DISPLAY_BLOCK_FORM_EXIT);
+			DISPLAY_BLOCK_FORM_EXIT();
 		}
 	} catch (Exception $e) {
 		logMessage("Error: " . $e->getMessage());

@@ -5,6 +5,6 @@ include "includes/function.inc.php";
 isVarFile();
 
 if(!isAllow()) {
-	eval(DISPLAY_CAPTCHA_FORM_EXIT);
+	DISPLAY_CAPTCHA_FORM_EXIT();
 }
 ?>
