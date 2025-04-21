@@ -375,7 +375,7 @@ function isAllow()
 {
 	global $DOCUMENT_ROOT, $AB_TOREXIT_BLOCK, $HTTP_ANTIBOT_PATH, $AB_IS_TOR, $HTTP_USER_AGENT;
 
-	logMessage("" . $HTTP_USER_AGENT);
+	logMessage("" . mb_substr($HTTP_USER_AGENT, 0, 255));
 
 	# Проверка на установленную метку
 	if (isMarker()) {
