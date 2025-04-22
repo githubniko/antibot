@@ -7,9 +7,12 @@ google.com
 yandex.ru
 yandex.net
 yandex.com
-msn.com # http://www.bing.com/bingbot.htm
-petalsearch.com # для сервисов Huawei https://webmaster.petalsearch.com/site/petalbot
-apple.com # http://www.apple.com/go/applebot
-baidu.com # http://www.baidu.com/search/spider.html
-baidu.jp # http://www.baidu.com/search/spider.html
-telegram.org # Телеграм бот, для чтения мета 
+msn.com         # Поисковыик bing.com +http://www.bing.com/bingbot.htm
+petalsearch.com # Сервисы Huawei +https://webmaster.petalsearch.com/site/petalbot
+apple.com       # http://www.apple.com/go/applebot
+baidu.com       # Китайский поисковик +http://www.baidu.com/search/spider.html
+baidu.jp        # Китайский поисковик +http://www.baidu.com/search/spider.html
+telegram.org    # Телеграм бот, для чтения мета 
+odnoklassniki.ru # Для чтения метатегов
+mail.ru         # Сервисы mail.ru, vk.com
+googleusercontent.com # Discord +https://discordapp.com
