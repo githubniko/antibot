@@ -2,6 +2,7 @@
 @include "vars.inc.php";
 include "includes/function.inc.php";
 isVarFile();
+session_start();
 header('Content-type: application/json; charset=utf-8');
 
 

@@ -5,7 +5,6 @@ $HTTP_USER_AGENT = isset($_SERVER['HTTP_USER_AGENT']) ?  $_SERVER['HTTP_USER_AGE
 
 require_once "tor.inc.php";
 
-session_start();
 $RayID = ""; // ид для идентификации пользователя в лог-файле
 $RayIDSecret = ""; // секретный ид для названия куки
 
@@ -131,7 +130,12 @@ function logMessage($message, $logFile = 'antibot.log')
 function endJSON($status)
 {
 	$res = array('status' => $status);
-
+	if(!session_id()) {
+		logMessage("Критическая ошибка: Сессия session_start() не начата.");
+		$res = "Критическая ошибка: Сессия session_start() не начата.";
+		echo json_encode($res);
+		exit;
+	}
 	# каждый раз генерируем ключ, чтобы форму не DDOS  
 	if ($status == 'captcha') {
 		$_SESSION['keyID'] = genKey();

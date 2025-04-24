@@ -78,6 +78,9 @@ function checkBot(func) {
 			else if (data.status == 'block') {
 				setTimeout(refresh, 1000);
 			}
+			else {
+				console.log(data);
+			}
 		} else {
 			console.error('Request failed with status:', xhr.status, xhr.statusText);
 		}
