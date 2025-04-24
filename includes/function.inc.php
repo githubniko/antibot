@@ -182,7 +182,7 @@ function whitelistIP($client_ip)
 				continue;
 			}
 
-			if ($ip == $client_ip) {
+			if (inet_pton($ip) == inet_pton($client_ip)) {
 				fclose($file);
 				return true;
 			}
@@ -221,7 +221,7 @@ function blacklistIP($client_ip)
 				continue;
 			}
 
-			if ($ip == $client_ip) {
+			if (inet_pton($ip) == inet_pton($client_ip)) {
 				fclose($file);
 				return true;
 			}
