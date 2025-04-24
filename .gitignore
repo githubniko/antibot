@@ -2,4 +2,5 @@
 *.cache
 blacklist
 whitelist
+wl_request_url.rules
 vars.inc.php

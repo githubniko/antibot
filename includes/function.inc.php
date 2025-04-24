@@ -29,20 +29,6 @@ function DISPLAY_BLOCK_FORM_EXIT() {
 function isVarFile()
 {
 	$DOCUMENT_ROOT = rtrim(getenv("DOCUMENT_ROOT"), "/\\");
-	
-	# добавляем в исключения ip серверов сайта
-	if(!is_file(__DIR__ . "/../list/whitelist")) {
-		$resolvedRecords = dns_get_record($_SERVER["HTTP_HOST"], DNS_ANY);
-
-			// Проверяем, совпадает ли исходный IP с одним из разрешенных
-			if (!empty($resolvedRecords)) {
-				foreach ($resolvedRecords as $record) {
-					if($record['type'] == 'A' || $record['type'] == 'AAAA') {
-						addToWhitelist($record['type'] == 'AAAA' ? $record['ipv6'] : $record['ip'], $_SERVER["HTTP_HOST"]);
-					}
-				}
-			}
-	}
 
 	if (!is_file(__DIR__ . "/../vars.inc.php")) {
 		if (!is_file(__DIR__ . "/../vars.inc.php.exemple")) {
@@ -54,6 +40,42 @@ function isVarFile()
 		ob_clean();
 		header("Refresh:0");
 		exit;
+	}
+}
+
+# Выполняет необходимые действия при первом запуске
+function initSystem()
+{
+	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
+
+	# Создаем файлы правил и исключений
+	$fileName = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . "lists/wl_request_url.rules";
+	$data="# Список исключений по REQUEST_URI
+# Можно писать регулярные выражения. Обрабатывается php функцией mb_eregi(). Правила проверяются поочередно до первого срабатывания.
+# Символ #(решетка) используется как комментарий.";
+
+	if(!is_file($fileName)) {
+		if(!file_put_contents($fileName, $data)) {
+			logMessage("Ошибка создания файла $fileName");
+			return false;
+		}
+		logMessage("Создан файл $fileName");
+		return true; 
+	}
+
+	# добавляем в исключения ip серверов сайта
+	$fileName = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . "list/whitelist";
+	if(!is_file($fileName)) {
+		$resolvedRecords = dns_get_record($_SERVER["HTTP_HOST"], DNS_ANY);
+
+			// Проверяем, совпадает ли исходный IP с одним из разрешенных
+			if (!empty($resolvedRecords)) {
+				foreach ($resolvedRecords as $record) {
+					if($record['type'] == 'A' || $record['type'] == 'AAAA') {
+						addToWhitelist($record['type'] == 'AAAA' ? $record['ipv6'] : $record['ip'], $_SERVER["HTTP_HOST"]);
+					}
+				}
+			}
 	}
 }
 
@@ -333,6 +355,35 @@ function isExcludedBotLegal($userAgent)
 	return false;
 }
 
+# Функция поиска исключений по REQUEST_URL
+function isWhiteListReauestUrl()
+{
+	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
+
+	$rulesPath = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . 'lists/wl_request_url.rules';
+
+	if (!is_file($rulesPath))
+		return false;
+
+	$file = fopen($rulesPath, 'r');
+	if (!$file) return false;
+
+	while (($line = fgets($file)) !== false) {
+		$line = trim($line);
+		if (empty($line)) continue;
+
+		$strSearch = trim(mb_eregi('(.*)(#.*)', $line, $match) ? $match[1] : $line);
+		if (empty($strSearch)) continue;
+		if (mb_eregi($strSearch, $_SERVER['REQUEST_URI'])) {
+			logMessage("REQUEST_URI содержит исключение: " . $strSearch);
+			fclose($file);
+			return true;
+		}
+	}
+	fclose($file);
+	return false;
+}
+
 # Фнкуция проверяет ip на индексирующего бота
 function isIndexbot($client_ip)
 {
@@ -414,7 +465,13 @@ function isAllow()
 {
 	global $HTTP_USER_AGENT, $AB_IS_TOR, $AB_IS_USERAGENT;
 
+	logMessage("" . mb_substr($_SERVER['REQUEST_URI'], 0, 255));
 	logMessage("" . mb_substr($HTTP_USER_AGENT, 0, 255));
+
+	# Проверка REQUSET_URI на исключения
+	if(isWhiteListReauestUrl()) {
+		return true;
+	}
 
 	# Проверка IP в черном списке
 	if (blacklistIP($_SERVER['REMOTE_ADDR'])) {
