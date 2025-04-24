@@ -390,7 +390,7 @@ function isIndexbot($client_ip)
 				}
 			}
 			fclose($file);
-			return true;
+			return false;
 		}
 	}
 
