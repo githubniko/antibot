@@ -63,6 +63,25 @@ function initSystem()
 		return true; 
 	}
 
+	$fileName = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . "lists/useragent.rules";
+	$data="# Список разрешающих совпадений User-agent
+# Можно писать регулярные выражения. Обрабатывается php функцией mb_eregi(). Правила проверяются поочередно до первого срабатывания.
+# Символ # используется как комментарий.
+# Примеры:
+# Myboot 
+# или Myb..t
+# WhatsApp/[0-9.]+
+# WhatsAppBot/[0-9.]+";
+
+	if(!is_file($fileName)) {
+		if(!file_put_contents($fileName, $data)) {
+			logMessage("Ошибка создания файла $fileName");
+			return false;
+		}
+		logMessage("Создан файл $fileName");
+		return true; 
+	}
+
 	# добавляем в исключения ip серверов сайта
 	$fileName = $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . "list/whitelist";
 	if(!is_file($fileName)) {
