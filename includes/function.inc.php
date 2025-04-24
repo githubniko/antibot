@@ -29,6 +29,21 @@ function DISPLAY_BLOCK_FORM_EXIT() {
 function isVarFile()
 {
 	$DOCUMENT_ROOT = rtrim(getenv("DOCUMENT_ROOT"), "/\\");
+	
+	# добавляем в исключения ip серверов сайта
+	if(!is_file(__DIR__ . "/../list/whitelist")) {
+		$resolvedRecords = dns_get_record($_SERVER["HTTP_HOST"], DNS_ANY);
+
+			// Проверяем, совпадает ли исходный IP с одним из разрешенных
+			if (!empty($resolvedRecords)) {
+				foreach ($resolvedRecords as $record) {
+					if($record['type'] == 'A' || $record['type'] == 'AAAA') {
+						addToWhitelist($record['type'] == 'AAAA' ? $record['ipv6'] : $record['ip'], $_SERVER["HTTP_HOST"]);
+					}
+				}
+			}
+	}
+
 	if (!is_file(__DIR__ . "/../vars.inc.php")) {
 		if (!is_file(__DIR__ . "/../vars.inc.php.exemple")) {
 			die("Error: Not file vars.inc.php.exemple");
