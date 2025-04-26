@@ -16,6 +16,7 @@ header('Content-type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 	logMessage("Не POST-запрос");
+	addToBlacklist($_SERVER['REMOTE_ADDR'], 'Не POST-запрос');
 	endJSON('block');
 }
 $data = json_decode(file_get_contents('php://input'), true);
@@ -23,6 +24,7 @@ $data = json_decode(file_get_contents('php://input'), true);
 
 if(!isset($data['func'])) {
 	logMessage("Значение _data[func] не установлено");
+	addToBlacklist($_SERVER['REMOTE_ADDR'], 'Значение _data[func] не установлено');
 	endJSON('block');
 }
 
