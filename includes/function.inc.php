@@ -1,7 +1,7 @@
 <?php
 $DOCUMENT_ROOT = rtrim( getenv("DOCUMENT_ROOT"), "/\\" );
 $HTTP_HOST = getenv("HTTP_HOST");
-$HTTP_USER_AGENT = isset($_SERVER['HTTP_USER_AGENT']) ?  $_SERVER['HTTP_USER_AGENT'] : '';
+$HTTP_USER_AGENT = isset($_SERVER['HTTP_USER_AGENT']) ? htmlspecialchars($_SERVER['HTTP_USER_AGENT'], ENT_QUOTES, 'UTF-8') : '';
 
 require_once "tor.inc.php";
 
@@ -96,6 +96,8 @@ function initSystem()
 			}
 	}
 }
+
+
 
 function logMessage($message, $logFile = 'antibot.log')
 {
