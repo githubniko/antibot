@@ -922,8 +922,8 @@
                 <div class="ray-id">Ray ID: <code><?=getRayID(); ?></code></div>
             </div>
             <div class="text-center" id="footer-text">Производительность и безопасность на платформе <a
-                    rel="noopener noreferer" href="#"
-                    target="_blank"><?=$_SERVER['SERVER_NAME'] ?></a></div>
+                    rel="noopener noreferer" href="https://github.com/githubniko/antibot"
+                    target="_blank">AntibotWAF</a></div>
         </div>
     </div>
 </body>

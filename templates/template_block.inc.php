@@ -269,8 +269,8 @@
             <span class="ni-footer-separator sm:hidden">&bull;</span>
           </span>
           <span class="ni-footer-item sm:block sm:mb-1"><span>Производительность и безопасность благодаря</span> <a
-              rel="noopener noreferrer" href="#" id="brand_link"
-              target="_blank"><?=$_SERVER['SERVER_NAME'] ?></a></span>
+              rel="noopener noreferrer" href="https://github.com/githubniko/antibot" id="brand_link"
+              target="_blank">AntibotWAF</a></span>
 
         </p>
         <script>(function () { function d() { var b = a.getElementById("ni-footer-item-ip"), c = a.getElementById("ni-footer-ip-reveal"); b && "classList" in b && (b.classList.remove("hidden"), c.addEventListener("click", function () { c.classList.add("hidden"); a.getElementById("ni-footer-ip").classList.remove("hidden") } )) }  var a = document; document.addEventListener && a.addEventListener("DOMContentLoaded", d) } )();</script>
