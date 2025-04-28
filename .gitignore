@@ -1,5 +1,7 @@
 *.log
 *.cache
+*.ini
+/lists/*
 blacklist
 whitelist
 wl_request_url.rules
