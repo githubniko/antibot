@@ -909,17 +909,17 @@
         </div>
     </div>
     <script>
-    var HTTP_ANTIBOT_PATH = '<?=$HTTP_ANTIBOT_PATH; ?>';
+    var HTTP_ANTIBOT_PATH = '<?=$this->Config->ANTIBOT_PATH; ?>';
 	(function () {
 		var cpo = document.createElement('script');
-		cpo.src = '<?=$HTTP_ANTIBOT_PATH.'api.js'; ?>';
+		cpo.src = '<?=$this->Config->ANTIBOT_PATH.'api.js'; ?>';
 		document.getElementsByTagName('head')[0].appendChild(cpo);
 	}());
 	</script>
     <div class="footer" role="contentinfo">
         <div class="footer-inner">
             <div class="clearfix diagnostic-wrapper">
-                <div class="ray-id">Ray ID: <code><?=getRayID(); ?></code></div>
+                <div class="ray-id">Ray ID: <code><?=$this->Profile->RayID; ?></code></div>
             </div>
             <div class="text-center" id="footer-text">Производительность и безопасность на платформе <a
                     rel="noopener noreferer" href="https://github.com/githubniko/antibot"

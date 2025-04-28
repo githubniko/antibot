@@ -1,9 +1,45 @@
 <?php
-@include "vars.inc.php";
-include "includes/function.inc.php";
-isVarFile();
+namespace WAFSystem;
+
+include "includes/autoload.php";
+
 session_start();
 header('Content-type: application/json; charset=utf-8');
+
+
+class WAFSystem
+{
+    private $Config;
+    private $Logger;
+    private $Profile;
+    private $IpWhitelist;
+    private $IpBlacklist;
+    private $UserAgentChecker;
+    private $RequestChecker;
+    private $Marker;
+    private $CaptchaHandler;
+    private $IndexBot;
+    private $TorChecker;
+
+    public function __construct()
+    {
+        $this->initializeComponents();
+    }
+
+    private function initializeComponents()
+    {
+        $this->Config = Config::getInstance();
+        $this->Profile = Profile::getInstance();
+        $this->Logger = new Logger($this->Config, $this->Profile);
+
+        $this->IpWhitelist = new IPWhitelist($this->Config, $this->Logger);
+        $this->IpBlacklist = new IPBlacklist($this->Config, $this->Logger);
+        $this->UserAgentChecker = new UserAgentChecker($this->Config, $this->Logger);
+        $this->RequestChecker = new RequestChecker($this->Config, $this->Logger);
+        $this->Marker = new Marker($this->Config, $this->Profile, $this->Logger);
+        $this->CaptchaHandler = new CaptchaHandler($this->Config, $this->Profile, $this->Logger);
+    }
+}
 
 
 # status [
@@ -22,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $data = json_decode(file_get_contents('php://input'), true);
 //echo $data['referer'];exit;
 
-if(!isset($data['func'])) {
+if (!isset($data['func'])) {
 	logMessage("Значение _data[func] не установлено");
 	addToBlacklist($_SERVER['REMOTE_ADDR'], 'Значение _data[func] не установлено');
 	endJSON('block');
@@ -31,24 +67,24 @@ if(!isset($data['func'])) {
 #### СДЕЛАТЬ БЛОКИРОВКУ ПО Raid_ID черному списку
 
 # Запрос по событию Закрыл страницу или вкладку
-if($data['func'] == 'win-close') {
+if ($data['func'] == 'win-close') {
 	logMessage("Закрыл страницу проверки");
 	endJSON(''); // возможно тут нужно добавлять пользователя в черный список
 }
 
 # Запрос на установку метки
-if($data['func'] == 'set-marker') {
-	if(empty($_SESSION['keyID'])) {
+if ($data['func'] == 'set-marker') {
+	if (empty($_SESSION['keyID'])) {
 		logMessage("Значение _SESSION[keyID] не установлено");
 		endJSON('block');
 	}
 
-	if(!isset($data['keyID']) || empty($data['keyID'])) {
+	if (!isset($data['keyID']) || empty($data['keyID'])) {
 		logMessage("Значение _data[keyID] не установлено");
 		endJSON('block');
 	}
 
-	if($data['keyID'] != $_SESSION['keyID']) {
+	if ($data['keyID'] != $_SESSION['keyID']) {
 		logMessage("KeyID '$data[keyID]' не соответствует '$_SESSION[keyID]'");
 		unset($_SESSION['keyID']);
 		endJSON('block');
@@ -65,7 +101,7 @@ if ($AB_IS_IPV6 && filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTE
 }
 
 # Проверка для мобильных девайсов
-if($AB_IS_MOBILE && $data['screenWidth'] < $AB_SCREEN_WIDTH) {
+if ($AB_IS_MOBILE && $data['screenWidth'] < $AB_SCREEN_WIDTH) {
 	logMessage("Разрешение экрана меньше {$AB_SCREEN_WIDTH}px");
 	endJSON('captcha');
 }
@@ -76,7 +112,7 @@ if ($AB_IS_IFRAME && $data['mainFrame'] != true) {
 	endJSON('block');
 }
 
-if ($AB_IS_DIRECT && (empty($data['referer']) || mb_eregi("^http(s*):\/\/".$_SERVER['HTTP_HOST'] , $data['referer']))) {
+if ($AB_IS_DIRECT && (empty($data['referer']) || mb_eregi("^http(s*):\/\/" . $_SERVER['HTTP_HOST'], $data['referer']))) {
 	logMessage("Прямой заход");
 	endJSON('captcha');
 }
@@ -86,5 +122,3 @@ setMarker();
 
 
 endJSON('allow');
-
-?>

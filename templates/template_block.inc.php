@@ -260,7 +260,7 @@
 
       <div class="ni-error-footer ni-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">
         <p class="text-13">
-          <span class="ni-footer-item sm:block sm:mb-1">Ray ID: <strong class="font-semibold"><?=getRayID(); ?></strong></span>
+          <span class="ni-footer-item sm:block sm:mb-1">Ray ID: <strong class="font-semibold"><?=$this->Profile->RayID; ?></strong></span>
           <span class="ni-footer-separator sm:hidden">&bull;</span>
           <span id="ni-footer-item-ip" class="ni-footer-item hidden sm:block sm:mb-1">
             Your IP:
