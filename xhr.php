@@ -76,8 +76,13 @@ if ($AB_IS_IFRAME && $data['mainFrame'] != true) {
 	endJSON('block');
 }
 
-if ($AB_IS_DIRECT && (empty($data['referer']) || mb_eregi("^http(s*):\/\/".$_SERVER['HTTP_HOST'] , $data['referer']))) {
-	logMessage("Прямой заход");
+# Показ капчи для Прямых заходов
+if ($AB_IS_DIRECT=='CAPTCHA' && (empty($data['referer']) || mb_eregi("^http(s*):\/\/".$_SERVER['HTTP_HOST'] , $data['referer']))) {
+	endJSON('captcha');
+}
+
+# Показ капчи для Рефереров
+if ($AB_IS_REFERER=='CAPTCHA' && !empty($data['referer'])) {
 	endJSON('captcha');
 }
 
