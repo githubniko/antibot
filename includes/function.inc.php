@@ -11,7 +11,7 @@ $RayIDSecret = ""; // секретный ид для названия куки
 # Функция для вывода страницы проверки и ввода капчи
 function DISPLAY_CAPTCHA_FORM_EXIT()
 {
-	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH;
+	global $DOCUMENT_ROOT, $HTTP_ANTIBOT_PATH, $AB_METRIKA;
 	logMessage("Отображение страницы проверки");
 	require $DOCUMENT_ROOT . $HTTP_ANTIBOT_PATH . "templates/template.inc.php";
 	exit;
