@@ -822,7 +822,7 @@
             }
         }
     </style>
-    <? if($metrika = $this->Config->get('main', 'metrika', false)): ?>
+    <? if(!empty($metrika = $this->Config->get('main', 'metrika', ''))): ?>
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript" >
     (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
