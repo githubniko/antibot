@@ -57,7 +57,7 @@ class Config
     private function validateConfig()
     {
         $required = [
-            'main' => ['debug', 'header404', ],
+            'main' => ['debug', 'header404', 'cookie_name'],
             'cookie' => ['expire_days'],
             'paths' => ['antibot_path']
         ];
