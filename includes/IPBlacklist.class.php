@@ -1,6 +1,8 @@
 <?php
 namespace WAFSystem;
 
+include_once 'IPList.class.php';
+
 class IPBlacklist extends IPList
 {
     public function __construct(Config $config, Logger $logger)

@@ -7,7 +7,7 @@ const blockHTTPSecurity = document.getElementById("LfAMd3");
 const blockInput = document.getElementById("ihOWn1");
 const blockVerifying = document.getElementById("verifying");
 const blockFail = document.getElementById("fail");
-let KEY_ID = "";
+let CSRF = "";
 let flagCloseWindow = true;
 
 /*
@@ -54,8 +54,8 @@ function checkBot(func) {
 		pixelRatio: window.devicePixelRatio || 1,
 		referer: document.referrer,
 		mainFrame: window.top === window.self,
-		func: func == undefined ? 'check' : func,
-		keyID: KEY_ID,
+		func: func == undefined ? 'csrf_token' : func,
+		csrf_token: CSRF,
 	});
 
 	xhr.open('POST', HTTP_ANTIBOT_PATH + 'xhr.php', true);
@@ -64,10 +64,14 @@ function checkBot(func) {
 	xhr.onload = function () {
 		if (xhr.status >= 200 && xhr.status < 300) {
 			var data = JSON.parse(xhr.responseText);
-			if (data.status == 'captcha') {
-				KEY_ID = data.keyID;
-				displayCaptcha();
+			if(data.func == 'csrf_token') {
+				CSRF = data.csrf_token;
+				checkBot('checks');
 			}
+			else if (data.status == 'captcha') {
+				CSRF = data.csrf_token;
+				displayCaptcha();
+			}			
 			else if (data.status == 'allow') {
 				form.style.display = "none";
 				lspinner.style.display = "none";

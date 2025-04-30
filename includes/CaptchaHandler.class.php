@@ -10,7 +10,8 @@ class CaptchaHandler
     private $Logger;
 
 
-    public function __construct(Config $config, Profile $profile, Logger $logger) {
+    public function __construct(Config $config, Profile $profile, Logger $logger)
+    {
         $this->Config = $config;
         $this->Profile = $profile;
         $this->Logger = $logger;
@@ -23,7 +24,7 @@ class CaptchaHandler
         if ($this->Config->get('main', 'header404')) {
             header("HTTP/1.0 404 Not Found");
         }
-        
+
         $this->Logger->log("Displaying the verification page");
         require $this->Config->BasePath . "templates/template.inc.php";
         exit;

@@ -2,6 +2,8 @@
 
 namespace WAFSystem;
 
+include_once 'IPList.class.php';
+
 class IPWhitelist extends IPList
 {
     public function __construct(Config $config, Logger $logger)

@@ -32,7 +32,7 @@ class Profile
     # генерирует случайный код
     public function genKey()
     {
-        return md5(rand(100, 200));
+        return bin2hex(random_bytes(32));
     }
 
     # генерирует идентификатор пользователя для идентификации в лог-файле

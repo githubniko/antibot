@@ -68,18 +68,15 @@ class IndexBot
                         foreach ($resolvedRecords as $record) {
                             if ($isIPv6) {
                                 if (isset($record['ipv6']) && $record['ipv6'] === $client_ip) {
-                                    fclose($file);
                                     return true;
                                 }
                             } else {
                                 if (isset($record['ip']) && $record['ip'] === $client_ip) {
-                                    fclose($file);
                                     return true;
                                 }
                             }
                         }
                     }
-                    fclose($file);
                     return false;
                 }
             }

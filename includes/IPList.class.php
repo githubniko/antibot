@@ -41,6 +41,11 @@ abstract class IPList
         $this->Logger->logMessage("IP added to list: " . $ip . " (" . static::class . ")");
     }
 
+    public static function isIPv6($ip)
+    {
+        return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+    }
+
     protected function checkIpInFile($ip)
     {
         if (!file_exists($this->listFile)) {

@@ -2,8 +2,6 @@
 
 namespace WAFSystem;
 
-include __DIR__ . '/autoload.php';
-
 class WAFSystem
 {
     private $Config;
@@ -58,7 +56,7 @@ class WAFSystem
         $userAgent = $this->Profile->UserAgent;
 
         $this->Logger->log("" . mb_substr($_SERVER['REQUEST_URI'], 0, 255));
-	    $this->Logger->log("" . mb_substr($userAgent, 0, 255));
+        $this->Logger->log("" . mb_substr($userAgent, 0, 255));
 
         // 1. Проверка URL в белом списке
         if ($this->RequestChecker->isWhitelistedUrl($_SERVER['REQUEST_URI'])) {
@@ -83,7 +81,7 @@ class WAFSystem
         }
 
         // 5. Проверка User-Agent
-        if ($this->Config->get('main', 'useragent_check', false)) {
+        if ($this->Config->get('checks', 'useragent', false)) {
             // Валидность User_Agent
             if (!$this->UserAgentChecker->isValid($userAgent)) {
                 $this->IpBlacklist->add($clientIp, 'Invalid User-Agent');
@@ -94,13 +92,13 @@ class WAFSystem
             if ($this->UserAgentChecker->isExcludedBot($userAgent)) {
                 return true;
             }
-            
+
             // Проверка разрешенных шаблонов User-Agent
             if ($this->UserAgentChecker->isAllowed($userAgent)) {
                 return true;
             }
         }
-        
+
         // 7. Проверка поисковых ботов
         if ($this->IndexBot->isIndexbot($clientIp)) {
             $this->Logger->log("Indexing robot");
@@ -109,12 +107,69 @@ class WAFSystem
         }
 
         // 8. Проверка Tor
-        if ($this->Config->get('main', 'tor_check') && $this->TorChecker->isTor($clientIp)) {
+        if ($this->Config->get('checks', 'tor') && $this->TorChecker->isTor($clientIp)) {
             $this->Logger->log("The IP address is a Tor exit node");
-			$this->IpBlacklist->add($clientIp, 'Tor');
-			$this->CaptchaHandler->showBlockPage();
+            $this->IpBlacklist->add($clientIp, 'Tor');
+            $this->CaptchaHandler->showBlockPage();
         }
 
         return false;
+    }
+
+    public function isAllowed2()
+    {
+        $Api = Api::getInstance($this->Config, $this->Profile, $this->Logger, $this->IpBlacklist);
+
+        # Важен приоритет проверки
+        if (!$Api->isPost()) {
+            $this->Logger->log("Not a POST request");
+            $this->IpBlacklist->add($this->Profile->Ip, 'Not a POST request');
+            $Api->endJSON('block');
+        }
+
+        $data = $Api->getData();
+
+        # Запрос по событию Закрыл страницу или вкладку
+        if ($data['func'] == 'win-close') {
+            $this->Logger->log("Closed the verification page");
+            $Api->endJSON(''); // возможно тут нужно добавлять пользователя в черный список
+        }
+
+        # Запрос на установку метки
+        if ($data['func'] == 'set-marker') {
+            $this->Logger->log("Successfully passed the captcha");
+            $this->Marker->set();
+            $Api->removeCSRF();
+            $Api->endJSON('allow');
+        }
+
+        if ($this->Config->get('checks', 'ipv6', false) && IPList::isIPv6($this->Profile->Ip)) {
+            $this->Logger->log("IPv6 address");
+            $Api->endJSON('captcha');
+        }
+        
+        # Проверка для мобильных девайсов
+        $screen_width = !$this->Config->get('main', 'screen_width', false) ? 1920 : $this->Config->get('main', 'screen_width');
+        if ($this->Config->get('checks', 'mobile', false) && $data['screenWidth'] < $screen_width) {
+            $this->Logger->log("Screen resolution is less than {$screen_width}px");
+            $Api->endJSON('captcha');
+        }
+        
+        if ($this->Config->get('checks', 'iframe', false) && $data['mainFrame'] != true) {
+            $this->Logger->log("Open in frame");
+            $this->IpBlacklist->add($this->Profile->Ip, 'iframe');
+            $Api->endJSON('block');
+        }
+        
+        if ($this->Config->get('checks', 'direct', false) && (empty($data['referer']) || mb_eregi("^http(s*):\/\/" . $_SERVER['HTTP_HOST'], $data['referer']))) {
+            $this->Logger->log("Direct approach");
+            $Api->endJSON('captcha');
+        }
+        
+        $this->Logger->log("Passed all filters");
+        $this->Marker->set();
+        
+        
+        $Api->endJSON('allow');
     }
 }
