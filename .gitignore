@@ -2,4 +2,4 @@
 *.log
 *.ini
 lists/*
-log/*
+logs/*

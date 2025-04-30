@@ -30,6 +30,7 @@ class Api
         }
 
         if ($this->data['func'] == 'csrf_token') {
+            $this->WAFSystem->Logger->rotateIfNeeded(); // делаем ротация логов, пока пользователь ожидает проверку
             echo json_encode([
                 'func' => $this->data['func'],
                 'csrf_token' => $this->createCSRF()
