@@ -4,17 +4,17 @@ namespace WAFSystem;
 
 class WAFSystem
 {
-    private $Config;
-    private $Logger;
-    private $Profile;
-    private $IpWhitelist;
-    private $IpBlacklist;
-    private $UserAgentChecker;
-    private $RequestChecker;
-    private $Marker;
-    private $CaptchaHandler;
-    private $IndexBot;
-    private $TorChecker;
+    public $Config;
+    public $Logger;
+    public $Profile;
+    public $IpWhitelist;
+    public $IpBlacklist;
+    public $UserAgentChecker;
+    public $RequestChecker;
+    public $Marker;
+    public $CaptchaHandler;
+    public $IndexBot;
+    public $TorChecker;
 
 
     public function __construct()
@@ -134,7 +134,7 @@ class WAFSystem
 
     public function isAllowed2()
     {
-        $Api = Api::getInstance($this->Config, $this->Profile, $this->Logger, $this->IpBlacklist);
+        $Api = Api::getInstance($this);
 
         # Важен приоритет проверки
         if (!$Api->isPost()) {

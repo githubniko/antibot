@@ -15,11 +15,14 @@ class Marker
         $this->expireDays = (int)$config->get('cookie', 'expire_days', 30);
     }
 
-    function set()
+    function set($time = null)
     {
+        if($time == null) 
+            $time = time() + $this->expireDays * 86400;
+        
         if (version_compare(PHP_VERSION, '7.3.0') >= 0) {
             setcookie($this->profile->RayIDSecret, $this->profile->genKey(), [
-                'expires' => time() + $this->expireDays * 86400,
+                'expires' => $time,
                 'path' => '/',
                 'httponly' => true,
                 'secure' => isset($_SERVER['HTTPS'])
@@ -28,6 +31,11 @@ class Marker
             setcookie($this->profile->RayIDSecret, $this->profile->genKey(), time() + $this->expireDays * 24 * 3600, "/");
         }
         $this->logger->logMessage("Tag set");
+    }
+
+    function remove()
+    {
+        $this->set(time() - 3600);
     }
 
     function isValid()

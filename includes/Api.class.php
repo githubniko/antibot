@@ -6,34 +6,26 @@ namespace WAFSystem;
 class Api
 {
     private static $_instances = null;
-    private $Config;
-    private $Profile;
-    private $Logger;
-    private $IpBlacklist;
+    private $WAFSystem;
     private $data; // хранит массив данных из php://input
 
-    public function __construct(Config $config, Profile $profile, Logger $logger, IPBlacklist $ipBlacklist = null)
+    public function __construct(WAFSystem $wafsystem)
     {
-        $this->Config = $config;
-        $this->Profile = $profile;
-        $this->Logger = $logger;
-        if ($ipBlacklist != null) {
-            $this->IpBlacklist = $ipBlacklist;
-        }
+        $this->WAFSystem = $wafsystem;
         $this->data = json_decode(file_get_contents('php://input'), true);
+        $client_ip = $this->WAFSystem->Profile->Ip;
 
         if (empty($this->data)) {
             $message = "Data is empty";
-            $this->Logger->log($message);
-            if ($this->IpBlacklist != null)
-                $this->IpBlacklist->add($this->Profile->Ip, $message);
+            $this->WAFSystem->Logger->log($message);
+            $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
         }
 
         if (!isset($this->data['func'])) {
             $message = "Value 'func' is not set";
-            $this->Logger->log($message);
-            $this->IpBlacklist->add($this->Profile->Ip, $message);
+            $this->WAFSystem->Logger->log($message);
+            $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
         }
 
@@ -47,34 +39,31 @@ class Api
 
         if (!$this->isCSRF()) {
             $message = "Value csrf_token is not set";
-            $this->Logger->log($message);
-            if ($this->IpBlacklist != null)
-                $this->IpBlacklist->add($this->Profile->Ip, $message);
+            $this->WAFSystem->Logger->log($message);
+            $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
         }
 
         if (!$this->isCSRFRequest()) {
             $message = "Value csrf_token is not set";
-            $this->Logger->log($message);
-            if ($this->IpBlacklist != null)
-                $this->IpBlacklist->add($this->Profile->Ip, $message);
+            $this->WAFSystem->Logger->log($message);
+            $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
         }
 
         if (!$this->validCSRF()) {
             $message = "Invalid csrf_token";
-            $this->Logger->log($message);
-            if ($this->IpBlacklist != null)
-                $this->IpBlacklist->add($this->Profile->Ip, $message);
+            $this->WAFSystem->Logger->log($message);
+            $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
         }
     }
 
-    public static function getInstance(Config $config, Profile $profile, Logger $logger, IPBlacklist $ipBlacklist)
+    public static function getInstance(WAFSystem $wafsystem)
     {
 
         if (is_null(self::$_instances)) {
-            self::$_instances = new self($config, $profile, $logger, $ipBlacklist);
+            self::$_instances = new self($wafsystem);
         }
         return self::$_instances;
     }
@@ -84,14 +73,14 @@ class Api
         $res = array('status' => $status);
         if (!session_id()) {
             $res = "Critical error: Session session_start() not started.";
-            $this->Logger->log($res);
+            $this->WAFSystem->Logger->log($res);
             echo json_encode($res);
             exit;
         }
 
         if ($status == 'captcha') {
             $res['csrf_token'] = $this->createCSRF(); // # каждый раз генерируем ключ, чтобы форму не DDOS 
-            $this->Logger->log("Show captcha");
+            $this->WAFSystem->Logger->log("Show captcha");
         }
 
         $res = array_merge([
@@ -111,7 +100,7 @@ class Api
 
     public function createCSRF()
     {
-        return $_SESSION['csrf_token'] = $this->Profile->genKey();
+        return $_SESSION['csrf_token'] = $this->WAFSystem->Profile->genKey();
     }
     public function isCSRF()
     {
@@ -162,5 +151,15 @@ class Api
     public function getData()
     {
         return $this->data;
+    }
+
+    /**
+     * Блокирует айпи, если его нет в белых списках и других правилах исключения
+     */
+    private function BlockIP($client_ip, $message)
+    {
+        if (!$this->WAFSystem->IpWhitelist->isListed($client_ip) && !$this->WAFSystem->IndexBot->isIndexbot($client_ip)) {
+            $this->WAFSystem->IpBlacklist->add($this->WAFSystem->Profile->Ip, $message);
+        }
     }
 }
