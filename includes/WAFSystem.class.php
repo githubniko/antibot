@@ -57,6 +57,7 @@ class WAFSystem
 
         $this->Logger->log("" . mb_substr($_SERVER['REQUEST_URI'], 0, 255));
         $this->Logger->log("" . mb_substr($userAgent, 0, 255));
+        $this->Logger->log("REF: " . mb_substr($_SERVER['HTTP_REFERER'], 0, 255));
 
         // 1. Проверка URL в белом списке
         if ($this->RequestChecker->isWhitelistedUrl($_SERVER['REQUEST_URI'])) {
@@ -77,6 +78,19 @@ class WAFSystem
         // 4. Проверка IP в белом списке
         if ($this->IpWhitelist->isListed($clientIp)) {
             $this->Logger->log("IP address found in whitelist: $clientIp");
+            return true;
+        }
+
+        // Пропускаем посетителей с Прямым заходом
+        if ($this->Config->get('checks', 'direct', false) == 'ALLOW' && (empty($_SERVER['HTTP_REFERER']))) {
+            $this->Logger->log("Direct entry permitted");
+            $this->Marker->set();
+            return true;
+        }
+
+        // Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
+        if ($this->Config->get('checks', 'referer', false) == 'ALLOW' && !empty($_SERVER['HTTP_REFERER'])) {
+            $this->Logger->log("HTTP_REFERER allowed");
             return true;
         }
 
@@ -147,29 +161,31 @@ class WAFSystem
             $this->Logger->log("IPv6 address");
             $Api->endJSON('captcha');
         }
-        
+
         # Проверка для мобильных девайсов
         $screen_width = !$this->Config->get('main', 'screen_width', false) ? 1920 : $this->Config->get('main', 'screen_width');
         if ($this->Config->get('checks', 'mobile', false) && $data['screenWidth'] < $screen_width) {
             $this->Logger->log("Screen resolution is less than {$screen_width}px");
             $Api->endJSON('captcha');
         }
-        
+
+        # Проверка для iframe
         if ($this->Config->get('checks', 'iframe', false) && $data['mainFrame'] != true) {
             $this->Logger->log("Open in frame");
             $this->IpBlacklist->add($this->Profile->Ip, 'iframe');
             $Api->endJSON('block');
         }
-        
-        if ($this->Config->get('checks', 'direct', false) && (empty($data['referer']) || mb_eregi("^http(s*):\/\/" . $_SERVER['HTTP_HOST'], $data['referer']))) {
-            $this->Logger->log("Direct approach");
+
+        # Показ капчи для Прямых заходов
+        if ($this->Config->get('checks', 'direct', false) == 'CAPTCHA' && (empty($data['referer']) || mb_eregi("^http(s*):\/\/" . $this->Profile->Host, $data['referer']))) {
+            $this->Logger->log("Direct transition");
             $Api->endJSON('captcha');
         }
-        
+
         $this->Logger->log("Passed all filters");
         $this->Marker->set();
-        
-        
+
+
         $Api->endJSON('allow');
     }
 }
