@@ -72,6 +72,7 @@ class WAFSystem
 
         // 3. Проверка куки маркера
         if ($this->Marker->isValid()) {
+            $this->Logger->log("Tag found");
             return true;
         }
 

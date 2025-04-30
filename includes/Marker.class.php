@@ -27,7 +27,7 @@ class Marker
         } else {
             setcookie($this->profile->RayIDSecret, $this->profile->genKey(), time() + $this->expireDays * 24 * 3600, "/");
         }
-        $this->logger->logMessage("Установлена метка для пользователя");
+        $this->logger->logMessage("Tag set");
     }
 
     function isValid()
