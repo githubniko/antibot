@@ -90,8 +90,9 @@ class WAFSystem
         }
 
         // Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
-        if ($this->Config->get('checks', 'referer', false) == 'ALLOW' && !empty($_SERVER['HTTP_REFERER'])) {
+        if ($this->Config->get('checks', 'referer', false) == 'ALLOW' && (!empty($_SERVER['HTTP_REFERER']) && !mb_eregi("^http(s*):\/\/".$_SERVER['HTTP_HOST'] , $_SERVER['HTTP_REFERER']))) {
             $this->Logger->log("HTTP_REFERER allowed");
+            $this->Marker->set();
             return true;
         }
 
