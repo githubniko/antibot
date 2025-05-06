@@ -16,15 +16,15 @@ class Api
         $client_ip = $this->WAFSystem->Profile->IP;
 
         if (empty($this->data)) {
-            $message = "Data is empty";
-            $this->WAFSystem->Logger->log($message);
+            $message = "Error: Data is empty";
+            $this->WAFSystem->Logger->log($message, [static::class]);
             $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
         }
 
         if (!isset($this->data['func'])) {
-            $message = "Value 'func' is not set";
-            $this->WAFSystem->Logger->log($message);
+            $message = "Error: Value 'func' is not set";
+            $this->WAFSystem->Logger->log($message, [static::class]);
             $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
         }
@@ -39,22 +39,22 @@ class Api
         }
 
         if (!$this->isCSRF()) {
-            $message = "Value csrf_token is not set";
-            $this->WAFSystem->Logger->log($message);
+            $message = "Error: Value csrf_token is not set";
+            $this->WAFSystem->Logger->log($message, [static::class]);
             $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
         }
 
         if (!$this->isCSRFRequest()) {
-            $message = "Value csrf_token is not set";
-            $this->WAFSystem->Logger->log($message);
+            $message = "Error: Value csrf_token is not set";
+            $this->WAFSystem->Logger->log($message, [static::class]);
             $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
         }
 
         if (!$this->validCSRF()) {
-            $message = "Invalid csrf_token";
-            $this->WAFSystem->Logger->log($message);
+            $message = "Error: Invalid csrf_token";
+            $this->WAFSystem->Logger->log($message, [static::class]);
             $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
         }
@@ -74,7 +74,7 @@ class Api
         $res = array('status' => $status);
         if (!session_id()) {
             $res = "Critical error: Session session_start() not started.";
-            $this->WAFSystem->Logger->log($res);
+            $this->WAFSystem->Logger->log($res, [static::class]);
             echo json_encode($res);
             exit;
         }
