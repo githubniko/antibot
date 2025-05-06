@@ -15,6 +15,7 @@ class WAFSystem
     public $CaptchaHandler;
     public $IndexBot;
     public $TorChecker;
+    public $RefererChecker;
 
 
     public function __construct()
@@ -36,6 +37,7 @@ class WAFSystem
         $this->CaptchaHandler = new CaptchaHandler($this->Config, $this->Profile, $this->Logger);
         $this->IndexBot = new IndexBot($this->Config, $this->Profile, $this->Logger);
         $this->TorChecker = new TorChecker($this->Config, $this->Logger);
+        $this->RefererChecker = new RefererChecker($this->Config, $this->Logger);
     }
 
     public function run()
@@ -83,20 +85,14 @@ class WAFSystem
         }
 
         // Пропускаем посетителей с Прямым заходом
-        if (
-            $this->Config->init('checks', 'direct', 'CAPTCHA', 'ALLOW - разрешить прямые заходы, CAPTCHA - капча для прямого захода, SKIP - пропустить правило') == 'ALLOW'
-            && (empty($this->Profile->Referer))
-        ) {
+        if ($this->RefererChecker->isDirect($this->Profile->Referer, 'ALLOW')) {
             $this->Logger->log("Direct entry permitted");
             $this->Marker->set();
             return true;
         }
 
         // Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
-        if (
-            $this->Config->init('checks', 'referer', 'ALLOW', 'ALLOW - разрешить при наличии реферера, SKIP - пропустить правило') == 'ALLOW'
-            && (!empty($this->Profile->Referer) && !mb_eregi("^http(s*):\/\/" . $this->Profile->Host, $this->Profile->Referer))
-        ) {
+        if ($this->RefererChecker->isReferer($this->Profile->Referer, 'ALLOW')) {
             $this->Logger->log("HTTP_REFERER allowed");
             $this->Marker->set();
             return true;
@@ -180,7 +176,7 @@ class WAFSystem
         }
 
         # Показ капчи для Прямых заходов
-        if ($this->Config->init('checks', 'direct', 'CAPTCHA', 'ALLOW - разрешить прямые заходы, CAPTCHA - капча для прямого захода, SKIP - пропустить правило') == 'CAPTCHA' && (empty($data['referer']) || mb_eregi("^http(s*):\/\/" . $this->Profile->Host, $data['referer']))) {
+        if ($this->RefererChecker->isDirect($data['referer'], 'CAPTCHA')) {
             $this->Logger->log("Direct transition");
             $Api->endJSON('captcha');
         }
