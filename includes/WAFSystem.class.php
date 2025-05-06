@@ -167,7 +167,7 @@ class WAFSystem
 
         # Проверка для мобильных девайсов
         $screen_width = $this->Config->init('mobile', 'screen_width', 1920, 'px, минимальная ширина экрана. Работает совместно с [checks]->mobile');
-        if ($this->Config->init('checks', 'mobile', true, 'капча для мобильных девайсов') && $data['screenWidth'] < $screen_width) {
+        if ($this->Config->init('checks', 'mobile', true, 'капча для мобильных девайсов') && (int)$data['screenWidth'] < $screen_width) {
             $this->Logger->log("Screen resolution is less than {$screen_width}px");
             $Api->endJSON('captcha');
         }
