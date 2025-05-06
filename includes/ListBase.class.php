@@ -29,10 +29,10 @@ abstract class ListBase
     public function isListed($value)
     {
         if (!$this->validate($value)) {
-            $this->Logger->log("Error: The value $value failed validation", [static::class]);
+            $this->Logger->log("Error: The value '$value' failed validation", [static::class]);
             return false;
         }
-
+        
         return $this->checkInList($value);
     }
 
@@ -41,8 +41,13 @@ abstract class ListBase
      */
     public function add($value, $comment = '')
     {
-        if ($this->isListed($value)) {
+        if (!$this->validate($value)) {
+            $this->Logger->log("Error: The value '$value' failed validation", [static::class]);
             return;
+        }
+
+        if ($this->isListed($value)) {            
+            return; 
         }
 
         $entry = $this->formatEntry($value, $comment);
