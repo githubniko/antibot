@@ -17,10 +17,17 @@ class Logger
         $this->config = $config;
         $this->profile = $profile;
 
-        $this->debugEnabled = $this->config->get('main', 'debug', false);
+        $this->config->init('main', 'debug', true);
+        $this->config->init('logs', 'log_file', 'logs/antibot.log');
+        $this->config->init('logs', 'max_size', 10, 'Максимальный размер, MB');
+        $this->config->init('logs', 'rotate', 7, 'Количество файлов ротации');
+
+        $this->debugEnabled = $this->config->get('main', 'debug', true);
+
         $logfile = ltrim($this->config->get('logs', 'log_file'), "/\\");
         if ($logfile == null) {
             $logfile = "logs/antibot.log";
+            $this->config->set('logs', 'log_file', $logfile);
         }
         $this->logFile = $config->BasePath . $logfile;
 
@@ -84,7 +91,7 @@ class Logger
     {
         $retry = 0;
         $maxRetries = 3;
-        
+
         while ($retry < $maxRetries) {
             if ($handle = @fopen($filePath, 'a')) {
                 if (flock($handle, LOCK_EX)) {
@@ -98,8 +105,8 @@ class Logger
             $retry++;
             usleep(100000);
         }
-        
-        error_log("Failed to write log after {$maxRetries} attempts: ". $filePath);
+
+        error_log("Failed to write log after {$maxRetries} attempts: " . $filePath);
     }
 
     /**
@@ -124,7 +131,7 @@ class Logger
     {
         $maxSizeMB = $this->config->get('logs', 'max_size', 10);
         $rotateCount = $this->config->get('logs', 'rotate', 5);
-        
+
         if (filesize($this->logFile) < ($maxSizeMB * 1024 * 1024)) {
             return;
         }
@@ -200,7 +207,7 @@ class Logger
 
         $gzFile = $sourceFile . '.gz';
         $mode = 'wb9'; // Максимальное сжатие
-        
+
         $fp_out = gzopen($gzFile, $mode);
         if (!$fp_out) {
             error_log("Cannot create gzip file: " . $gzFile);

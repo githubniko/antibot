@@ -9,6 +9,7 @@ abstract class ListBase
 {
     protected $absolutePath; 
     protected $path; // путь от корня проекта
+    protected $listName; // название листа в конфиг-файле
     protected $Config;
     protected $Logger;
 
@@ -69,14 +70,14 @@ abstract class ListBase
      */
     protected function checkInList($value)
     {
-        if (!file_exists($this->absolutePath)) {
-            $this->Logger->log("File not found: " . $this->absolutePath);
+        if (!is_file($this->absolutePath)) {
+            $this->Logger->log("Critical error: file list not found, check parameters " . $this->listName, [static::class]);
             return false;
         }
 
         $file = fopen($this->absolutePath, 'r');
         if (!$file) {
-            $this->Logger->logMessage("Error reading file: " . $this->absolutePath);
+            $this->Logger->logMessage("Error reading file: " . $this->absolutePath, [static::class]);
             return false;
         }
 

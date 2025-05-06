@@ -5,12 +5,15 @@ include_once 'ListBase.class.php';
 
 class BlackListIP extends ListBase
 {
+    public $listName = 'blacklist_ip';
+
     public function __construct(Config $config, Logger $logger)
     {
 
-        $file = ltrim($config->get('lists', 'blacklist_ip'), "/\\");
-        if ($file == null) {
-            $file = "lists/blacklist_ip";
+        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        if (empty($file)) {
+            $file = "lists/" . $this->listName;
+            $config->set('lists', $this->listName, $file);
         }
 
         parent::__construct($file, $config, $logger);

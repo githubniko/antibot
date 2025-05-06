@@ -7,15 +7,17 @@ include_once 'ListBase.class.php';
 class IndexBot extends ListBase
 {
     private $Profile;
+    public $listName = 'indexbot_rules';
 
     public function __construct(Config $config, Profile $profile, Logger $logger)
     {
         $this->Logger = $logger;
         $this->Profile = $profile;
 
-        $file = ltrim($config->get('lists', 'indexbot_rules'), "/\\");
-        if ($file == null) {
-            $file = "lists/indexbot.rules";
+        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        if (empty($file)) {
+            $file = "lists/" . $this->listName;
+            $config->set('lists', $this->listName, $file);
         }
 
         parent::__construct($file, $config, $logger);

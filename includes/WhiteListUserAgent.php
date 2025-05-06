@@ -6,15 +6,19 @@ include_once 'ListBase.class.php';
 
 class WhiteListUserAgent extends ListBase
 {
+    public $listName = 'whitelist_useragent';
+
     public function __construct(Config $config, Logger $logger)
     {
-        $this->Config = $config;
+        $config->init('checks', 'useragent', true, 'блокировка, если User-Agent отсутствуте или пустой');
+        $config->init('useragent', 'min_length', 20);
+        $config->init('useragent', 'max_length', 512);
 
-        $file = ltrim($config->get('lists', 'whitelist_useragent'), "/\\");
-        if ($file == null) {
-            $file = "lists/whitelist_useragent";
+        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        if (empty($file)) {
+            $file = "lists/" . $this->listName;
+            $config->set('lists', $this->listName, $file);
         }
-
         parent::__construct($file, $config, $logger);
     }
 
@@ -49,7 +53,7 @@ EOT;
         return preg_match("/$pattern/i", $value) === 1;
     }
 
-    protected function Comparison($value1, $value2) 
+    protected function Comparison($value1, $value2)
     {
         $pattern = str_replace('/', '\/', $value1); // Экранируем слеши для регулярки
         return preg_match("/$pattern/iu", $value2) === 1;
@@ -58,7 +62,8 @@ EOT;
     /**
      * Проверяет валидность User-Agent
      */
-    public function isValid($userAgent) {
+    public function isValid($userAgent)
+    {
         if (empty($userAgent)) {
             $this->Logger->log("Empty User-Agent string");
             return false;
@@ -67,7 +72,7 @@ EOT;
         // Проверка минимальной/максимальной длины
         $minLength = $this->Config->get('useragent', 'min_length', 20);
         $maxLength = $this->Config->get('useragent', 'max_length', 512);
-        
+
         if (strlen($userAgent) < $minLength || strlen($userAgent) > $maxLength) {
             $this->Logger->log("Invalid User-Agent length: " . strlen($userAgent));
             return false;

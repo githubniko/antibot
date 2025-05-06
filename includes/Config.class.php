@@ -1,14 +1,19 @@
 <?php
+
 namespace WAFSystem;
 
 class Config
 {
     private static $instances = [];
     private $config = [];
+    private $comments = [];
     public $BasePath;
     public $DOCUMENT_ROOT;
     public $ANTIBOT_PATH;
     public $HTTP_HOST;
+    private $configFile;
+    private $lockFile;
+    private $useBooleanAsOnOff = true;
 
     private function __construct($documentRoot, $antibotPath)
     {
@@ -17,6 +22,8 @@ class Config
         $this->HTTP_HOST = getenv("HTTP_HOST");
 
         $this->BasePath = rtrim($documentRoot, "/\\") . '/' . ltrim($antibotPath, "/\\");
+        $this->configFile = $this->BasePath . 'config.ini';
+        $this->lockFile = $this->BasePath . 'config.lock';
         $this->loadConfig();
     }
 
@@ -27,7 +34,7 @@ class Config
         }
 
         if ($antibotPath === null) {
-            $antibotPath = '/antibot/'; // значение по умолчанию
+            $antibotPath = '/antibot/';
         }
 
         $key = md5($documentRoot . $antibotPath);
@@ -39,45 +46,270 @@ class Config
         return self::$instances[$key];
     }
 
-    private function loadConfig()
+    public function setBooleanFormat($useOnOff)
     {
-        $iniFile = $this->BasePath . 'config.ini';
-        if (!file_exists($iniFile)) {
-            throw new \RuntimeException("Config file not found: $iniFile");
-        }
-
-        $this->config = parse_ini_file($iniFile, true);
-        if ($this->config === false) {
-            throw new \RuntimeException("Failed to parse config file");
-        }
-
-        $this->validateConfig();
+        $this->useBooleanAsOnOff = (bool)$useOnOff;
     }
 
-    private function validateConfig()
+    private function sanitizeKey($key)
     {
-        $required = [
-            'main' => ['debug', 'header404', 'cookie_name'],
-            'cookie' => ['expire_days'],
-            'paths' => ['antibot_path']
-        ];
+        $key = preg_replace('/[^a-zA-Z0-9_\-]/', '', $key);
 
-        foreach ($required as $section => $keys) {
-            foreach ($keys as $key) {
-                if (!isset($this->config[$section][$key])) {
-                    throw new \RuntimeException("Missing required config parameter: $section.$key");
+        if (preg_match('/^[0-9]/', $key)) {
+            $key = 'key_' . $key;
+        }
+
+        if (empty($key)) {
+            $key = 'key_' . uniqid();
+        }
+
+        return $key;
+    }
+
+    private function loadConfig()
+    {
+        $iniFile = $this->configFile;
+        if (!file_exists($iniFile)) {
+            $this->config = [];
+            $this->comments = [];
+            return;
+        }
+
+        $lines = file($iniFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $currentSection = '';
+        $this->config = [];
+        $this->comments = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            if (preg_match('/^\[([^]]+)\]$/', $line, $matches)) {
+                $currentSection = $this->sanitizeKey($matches[1]);
+                $this->comments[$currentSection]['__section_comment__'] = '';
+                continue;
+            }
+
+            if (strpos($line, ';') === 0) {
+                if ($currentSection === '') {
+                    $this->comments['__global_comments__'][] = $line;
+                } else {
+                    $this->comments[$currentSection]['__section_comment__'] .= $line . "\n";
+                }
+                continue;
+            }
+
+            if (strpos($line, '=') !== false) {
+                list($key, $value) = array_map('trim', explode('=', $line, 2));
+                $key = $this->sanitizeKey($key);
+
+                $paramComment = '';
+                if (($commentPos = strpos($value, ';')) !== false) {
+                    $paramComment = substr($value, $commentPos);
+                    $value = trim(substr($value, 0, $commentPos));
+                }
+
+                $value = $this->parseValue($value);
+
+                $this->config[$currentSection][$key] = $value;
+                if ($paramComment !== '') {
+                    $this->comments[$currentSection][$key] = $paramComment;
                 }
             }
         }
     }
 
+    private function parseValue($value)
+    {
+        if (preg_match('/^["\'](.*)["\']$/', $value, $matches)) {
+            return $matches[1];
+        }
+
+        $lowerValue = strtolower($value);
+        $booleanMap = [
+            'true' => true,
+            'on' => true,
+            'yes' => true,
+            '1' => true,
+            'false' => false,
+            'off' => false,
+            'no' => false,
+            '0' => false
+        ];
+
+        if (isset($booleanMap[$lowerValue])) {
+            return $booleanMap[$lowerValue];
+        }
+
+        if (is_numeric($value)) {
+            return strpos($value, '.') !== false ? (float)$value : (int)$value;
+        }
+
+        return $value;
+    }
+
     public function get($section, $key, $default = null)
     {
-        return isset($this->config[$section][$key]) ? $this->config[$section][$key] : $default;
+        $section = $this->sanitizeKey($section);
+        $key = $this->sanitizeKey($key);
+
+        if (isset($this->config[$section][$key])) {
+            return $this->config[$section][$key];
+        }
+
+        return $default;
+    }
+    /**
+     * Изменяет или устанавливает параметр
+     */
+    public function set($section, $key, $value, $comment = null)
+    {
+        $section = $this->sanitizeKey($section);
+        $key = $this->sanitizeKey($key);
+
+        if (!isset($this->config[$section])) {
+            $this->config[$section] = [];
+            $this->comments[$section]['__section_comment__'] = '';
+        }
+
+        $this->config[$section][$key] = $value;
+
+        if ($comment !== null) {
+            $this->comments[$section][$key] = '; ' . ltrim($comment, '; ');
+        }
+
+        $this->saveConfig();
+
+        return $value;
+    }
+    /**
+     * Если параметр не существует, то создает его. Возвращает значение созданного или текущего значения
+     */
+    public function init($section, $key, $value, $comment = null)
+    {
+        $getValue = $this->get($section, $key);
+        if ($getValue == null) {
+            return $this->set($section, $key, $value, $comment);
+        }
+        return $value;
+    }
+
+    private function formatValue($value)
+    {
+        if (is_bool($value)) {
+            return $this->useBooleanAsOnOff
+                ? ($value ? 'On' : 'Off')
+                : ($value ? 'true' : 'false');
+        }
+
+        if (is_array($value)) {
+            return '"' . implode(',', array_map('addslashes', $value)) . '"';
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return $value;
+        }
+
+        if (preg_match('/^[a-zA-Z0-9_\-\.]+$/', $value) && !is_numeric($value)) {
+            return $value;
+        }
+
+        return '"' . addslashes($value) . '"';
+    }
+
+    private function saveConfig()
+    {
+        $content = '';
+
+        if (!empty($this->comments['__global_comments__'])) {
+            $content .= implode("\n", $this->comments['__global_comments__']) . "\n\n";
+        }
+
+        foreach ($this->config as $section => $params) {
+            if (!empty($this->comments[$section]['__section_comment__'])) {
+                $content .= trim($this->comments[$section]['__section_comment__']) . "\n";
+            }
+
+            $content .= "[$section]\n";
+
+            foreach ($params as $key => $value) {
+                $line = "$key = " . $this->formatValue($value);
+
+                if (!empty($this->comments[$section][$key])) {
+                    $line .= ' ' . $this->comments[$section][$key];
+                }
+
+                $content .= $line . "\n";
+            }
+
+            $content .= "\n";
+        }
+
+        $lock = $this->acquireLock();
+        try {
+            $tempFile = tempnam(dirname($this->configFile), 'tmp_');
+
+            if (file_put_contents($tempFile, $content) === false) {
+                throw new \RuntimeException("Failed to write temp config file");
+            }
+
+            if (!rename($tempFile, $this->configFile)) {
+                @unlink($tempFile);
+                throw new \RuntimeException("Failed to replace config file");
+            }
+
+            chmod($this->configFile, 0644);
+        } finally {
+            $this->releaseLock($lock);
+        }
+    }
+
+    private function acquireLock()
+    {
+        $maxWait = 5;
+        $startTime = time();
+        $lock = null;
+
+        while (time() - $startTime < $maxWait) {
+            $lock = fopen($this->lockFile, 'w+');
+            if (flock($lock, LOCK_EX | LOCK_NB)) {
+                return $lock;
+            }
+
+            if (is_resource($lock)) {
+                fclose($lock);
+            }
+
+            usleep(100000);
+        }
+
+        throw new \RuntimeException("Could not acquire config file lock after $maxWait seconds");
+    }
+
+    private function releaseLock($lock)
+    {
+        if (is_resource($lock)) {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+        @unlink($this->lockFile);
     }
 
     public function getAll()
     {
+        $this->loadConfig();
         return $this->config;
+    }
+
+    public function getAllWithComments()
+    {
+        $this->loadConfig();
+        return [
+            'config' => $this->config,
+            'comments' => $this->comments
+        ];
+    }
+    public function reloadConfig()
+    {
+        $this->loadConfig();
     }
 }

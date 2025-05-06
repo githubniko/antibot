@@ -14,6 +14,10 @@ class Marker
         $this->Config = $config;
         $this->profile = $profile;
         $this->logger = $logger;
+
+        $config->init('cookie', 'cookie_name', substr($this->profile->genKey(), 0, 5), 'Изменение значения, позволяет сбросить метку всем пользователям');
+        $config->init('cookie', 'expire_days', 30, 'дней, действия метки');
+
         $this->expireDays = (int)$config->get('cookie', 'expire_days', 30);
     }
 
@@ -22,7 +26,7 @@ class Marker
         if ($time == null)
             $time = time() + $this->expireDays * 86400;
 
-        $cookie_value = $this->Config->get('main', 'cookie_name', '');
+        $cookie_value = $this->Config->get('cookie', 'cookie_name', '');
         if (version_compare(PHP_VERSION, '7.3.0') >= 0) {
             setcookie($this->profile->RayIDSecret, $cookie_value, [
                 'expires' => $time,
@@ -45,7 +49,7 @@ class Marker
     {
         if (
             isset($_COOKIE[$this->profile->RayIDSecret])
-            && $_COOKIE[$this->profile->RayIDSecret] == $this->Config->get('main', 'cookie_name', '')
+            && $_COOKIE[$this->profile->RayIDSecret] == $this->Config->get('cookie', 'cookie_name', '')
         ) {
             return true;
         }

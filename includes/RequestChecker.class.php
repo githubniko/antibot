@@ -6,11 +6,14 @@ include_once 'ListBase.class.php';
 
 class RequestChecker extends ListBase
 {
+    public $listName = 'whitelist_url';
+
     public function __construct(Config $config, Logger $logger)
     {
-        $file = ltrim($config->get('lists', 'whitelist_url'), "/\\");
-        if ($file == null) {
-            $file = "lists/whitelist_url";
+        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        if (empty($file)) {
+            $file = "lists/" . $this->listName;
+            $config->set('lists', $this->listName, $file);
         }
 
         parent::__construct($file, $config, $logger);

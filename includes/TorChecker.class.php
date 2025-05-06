@@ -14,6 +14,8 @@ class TorChecker
     {
         $this->cacheTime = $cacheTime;
         $this->cacheFile = $config->BasePath . 'tor_exit_nodes.cache';
+
+        $config->init('checks', 'tor', true, 'блокировать вход с ip tor-сетей');
     }
 
     /**

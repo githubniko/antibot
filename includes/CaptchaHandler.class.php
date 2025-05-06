@@ -8,14 +8,16 @@ class CaptchaHandler
     private $Config;
     private $Profile;
     private $Logger;
-
+    private $metrika = '101475381';
 
     public function __construct(Config $config, Profile $profile, Logger $logger)
     {
         $this->Config = $config;
         $this->Profile = $profile;
         $this->Logger = $logger;
-        
+
+        $config->init('main', 'header404', false, 'отдает на заглушку 404 заголовок');
+        $config->init('main', 'metrika', $this->metrika, 'Код Яндекс Метрики. Можете установить свой код или оставить текущий для сбора данных о ботах нашими специалистами. Пустая строка отключает показ метрики');
     }
 
     # Функция для вывода страницы проверки и ввода капчи
