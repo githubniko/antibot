@@ -53,11 +53,10 @@ class WAFSystem
     private function isAllowed()
     {
         $clientIp = $this->Profile->Ip;
-        $userAgent = $this->Profile->UserAgent;
 
         $this->Logger->log("" . mb_substr($_SERVER['REQUEST_URI'], 0, 255));
-        $this->Logger->log("" . mb_substr($userAgent, 0, 255));
-        $this->Logger->log("REF: " . mb_substr($_SERVER['HTTP_REFERER'], 0, 255));
+        $this->Logger->log("" . $this->Profile->UserAgent);
+        $this->Logger->log("REF: " . $this->Profile->Referer);
 
         // 1. Проверка URL в белом списке
         if ($this->RequestChecker->isListed($_SERVER['REQUEST_URI'])) {
@@ -84,14 +83,14 @@ class WAFSystem
         }
 
         // Пропускаем посетителей с Прямым заходом
-        if ($this->Config->get('checks', 'direct', false) == 'ALLOW' && (empty($_SERVER['HTTP_REFERER']))) {
+        if ($this->Config->get('checks', 'direct', false) == 'ALLOW' && (empty($this->Profile->Referer))) {
             $this->Logger->log("Direct entry permitted");
             $this->Marker->set();
             return true;
         }
 
         // Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
-        if ($this->Config->get('checks', 'referer', false) == 'ALLOW' && (!empty($_SERVER['HTTP_REFERER']) && !mb_eregi("^http(s*):\/\/".$_SERVER['HTTP_HOST'] , $_SERVER['HTTP_REFERER']))) {
+        if ($this->Config->get('checks', 'referer', false) == 'ALLOW' && (!empty($this->Profile->Referer) && !mb_eregi("^http(s*):\/\/".$this->Profile->Host , $this->Profile->Referer))) {
             $this->Logger->log("HTTP_REFERER allowed");
             $this->Marker->set();
             return true;
@@ -100,13 +99,13 @@ class WAFSystem
         // 5. Проверка User-Agent
         if ($this->Config->get('checks', 'useragent', false)) {
             // Валидность User_Agent
-            if (!$this->WhiteListUserAgent->isValid($userAgent)) {
+            if (!$this->WhiteListUserAgent->isValid($this->Profile->UserAgent)) {
                 $this->BlackLiskIP->add($clientIp, 'Invalid User-Agent');
                 return false;
             }
 
             // Пропускаем исключенные User-Agent
-            if ($this->WhiteListUserAgent->isListed($userAgent)) {   
+            if ($this->WhiteListUserAgent->isListed($this->Profile->UserAgent)) {   
                 return true;
             }
         }
