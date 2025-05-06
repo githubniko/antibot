@@ -124,7 +124,7 @@ class WAFSystem
         }
 
         // 8. Проверка Tor
-        if ($this->Config->get('checks', 'tor') && $this->TorChecker->isTor($clientIp)) {
+        if ($this->TorChecker->isTor($clientIp)) {
             $this->Logger->log("The IP address is a Tor exit node");
             $this->BlackLiskIP->add($clientIp, 'Tor');
             $this->CaptchaHandler->showBlockPage();

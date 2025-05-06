@@ -10,8 +10,11 @@ class TorChecker
     private $url = 'https://www.dan.me.uk/torlist/?exit'; // Список загружаемых листов для HTTP-метода
     private $cacheFile; // Путь до кэш файла
 
+    private $Config;
+
     public function __construct(Config $config, $cacheTime = 3600)
     {
+        $this->Config = $config;
         $this->cacheTime = $cacheTime;
         $this->cacheFile = $config->BasePath . 'tor_exit_nodes.cache';
 
@@ -32,6 +35,9 @@ class TorChecker
      */
     public function isTor($ip)
     {
+        if(!$this->Config->get('checks', 'tor', false))
+            return;
+
         // Нормализация параметров
         $options = [
             'cache_ttl' => $this->cacheTime,
