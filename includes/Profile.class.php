@@ -11,6 +11,7 @@ class Profile
     public $UserAgent;
     public $isIPv6;
     public $Referer;
+    public $REQUEST_URI;
 
     private function __construct()
     {
@@ -18,6 +19,7 @@ class Profile
         $this->Ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
         $this->UserAgent = isset($_SERVER['HTTP_USER_AGENT']) ? mb_substr($_SERVER['HTTP_USER_AGENT'], 0, 512) : '';
         $this->Referer = isset($_SERVER['HTTP_REFERER']) ? mb_substr($_SERVER['HTTP_REFERER'], 0, 512) : '';
+        $this->REQUEST_URI = isset($_SERVER['REQUEST_URI']) ? mb_substr($_SERVER['REQUEST_URI'], 0, 512) : '';
         
         $this->isIPv6 = filter_var($this->Ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
 

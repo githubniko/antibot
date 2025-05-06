@@ -54,12 +54,12 @@ class WAFSystem
     {
         $clientIp = $this->Profile->Ip;
 
-        $this->Logger->log("" . mb_substr($_SERVER['REQUEST_URI'], 0, 255));
+        $this->Logger->log("" . $this->Profile->REQUEST_URI);
         $this->Logger->log("" . $this->Profile->UserAgent);
         $this->Logger->log("REF: " . $this->Profile->Referer);
 
         // 1. Проверка URL в белом списке
-        if ($this->RequestChecker->isListed($_SERVER['REQUEST_URI'])) {
+        if ($this->RequestChecker->isListed($this->Profile->REQUEST_URI)) {
             $this->Logger->log("REQUEST_URI whitelist");
             return true;
         }
