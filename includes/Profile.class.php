@@ -9,12 +9,15 @@ class Profile
     public $Host;
     public $Ip;
     public $UserAgent;
+    public $isIPv6;
 
     private function __construct()
     {
         $this->Host = isset($_SERVER['HTTP_HOST']) ?  $_SERVER['HTTP_HOST'] : '';
         $this->Ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
         $this->UserAgent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
+
+        $this->isIPv6 = filter_var($this->Ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
 
         $this->RayID = $this->getRayID();
         $this->RayIDSecret = $this->getRayIDSecret();

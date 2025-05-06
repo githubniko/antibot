@@ -2,65 +2,19 @@
 
 namespace WAFSystem;
 
-class RequestChecker
-{
-    private $rulesFile;
-    private $logger;
+include_once 'ListBase.class.php';
 
+class RequestChecker extends ListBase
+{
     public function __construct(Config $config, Logger $logger)
     {
         $file = ltrim($config->get('lists', 'whitelist_url'), "/\\");
         if ($file == null) {
             $logfile = "lists/whitelist_url";
         }
-        $this->rulesFile = $config->BasePath . $file;
+        $fullPathFile = $config->BasePath . $file;
 
-        $this->logger = $logger;
-        $this->validateRulesFile();
-    }
-
-    /**
-     * Проверяет, есть ли текущий URL в белом списке
-     * @param string $requestUri Проверяемый URI
-     * @return bool
-     */
-    public function isWhitelistedUrl($requestUri)
-    {
-        if (!file_exists($this->rulesFile)) {
-            return false;
-        }
-
-        $file = fopen($this->rulesFile, 'r');
-        if (!$file) {
-            $this->logger->logMessage("Failed to open rules file: " . $this->rulesFile);
-            return false;
-        }
-
-        try {
-            while (($line = fgets($file)) !== false) {
-                $line = trim($line);
-                if (empty($line) || strpos($line, '#') === 0) {
-                    continue;
-                }
-
-                // Извлечение шаблона (игнорируем комментарии после #)
-                $pattern = trim(preg_replace('/#.*$/', '', $line));
-                if (empty($pattern)) {
-                    continue;
-                }
-
-                // Проверка совпадения с регулярным выражением
-                if ($this->matchPattern($pattern, $requestUri)) {
-                    fclose($file);
-                    $this->logger->logMessage("URL в белом списке: " . $pattern);
-                    return true;
-                }
-            }
-        } finally {
-            fclose($file);
-        }
-
-        return false;
+        parent::__construct($fullPathFile, $logger);
     }
 
     /**
@@ -81,24 +35,7 @@ class RequestChecker
         return preg_match("/$pattern/i", $uri) === 1;
     }
 
-    /**
-     * Проверяет доступность файла правил
-     */
-    private function validateRulesFile()
-    {
-        if (!file_exists($this->rulesFile)) {
-            $this->logger->logMessage("Rules file not found, creating: " . $this->rulesFile);
-            $this->createDefaultRulesFile();
-        } elseif (!is_readable($this->rulesFile)) {
-            $this->logger->logMessage("Rules file not readable: " . $this->rulesFile);
-            throw new \RuntimeException("Rules file not readable");
-        }
-    }
-
-    /**
-     * Создает файл правил по умолчанию
-     */
-    private function createDefaultRulesFile()
+    protected function createDefaultFileContent()
     {
         $defaultContent = <<<EOT
 # Список исключений по REQUEST_URI
@@ -112,9 +49,13 @@ class RequestChecker
 # /admin/.*\.json$ # Админские JSON-запросы
 
 EOT;
+        return $defaultContent;
+    }
 
-        if (!file_put_contents($this->rulesFile, $defaultContent)) {
-            throw new \RuntimeException("Failed to create default rules file");
-        }
+    protected function Comparison($value1, $value2) 
+    {
+        if ($this->matchPattern($value1, $value1))
+           return true;
+        return false;
     }
 }

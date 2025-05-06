@@ -2,100 +2,41 @@
 
 namespace WAFSystem;
 
-class IndexBot
-{
-    private $Logger;
-    private $rulesFile;
+include_once 'ListBase.class.php';
 
-    public function __construct(Config $config, Logger $logger)
+class IndexBot extends ListBase
+{
+    private $Profile;
+
+    public function __construct(Config $config, Profile $profile, Logger $logger)
     {
         $this->Logger = $logger;
+        $this->Profile = $profile;
 
         $file = ltrim($config->get('lists', 'indexbot_rules'), "/\\");
         if ($file == null) {
             $file = "lists/indexbot.rules";
         }
-        $this->rulesFile = $config->BasePath . $file;
+        $fullPathFile = $config->BasePath . $file;
 
-        if (!file_exists($this->rulesFile)) {
-            $this->createDefaultRulesFile();
-        }
+        parent::__construct($fullPathFile, $logger);
     }
 
     # Функция проверяет ip на индексирующего бота
     public function isIndexbot($client_ip)
     {
-        $isIPv6 = filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
-
-        // Выполняем обратный DNS-запрос
-        $hostname = gethostbyaddr($client_ip);
+        $hostname = gethostbyaddr($client_ip); // Выполняем обратный DNS-запрос
         $this->Logger->log('PTR: ' . $hostname);
-
-        if (!file_exists($this->rulesFile)) {
-            return false;
-        }
-
-        $file = fopen($this->rulesFile, 'r');
-        if (!$file) {
-            $this->Logger->log("Failed to open rules file: " . $this->rulesFile);
-            return false;
-        }
-
-        try {
-            while (($line = fgets($file)) !== false) {
-                $line = trim($line);
-                if (empty($line)) continue;
-
-                $reg = trim(mb_eregi('(.*)(#.*)', $line, $match) ? $match[1] : $line);
-                if (empty($reg)) continue;
-
-                if (!$this->validateDomain($reg)) {
-                    $this->Logger->log('The domain is not valid: ' . $reg);
-                    continue;
-                }
-                $reg = str_replace('.', '\.', $reg);
-
-                mb_regex_encoding('UTF-8');   //кодировка строки
-
-                // Проверяем, заканчивается ли доменное имя на .googlebot.com или .google.com
-                $count = preg_match("/\.$reg$/i", $hostname, $match);   //поиск подстрок в строке pValue
-                if ($count > 0) {
-                    // Выполняем прямой DNS-запрос в зависимости от типа IP
-                    $resolvedRecords = dns_get_record($hostname, $isIPv6 ? DNS_AAAA : DNS_A);
-
-                    // Проверяем, совпадает ли исходный IP с одним из разрешенных
-                    if (!empty($resolvedRecords)) {
-                        foreach ($resolvedRecords as $record) {
-                            if ($isIPv6) {
-                                if (isset($record['ipv6']) && $record['ipv6'] === $client_ip) {
-                                    return true;
-                                }
-                            } else {
-                                if (isset($record['ip']) && $record['ip'] === $client_ip) {
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-                    return false;
-                }
-            }
-        } finally {
-            fclose($file);
-        }
-        return false;
+        return $this->isListed($hostname);
     }
 
-    private function validateDomain($domain)
+    protected function validate($domain)
     {
         $pattern = '/^(?!\-)(?:[a-zA-Z\d\-]{0,62}[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/';
         return preg_match($pattern, $domain);
     }
 
-    /**
-     * Создает файл правил по умолчанию
-     */
-    private function createDefaultRulesFile()
+    protected function createDefaultFileContent()
     {
         $defaultContent = <<<EOT
 # Список PTR индексирующих роботов. Указывается домен первого уровня.
@@ -118,9 +59,34 @@ mail.ru         # Сервисы mail.ru, vk.com
 googleusercontent.com # Discord +https://discordapp.com
 
 EOT;
+        return $defaultContent;
+    }
 
-        if (!file_put_contents($this->rulesFile, $defaultContent)) {
-            $this->Logger->log("Failed to create default Indexbot rules file: " . $this->rulesFile);
+    protected function Comparison($value1, $hostname)
+    {
+        $reg = str_replace('.', '\.', $value1);
+        mb_regex_encoding('UTF-8');   //кодировка строки
+
+        if (preg_match("/\.$reg$/i", $hostname, $match) === 1) {
+            // Выполняем прямой DNS-запрос в зависимости от типа IP
+            $resolvedRecords = dns_get_record($hostname, $this->Profile->isIPv6 ? DNS_AAAA : DNS_A);
+
+            // Проверяем, совпадает ли исходный IP с одним из разрешенных
+            if (!empty($resolvedRecords)) {
+                foreach ($resolvedRecords as $record) {
+                    if ($this->Profile->isIPv6) {
+                        if (isset($record['ipv6']) && inet_pton($record['ipv6']) === inet_pton($this->Profile->Ip)) {
+                            return true;
+                        }
+                    } else {
+                        if (isset($record['ip']) && inet_pton($record['ip']) === inet_pton($this->Profile->Ip)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
+        return false;
     }
 }

@@ -7,8 +7,8 @@ class WAFSystem
     public $Config;
     public $Logger;
     public $Profile;
-    public $IpWhitelist;
-    public $IpBlacklist;
+    public $WhiteListIP;
+    public $BlackLiskIP;
     public $UserAgentChecker;
     public $RequestChecker;
     public $Marker;
@@ -28,13 +28,13 @@ class WAFSystem
         $this->Profile = Profile::getInstance();
         $this->Logger = new Logger($this->Config, $this->Profile);
 
-        $this->IpWhitelist = new IPWhitelist($this->Config, $this->Logger);
-        $this->IpBlacklist = new IPBlacklist($this->Config, $this->Logger);
+        $this->WhiteListIP = new WhiteListIP($this->Config, $this->Logger);
+        $this->BlackLiskIP = new BlackListIP($this->Config, $this->Logger);
         $this->UserAgentChecker = new UserAgentChecker($this->Config, $this->Logger);
         $this->RequestChecker = new RequestChecker($this->Config, $this->Logger);
         $this->Marker = new Marker($this->Config, $this->Profile, $this->Logger);
         $this->CaptchaHandler = new CaptchaHandler($this->Config, $this->Profile, $this->Logger);
-        $this->IndexBot = new IndexBot($this->Config, $this->Logger);
+        $this->IndexBot = new IndexBot($this->Config, $this->Profile, $this->Logger);
         $this->TorChecker = new TorChecker($this->Config, $this->Logger);
     }
 
@@ -60,12 +60,13 @@ class WAFSystem
         $this->Logger->log("REF: " . mb_substr($_SERVER['HTTP_REFERER'], 0, 255));
 
         // 1. Проверка URL в белом списке
-        if ($this->RequestChecker->isWhitelistedUrl($_SERVER['REQUEST_URI'])) {
+        if ($this->RequestChecker->isListed($_SERVER['REQUEST_URI'])) {
+            $this->Logger->log("REQUEST_URI whitelist");
             return true;
         }
 
         // 2. Проверка IP в черном списке
-        if ($this->IpBlacklist->isListed($clientIp)) {
+        if ($this->BlackLiskIP->isListed($clientIp)) {
             $this->Logger->log("IP address found on blacklist: $clientIp");
             $this->CaptchaHandler->showBlockPage();
         }
@@ -77,7 +78,7 @@ class WAFSystem
         }
 
         // 4. Проверка IP в белом списке
-        if ($this->IpWhitelist->isListed($clientIp)) {
+        if ($this->WhiteListIP->isListed($clientIp)) {
             $this->Logger->log("IP address found in whitelist: $clientIp");
             return true;
         }
@@ -100,7 +101,7 @@ class WAFSystem
         if ($this->Config->get('checks', 'useragent', false)) {
             // Валидность User_Agent
             if (!$this->UserAgentChecker->isValid($userAgent)) {
-                $this->IpBlacklist->add($clientIp, 'Invalid User-Agent');
+                $this->BlackLiskIP->add($clientIp, 'Invalid User-Agent');
                 return false;
             }
 
@@ -118,14 +119,14 @@ class WAFSystem
         // 7. Проверка поисковых ботов
         if ($this->IndexBot->isIndexbot($clientIp)) {
             $this->Logger->log("Indexing robot");
-            $this->IpWhitelist->add($clientIp, 'indexbot');
+            $this->WhiteListIP->add($clientIp, 'indexbot');
             return true;
         }
 
         // 8. Проверка Tor
         if ($this->Config->get('checks', 'tor') && $this->TorChecker->isTor($clientIp)) {
             $this->Logger->log("The IP address is a Tor exit node");
-            $this->IpBlacklist->add($clientIp, 'Tor');
+            $this->BlackLiskIP->add($clientIp, 'Tor');
             $this->CaptchaHandler->showBlockPage();
         }
 
@@ -139,7 +140,7 @@ class WAFSystem
         # Важен приоритет проверки
         if (!$Api->isPost()) {
             $this->Logger->log("Not a POST request");
-            $this->IpBlacklist->add($this->Profile->Ip, 'Not a POST request');
+            $this->BlackLiskIP->add($this->Profile->Ip, 'Not a POST request');
             $Api->endJSON('block');
         }
 
@@ -159,7 +160,7 @@ class WAFSystem
             $Api->endJSON('allow');
         }
 
-        if ($this->Config->get('checks', 'ipv6', false) && IPList::isIPv6($this->Profile->Ip)) {
+        if ($this->Config->get('checks', 'ipv6', false) && filter_var($this->Profile->Ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
             $this->Logger->log("IPv6 address");
             $Api->endJSON('captcha');
         }
@@ -174,7 +175,7 @@ class WAFSystem
         # Проверка для iframe
         if ($this->Config->get('checks', 'iframe', false) && $data['mainFrame'] != true) {
             $this->Logger->log("Open in frame");
-            $this->IpBlacklist->add($this->Profile->Ip, 'iframe');
+            $this->BlackLiskIP->add($this->Profile->Ip, 'iframe');
             $Api->endJSON('block');
         }
 

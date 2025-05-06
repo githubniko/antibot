@@ -2,9 +2,9 @@
 
 namespace WAFSystem;
 
-include_once 'IPList.class.php';
+include_once 'ListBase.class.php';
 
-class IPWhitelist extends IPList
+class WhiteListIP extends ListBase
 {
     public function __construct(Config $config, Logger $logger)
     {
@@ -39,8 +39,25 @@ class IPWhitelist extends IPList
         }
     }
 
-    protected function getDefaultFileContent()
+    protected function createDefaultFileContent()
     {
-        return "# Белый список IP-адресов\n# Формат: IP # комментарий\n";
+        $defaultContent = <<<EOT
+# Белый список IP-адресов
+# Формат: IP # комментарий
+
+EOT;
+        return $defaultContent;
+    }
+
+    protected function validate($value)
+    {
+        return filter_var($value, FILTER_VALIDATE_IP) !== false;
+    }
+
+    protected function Comparison($value1, $value2) 
+    {
+        if (inet_pton($value1) === inet_pton($value2))
+           return true;
+        return false;
     }
 }
