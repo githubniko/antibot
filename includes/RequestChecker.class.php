@@ -10,11 +10,10 @@ class RequestChecker extends ListBase
     {
         $file = ltrim($config->get('lists', 'whitelist_url'), "/\\");
         if ($file == null) {
-            $logfile = "lists/whitelist_url";
+            $file = "lists/whitelist_url";
         }
-        $fullPathFile = $config->BasePath . $file;
 
-        parent::__construct($fullPathFile, $logger);
+        parent::__construct($file, $config, $logger);
     }
 
     /**

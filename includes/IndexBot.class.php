@@ -17,9 +17,8 @@ class IndexBot extends ListBase
         if ($file == null) {
             $file = "lists/indexbot.rules";
         }
-        $fullPathFile = $config->BasePath . $file;
 
-        parent::__construct($fullPathFile, $logger);
+        parent::__construct($file, $config, $logger);
     }
 
     # Функция проверяет ip на индексирующего бота

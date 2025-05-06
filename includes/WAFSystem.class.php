@@ -9,7 +9,7 @@ class WAFSystem
     public $Profile;
     public $WhiteListIP;
     public $BlackLiskIP;
-    public $UserAgentChecker;
+    public $WhiteListUserAgent;
     public $RequestChecker;
     public $Marker;
     public $CaptchaHandler;
@@ -30,7 +30,7 @@ class WAFSystem
 
         $this->WhiteListIP = new WhiteListIP($this->Config, $this->Logger);
         $this->BlackLiskIP = new BlackListIP($this->Config, $this->Logger);
-        $this->UserAgentChecker = new UserAgentChecker($this->Config, $this->Logger);
+        $this->WhiteListUserAgent = new WhiteListUserAgent($this->Config, $this->Logger);
         $this->RequestChecker = new RequestChecker($this->Config, $this->Logger);
         $this->Marker = new Marker($this->Config, $this->Profile, $this->Logger);
         $this->CaptchaHandler = new CaptchaHandler($this->Config, $this->Profile, $this->Logger);
@@ -100,18 +100,13 @@ class WAFSystem
         // 5. Проверка User-Agent
         if ($this->Config->get('checks', 'useragent', false)) {
             // Валидность User_Agent
-            if (!$this->UserAgentChecker->isValid($userAgent)) {
+            if (!$this->WhiteListUserAgent->isValid($userAgent)) {
                 $this->BlackLiskIP->add($clientIp, 'Invalid User-Agent');
                 return false;
             }
 
-            // Проверка исключений User-Agent
-            if ($this->UserAgentChecker->isExcludedBot($userAgent)) {
-                return true;
-            }
-
-            // Проверка разрешенных шаблонов User-Agent
-            if ($this->UserAgentChecker->isAllowed($userAgent)) {
+            // Пропускаем исключенные User-Agent
+            if ($this->WhiteListUserAgent->isListed($userAgent)) {   
                 return true;
             }
         }

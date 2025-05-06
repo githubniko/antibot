@@ -10,11 +10,10 @@ class BlackListIP extends ListBase
 
         $file = ltrim($config->get('lists', 'blacklist_ip'), "/\\");
         if ($file == null) {
-            $logfile = "lists/blacklist_ip";
+            $file = "lists/blacklist_ip";
         }
-        $fullPathFile = $config->BasePath . $file;
 
-        parent::__construct($fullPathFile, $logger);
+        parent::__construct($file, $config, $logger);
     }
 
     protected function eventInitListFile()

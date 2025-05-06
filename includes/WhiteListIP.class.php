@@ -11,21 +11,14 @@ class WhiteListIP extends ListBase
 
         $file = ltrim($config->get('lists', 'whitelist_ip'), "/\\");
         if ($file == null) {
-            $logfile = "lists/whitelist_ip";
+            $file = "lists/whitelist_ip";
         }
-        $fullPathFile = $config->BasePath . $file;
 
-        parent::__construct($fullPathFile, $logger);
+        parent::__construct($file, $config, $logger);
     }
 
     protected function eventInitListFile()
     {
-        # добавляем в исключения ip серверов сайта
-        if (!is_file($this->listFile)) {
-            $this->Logger->log("Error file does not exist: " . $this->listFile);
-            return;
-        }
-
         $resolvedRecords = dns_get_record($_SERVER["HTTP_HOST"], DNS_ANY);
 
         // Проверяем, совпадает ли исходный IP с одним из разрешенных

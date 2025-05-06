@@ -7,13 +7,19 @@ namespace WAFSystem;
  */
 abstract class ListBase
 {
-    protected $listFile;
+    protected $absolutePath; 
+    protected $path; // путь от корня проекта
+    protected $Config;
     protected $Logger;
 
-    public function __construct(string $listFile, Logger $logger)
+    public function __construct(string $pathFile, Config $config, Logger $logger)
     {
-        $this->listFile = $listFile;
+        $this->Config = $config;
         $this->Logger = $logger;
+
+        $this->absolutePath = $config->BasePath . $pathFile;
+        $this->path = $pathFile;
+
         $this->initListFile();
     }
 
@@ -42,7 +48,7 @@ abstract class ListBase
         $entry = $this->formatEntry($value, $comment);
         $this->saveEntry($entry);
 
-        $this->Logger->logMessage("Value added to list: " . $value . " (" . static::class . ")");
+        $this->Logger->logMessage("Value added to list: " . $value . " (" . $this->path . ")");
     }
 
     /**
@@ -58,14 +64,14 @@ abstract class ListBase
      */
     protected function checkInList($value)
     {
-        if (!file_exists($this->listFile)) {
-            $this->Logger->log("File not found: " . $this->listFile);
+        if (!file_exists($this->absolutePath)) {
+            $this->Logger->log("File not found: " . $this->absolutePath);
             return false;
         }
 
-        $file = fopen($this->listFile, 'r');
+        $file = fopen($this->absolutePath, 'r');
         if (!$file) {
-            $this->Logger->logMessage("Error reading file: " . $this->listFile);
+            $this->Logger->logMessage("Error reading file: " . $this->absolutePath);
             return false;
         }
 
@@ -74,7 +80,7 @@ abstract class ListBase
                 $lineValue = $this->extractFromLine($line);
                 if (!empty($lineValue)) {
                     if ($this->Comparison($lineValue, $value)) {
-                        $this->Logger->log("Value found in list: ". $lineValue, [static::class] );
+                        $this->Logger->log("Value found in list: ". $lineValue ." (" . $this->path .")");
                         return true;
                     }
                 }
@@ -100,10 +106,10 @@ abstract class ListBase
      */
     protected function initListFile()
     {
-        if (!file_exists($this->listFile)) {
+        if (!file_exists($this->absolutePath)) {
             $defaultContent = $this->createDefaultFileContent();
-            file_put_contents($this->listFile, $defaultContent);
-            $this->Logger->logMessage("New list file created: " . $this->listFile);
+            file_put_contents($this->absolutePath, $defaultContent);
+            $this->Logger->logMessage("New list file created: " . $this->absolutePath);
 
             $this->eventInitListFile();
         }
@@ -114,7 +120,7 @@ abstract class ListBase
      */
     protected function saveEntry($value)
     {
-        $file = fopen($this->listFile, 'a');
+        $file = fopen($this->absolutePath, 'a');
         if (flock($file, LOCK_EX)) {
             fwrite($file, $value);
             flock($file, LOCK_UN);
