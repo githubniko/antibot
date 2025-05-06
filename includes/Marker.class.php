@@ -15,7 +15,7 @@ class Marker
         $this->profile = $profile;
         $this->logger = $logger;
 
-        $config->init('cookie', 'cookie_name', substr($this->profile->genKey(), 0, 5), 'Изменение значения, позволяет сбросить метку всем пользователям');
+        $config->init('cookie', 'cookie_name', substr($this->profile->genKey(), 0, rand(5, 11)), 'Изменение значения, позволяет сбросить метку всем пользователям');
         $config->init('cookie', 'expire_days', 30, 'дней, действия метки');
 
         $this->expireDays = (int)$config->get('cookie', 'expire_days', 30);
