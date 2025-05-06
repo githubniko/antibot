@@ -13,7 +13,7 @@ class Api
     {
         $this->WAFSystem = $wafsystem;
         $this->data = json_decode(file_get_contents('php://input'), true);
-        $client_ip = $this->WAFSystem->Profile->Ip;
+        $client_ip = $this->WAFSystem->Profile->IP;
 
         if (empty($this->data)) {
             $message = "Data is empty";

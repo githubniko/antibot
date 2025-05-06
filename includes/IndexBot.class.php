@@ -74,11 +74,11 @@ EOT;
             if (!empty($resolvedRecords)) {
                 foreach ($resolvedRecords as $record) {
                     if ($this->Profile->isIPv6) {
-                        if (isset($record['ipv6']) && inet_pton($record['ipv6']) === inet_pton($this->Profile->Ip)) {
+                        if (isset($record['ipv6']) && inet_pton($record['ipv6']) === inet_pton($this->Profile->IP)) {
                             return true;
                         }
                     } else {
-                        if (isset($record['ip']) && inet_pton($record['ip']) === inet_pton($this->Profile->Ip)) {
+                        if (isset($record['ip']) && inet_pton($record['ip']) === inet_pton($this->Profile->IP)) {
                             return true;
                         }
                     }

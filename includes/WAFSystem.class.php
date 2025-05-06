@@ -52,7 +52,7 @@ class WAFSystem
 
     private function isAllowed()
     {
-        $clientIp = $this->Profile->Ip;
+        $clientIp = $this->Profile->IP;
 
         $this->Logger->log("" . $this->Profile->REQUEST_URI);
         $this->Logger->log("" . $this->Profile->UserAgent);
@@ -134,7 +134,7 @@ class WAFSystem
         # Важен приоритет проверки
         if (!$Api->isPost()) {
             $this->Logger->log("Not a POST request");
-            $this->BlackLiskIP->add($this->Profile->Ip, 'Not a POST request');
+            $this->BlackLiskIP->add($this->Profile->IP, 'Not a POST request');
             $Api->endJSON('block');
         }
 
@@ -154,7 +154,7 @@ class WAFSystem
             $Api->endJSON('allow');
         }
 
-        if ($this->Config->get('checks', 'ipv6', false) && filter_var($this->Profile->Ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+        if ($this->Config->get('checks', 'ipv6', false) && filter_var($this->Profile->IP, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
             $this->Logger->log("IPv6 address");
             $Api->endJSON('captcha');
         }
@@ -169,7 +169,7 @@ class WAFSystem
         # Проверка для iframe
         if ($this->Config->get('checks', 'iframe', false) && $data['mainFrame'] != true) {
             $this->Logger->log("Open in frame");
-            $this->BlackLiskIP->add($this->Profile->Ip, 'iframe');
+            $this->BlackLiskIP->add($this->Profile->IP, 'iframe');
             $Api->endJSON('block');
         }
 

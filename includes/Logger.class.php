@@ -70,7 +70,7 @@ class Logger
             "%s %s %s %s\n",
             date('Y-m-d H:i:s'),
             $this->profile->RayID,
-            $this->profile->Ip,
+            $this->profile->IP,
             $message
         );
     }
