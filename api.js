@@ -9,6 +9,8 @@ const blockVerifying = document.getElementById("verifying");
 const blockFail = document.getElementById("fail");
 let CSRF = "";
 let flagCloseWindow = true;
+let FINGERPRINT = '';
+
 
 /*
 function isWebWorkerSupported() {
@@ -45,7 +47,39 @@ function refresh() {
 	window.location.href = window.location.href;
 }
 
+/**
+ * Подключает js скрипт к странице
+ * @param pathFile Относительный путь к файлу js
+ */
+function loadScript(pathFile, callback) {
+	var script = document.createElement('script');
+	script.src = HTTP_ANTIBOT_PATH + pathFile;
+	script.async = true;
+	script.onload = callback; 
+	script.onerror = function () {
+		console.error('Error load: ' + pathFile);
+	};
+	document.head.appendChild(script);
+}
+
+function initFingerPrint()
+{
+	if (typeof FingerprintJS !== 'undefined') {
+		FingerprintJS.load()
+         .then(fp => fp.get())
+         .then(result => {
+            FINGERPRINT = result.visitorId;
+			checkBot('checks');
+		 });
+		
+	} else {
+		console.error(callback + 'FingerprintJS no load');
+	}
+}
+
 function checkBot(func) {
+
+
 	var xhr = new XMLHttpRequest();
 
 	var data = JSON.stringify({ // Данные для отправки
@@ -55,6 +89,7 @@ function checkBot(func) {
 		referer: document.referrer,
 		mainFrame: window.top === window.self,
 		func: func == undefined ? 'csrf_token' : func,
+		fingerPrint: FINGERPRINT,
 		csrf_token: CSRF,
 	});
 
@@ -64,14 +99,14 @@ function checkBot(func) {
 	xhr.onload = function () {
 		if (xhr.status >= 200 && xhr.status < 300) {
 			var data = JSON.parse(xhr.responseText);
-			if(data.func == 'csrf_token') {
+			if (data.func == 'csrf_token') {
 				CSRF = data.csrf_token;
-				checkBot('checks');
+				loadScript('js/fp.min.js', initFingerPrint);
 			}
 			else if (data.status == 'captcha') {
 				CSRF = data.csrf_token;
 				displayCaptcha();
-			}			
+			}
 			else if (data.status == 'allow') {
 				form.style.display = "none";
 				lspinner.style.display = "none";
@@ -111,7 +146,7 @@ function displayCaptcha() {
 		}
 	});
 	window.onbeforeunload = function (e) {
-		if(flagCloseWindow) {
+		if (flagCloseWindow) {
 			checkBot('win-close');
 		}
 	};

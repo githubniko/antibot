@@ -12,6 +12,7 @@ class Profile
     public $isIPv6;
     public $Referer;
     public $REQUEST_URI;
+    public $FingerPrint;
 
     private function __construct()
     {

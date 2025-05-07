@@ -46,7 +46,7 @@ class Api
         }
 
         if (!$this->isCSRFRequest()) {
-            $message = "Error: Value csrf_token is not set";
+            $message = "Error: Value csrf_token_request is not set";
             $this->WAFSystem->Logger->log($message, [static::class]);
             $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
@@ -103,6 +103,7 @@ class Api
     {
         return $_SESSION['csrf_token'] = $this->WAFSystem->Profile->genKey();
     }
+
     public function isCSRF()
     {
         return !empty($_SESSION['csrf_token']);

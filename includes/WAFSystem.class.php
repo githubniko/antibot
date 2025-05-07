@@ -16,6 +16,7 @@ class WAFSystem
     public $IndexBot;
     public $TorChecker;
     public $RefererChecker;
+    public $FingerPrint;
 
 
     public function __construct()
@@ -38,6 +39,7 @@ class WAFSystem
         $this->IndexBot = new IndexBot($this->Config, $this->Profile, $this->Logger);
         $this->TorChecker = new TorChecker($this->Config, $this->Logger);
         $this->RefererChecker = new RefererChecker($this->Config, $this->Logger);
+        $this->FingerPrint = new FingerPrint($this->Config, $this->Logger);
     }
 
     public function run()
@@ -142,6 +144,12 @@ class WAFSystem
 
         $data = $Api->getData();
 
+        if (!isset($data['fingerPrint']) || empty($data['fingerPrint'])) {
+            $this->Logger->log("Not FingerPrint");
+            $Api->endJSON('block');
+        }
+        $this->Profile->FingerPrint = $data['fingerPrint'];
+
         # Запрос по событию Закрыл страницу или вкладку
         if ($data['func'] == 'win-close') {
             $this->Logger->log("Closed the verification page");
@@ -154,6 +162,12 @@ class WAFSystem
             $this->Marker->set();
             $Api->removeCSRF();
             $Api->endJSON('allow');
+        }
+
+        # Блокировка по FingerPrint
+        if ($this->FingerPrint->isFP($this->Profile->FingerPrint)) {
+            $this->BlackLiskIP->add($this->Profile->IP, 'FP ' . $this->Profile->FingerPrint);
+            $Api->endJSON('block');
         }
 
         if ($this->Config->init('checks', 'ipv6', true, 'капча для IPv6') && filter_var($this->Profile->IP, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
