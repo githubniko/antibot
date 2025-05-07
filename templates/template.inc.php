@@ -933,7 +933,7 @@
     var HTTP_ANTIBOT_PATH = '<?=$this->Config->ANTIBOT_PATH; ?>';
 	(function () {
 		var cpo = document.createElement('script');
-		cpo.src = '<?=$this->Config->ANTIBOT_PATH.'api.js'; ?>';
+		cpo.src = '<?=$this->Config->ANTIBOT_PATH.'js/api.js'; ?>';
 		document.getElementsByTagName('head')[0].appendChild(cpo);
 	}());
 	</script>
