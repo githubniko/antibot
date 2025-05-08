@@ -22,7 +22,7 @@ class WhiteListIP extends ListBase
 
     protected function eventInitListFile()
     {
-        $resolvedRecords = dns_get_record($_SERVER["HTTP_HOST"], DNS_ANY);
+        $resolvedRecords = dns_get_record($_SERVER["HTTP_HOST"], DNS_A + DNS_AAAA);
 
         // Проверяем, совпадает ли исходный IP с одним из разрешенных
         if (!empty($resolvedRecords)) {
