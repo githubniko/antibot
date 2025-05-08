@@ -140,6 +140,7 @@ function displayCaptcha() {
 
 	input.addEventListener('click', function (event) {
 		if (this.checked) {
+			ym(METRIKA_ID,'reachGoal','onclickcapcha');
 			blockInput.style.display = "none";
 			blockVerifying.style.display = "";
 			checkBot('set-marker');

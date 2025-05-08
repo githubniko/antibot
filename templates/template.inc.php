@@ -931,6 +931,7 @@
     </div>
     <script>
     var HTTP_ANTIBOT_PATH = '<?=$this->Config->ANTIBOT_PATH; ?>';
+    var METRIKA_ID = '<?=$metrika; ?>';
 	(function () {
 		var cpo = document.createElement('script');
 		cpo.src = '<?=$this->Config->ANTIBOT_PATH.'js/api.js'; ?>';
