@@ -934,7 +934,7 @@
     var METRIKA_ID = '<?=$metrika; ?>';
 	(function () {
 		var cpo = document.createElement('script');
-		cpo.src = '<?=$this->Config->ANTIBOT_PATH.'js/api.js'; ?>';
+		cpo.src = '<?=$this->Config->ANTIBOT_PATH.'js/api.js?'.filemtime($this->Config->DOCUMENT_ROOT . $this->Config->ANTIBOT_PATH.'js/api.js'); ?>';
 		document.getElementsByTagName('head')[0].appendChild(cpo);
 	}());
 	</script>
