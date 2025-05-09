@@ -101,6 +101,10 @@ function checkBot(func) {
 			var data = JSON.parse(xhr.responseText);
 			if (data.func == 'csrf_token') {
 				CSRF = data.csrf_token;
+				if(CSRF == undefined || CSRF == '') {
+					console.log('Error getting csrf_token');
+					return;
+				}
 				loadScript('js/fp.min.js', initFingerPrint);
 			}
 			else if (data.status == 'captcha') {
