@@ -18,7 +18,7 @@ class Api
         if (empty($this->data)) {
             $message = "Error: Data is empty";
             $this->WAFSystem->Logger->log($message, [static::class]);
-            $this->BlockIP($client_ip, $message);
+            //$this->BlockIP($client_ip, $message); // если оставить, то простой переход ускорителями загрузки может заблокировать пользователя
             $this->endJSON('block');
         }
 
