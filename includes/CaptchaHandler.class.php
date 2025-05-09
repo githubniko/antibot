@@ -35,6 +35,7 @@ class CaptchaHandler
     # Функция для вывода страницы блокировки
     function showBlockPage()
     {
+        header("HTTP/1.0 403 Forbidden");
         $this->Logger->log("Display the blocking page");
         require $this->Config->BasePath . "templates/template_block.inc.php";
         exit;
