@@ -10,8 +10,8 @@ class RefererChecker
     {
         $this->Config = $config;
 
-        $config->init('checks', 'direct', 'CAPTCHA', 'ALLOW - разрешить прямые заходы, CAPTCHA - капча для прямого захода, SKIP - пропустить правило');
-        $config->init('checks', 'referer', 'ALLOW', 'ALLOW - разрешить при наличии реферера, SKIP - пропустить правило');
+        $config->init('checks', 'direct', 'CAPTCHA', 'ALLOW - разрешить прямые заходы, CAPTCHA - капча, SKIP - пропустить правило');
+        $config->init('checks', 'referer', 'ALLOW', 'ALLOW - разрешить при наличии реферера, CAPTCHA - капча, SKIP - пропустить правило');
     }
 
     public function isDirect($referer, $action = 'ALLOW')

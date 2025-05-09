@@ -171,7 +171,7 @@ class WAFSystem
         }
 
         if ($this->Config->init('checks', 'ipv6', true, 'капча для IPv6') && filter_var($this->Profile->IP, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            $this->Logger->log("IPv6 address");
+            $this->Logger->log("Show captcha for IPv6");
             $Api->endJSON('captcha');
         }
 
@@ -191,7 +191,13 @@ class WAFSystem
 
         # Показ капчи для Прямых заходов
         if ($this->RefererChecker->isDirect($data['referer'], 'CAPTCHA')) {
-            $this->Logger->log("Direct transition");
+            $this->Logger->log("Show captcha for direct transition");
+            $Api->endJSON('captcha');
+        }
+
+        # Показ капчи для Прямых заходов
+        if ($this->RefererChecker->isReferer($data['referer'], 'CAPTCHA')) {
+            $this->Logger->log("Show captcha if there is a referrer");
             $Api->endJSON('captcha');
         }
 
