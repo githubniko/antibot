@@ -160,7 +160,6 @@ class WAFSystem
         if ($data['func'] == 'set-marker') {
             $this->Logger->log("Successfully passed the captcha");
             $this->Marker->set();
-            $Api->removeCSRF();
             $Api->endJSON('allow');
         }
 
