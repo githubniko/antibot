@@ -264,7 +264,7 @@ function checkBot(func) {
 				form.style.display = "none";
 				lspinner.style.display = "none";
 				blockHTTPSecurity.style.display = "none";
-				blockSuccessful.style.display = "block";debugger;
+				blockSuccessful.style.display = "block";
 				if(data.refsave != undefined && data.refsave) {
 					loadPage(window.location.href);
 				} else {
