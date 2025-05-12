@@ -11,6 +11,7 @@ class Config
     public $DOCUMENT_ROOT;
     public $ANTIBOT_PATH;
     public $HTTP_HOST;
+    public $HTTPS;
     private $configFile;
     private $lockFile;
     private $useBooleanAsOnOff = true;
@@ -20,6 +21,12 @@ class Config
         $this->DOCUMENT_ROOT = $documentRoot;
         $this->ANTIBOT_PATH = $antibotPath;
         $this->HTTP_HOST = getenv("HTTP_HOST");
+        if (isset($_SERVER['HTTPS'])) {
+            $this->HTTPS =  $_SERVER['HTTPS'] === 'on' ? true : false;
+        } else {
+            $this->HTTPS = isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] === 'https' ? true : null;
+        }
+
 
         $this->BasePath = rtrim($documentRoot, "/\\") . '/' . ltrim($antibotPath, "/\\");
         $this->configFile = $this->BasePath . 'config.ini';
