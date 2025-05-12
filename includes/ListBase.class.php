@@ -13,7 +13,7 @@ abstract class ListBase
     protected $Config;
     protected $Logger;
 
-    public function __construct(string $pathFile, Config $config, Logger $logger)
+    public function __construct($pathFile, Config $config, Logger $logger)
     {
         $this->Config = $config;
         $this->Logger = $logger;

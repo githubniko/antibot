@@ -40,7 +40,24 @@ class Profile
     # генерирует случайный код
     public function genKey()
     {
-        return bin2hex(random_bytes(32));
+        if (version_compare(PHP_VERSION, '7.0.0') >= 0) {
+            return bin2hex(random_bytes(32));
+        } else {
+            return bin2hex($this->random_bytes_php5(32));
+        }
+        
+    }
+
+    # альтернатива random_bytes() для PHP < 7.0.0
+    public function random_bytes_php5($length) {
+        if (function_exists('openssl_random_pseudo_bytes')) {
+            $bytes = openssl_random_pseudo_bytes($length, $strong);
+            if ($strong === true) {
+                return $bytes;
+            }
+        }
+        // Если openssl недоступен, можно использовать менее безопасные варианты
+        throw new \RuntimeException('Не удалось сгенерировать криптографически безопасные данные');
     }
 
     # генерирует идентификатор пользователя для идентификации в лог-файле
