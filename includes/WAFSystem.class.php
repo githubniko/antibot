@@ -17,11 +17,13 @@ class WAFSystem
     public $TorChecker;
     public $RefererChecker;
     public $FingerPrint;
+    public $refererSave;
 
 
     public function __construct()
     {
         $this->initializeComponents();
+        $this->refererSave = $this->Config->init('main', 'referer_save', true, 'сохранять referer (экспериментальная опция)');
     }
 
     private function initializeComponents()
@@ -160,7 +162,7 @@ class WAFSystem
         if ($data['func'] == 'set-marker') {
             $this->Logger->log("Successfully passed the captcha");
             $this->Marker->set();
-            $Api->endJSON('allow');
+            $Api->endJSON('allow', ['refsave' => $this->refererSave]);
         }
 
         # Блокировка по FingerPrint
@@ -204,6 +206,6 @@ class WAFSystem
         $this->Marker->set();
 
 
-        $Api->endJSON('allow');
+        $Api->endJSON('allow', ['refsave' => $this->refererSave]);
     }
 }
