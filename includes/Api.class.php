@@ -69,7 +69,7 @@ class Api
         return self::$_instances;
     }
 
-    public function endJSON($status)
+    public function endJSON($status, $data = [])
     {
         $res = array('status' => $status);
         if (!session_id()) {
@@ -87,6 +87,9 @@ class Api
         $res = array_merge([
             'func' => $this->data['func']
         ], $res);
+
+        if (sizeof($data) > 0)
+            $res = array_merge($res, $data);
 
         echo json_encode($res);
         exit;
