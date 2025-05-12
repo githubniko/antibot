@@ -194,10 +194,10 @@ class Config
     public function init($section, $key, $value, $comment = null)
     {
         $getValue = $this->get($section, $key);
-        if ($getValue == null) {
+        if (is_null($getValue)) {
             return $this->set($section, $key, $value, $comment);
         }
-        return $value;
+        return $getValue;
     }
 
     private function formatValue($value)
