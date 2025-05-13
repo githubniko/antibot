@@ -55,8 +55,10 @@ class Api
         if (!$this->validCSRF()) {
             $message = "Error: Invalid csrf_token";
             $this->WAFSystem->Logger->log($message, [static::class]);
-            $this->BlockIP($client_ip, $message);
-            $this->endJSON('block');
+            //$this->BlockIP($client_ip, $message);
+            //$this->endJSON('block');
+            $this->WAFSystem->GrayList->add($client_ip, $message);
+            $this->endJSON('refresh');
         }
     }
 

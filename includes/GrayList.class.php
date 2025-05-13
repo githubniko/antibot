@@ -1,0 +1,35 @@
+<?php
+namespace WAFSystem;
+
+include_once 'ListBase.class.php';
+
+class GrayList extends ListBase
+{
+    public $listName = 'graylist';
+
+    public function __construct(Config $config, Logger $logger)
+    {
+
+        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        if (empty($file)) {
+            $file = "lists/" . $this->listName;
+            $config->set('lists', $this->listName, $file);
+        }
+
+        parent::__construct($file, $config, $logger);
+    }
+
+    protected function eventInitListFile()
+    {
+    }
+
+    protected function createDefaultFileContent()
+    {
+        $defaultContent = <<<EOT
+# Серый список, хранит информацию требующую ручной проверки
+# Формат: данные # тип данных
+
+EOT;
+        return $defaultContent;
+    }
+}

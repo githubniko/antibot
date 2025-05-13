@@ -17,6 +17,8 @@ class WAFSystem
     public $TorChecker;
     public $RefererChecker;
     public $FingerPrint;
+    public $GrayList;
+
     public $refererSave;
 
 
@@ -42,6 +44,7 @@ class WAFSystem
         $this->TorChecker = new TorChecker($this->Config, $this->Logger);
         $this->RefererChecker = new RefererChecker($this->Config, $this->Logger);
         $this->FingerPrint = new FingerPrint($this->Config, $this->Logger);
+        $this->GrayList = new GrayList($this->Config, $this->Logger);
     }
 
     public function run()
