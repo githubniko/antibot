@@ -64,6 +64,7 @@ EOT;
      */
     public function isValid($userAgent)
     {
+        $this->Logger->log("UA: " . $userAgent);
         if (empty($userAgent)) {
             $this->Logger->log("Empty User-Agent string");
             return false;

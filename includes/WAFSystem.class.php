@@ -64,7 +64,6 @@ class WAFSystem
         $clientIp = $this->Profile->IP;
 
         $this->Logger->log("" . $this->Profile->REQUEST_URI);
-        $this->Logger->log("" . $this->Profile->UserAgent);
         $this->Logger->log("REF: " . $this->Profile->Referer);
 
         // 1. Проверка URL в белом списке
