@@ -180,7 +180,7 @@ function clearEvents() {
 		if (!element) return;
 
 		const clone = element.cloneNode(false); // Клонируем без обработчиков
-		element.parentNode?.replaceChild(clone, element);
+		element.parentNode && element.parentNode.replaceChild(clone, element);
 	};
 
 	// Очищаем body и все его дочерние элементы
@@ -215,7 +215,7 @@ async function loadPage(url) {
 		loadCSS(doc);
 
 		// Title
-		const newTitle = doc.querySelector('title')?.textContent || document.title;
+		const newTitle = doc.querySelector('title') && doc.querySelector('title').textContent || document.title;
 		document.title = newTitle;
 
 		loadJS(doc, document.head);
