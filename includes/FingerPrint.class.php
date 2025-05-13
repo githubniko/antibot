@@ -27,7 +27,7 @@ class FingerPrint extends ListBase
     public function isFP($fp)
     {
         if ($this->Config->get('checks', 'fingerprint', false)) {
-            $this->Logger->log("FP: " . $fp);
+            $this->Logger->log("FP:  " . $fp);
             return $this->isListed($fp);
         }
     }
