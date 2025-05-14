@@ -62,7 +62,7 @@ abstract class ListBase
      */
     protected function formatEntry($value, $comment)
     {
-        return $value . (empty($comment) ? '' : " # " . trim($comment)) . PHP_EOL;
+        return $value . (empty($comment) ? '' : " # ".date("Y-m-d H:i:s").' '. trim($comment)) . PHP_EOL;
     }
 
     /**

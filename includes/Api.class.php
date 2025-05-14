@@ -20,14 +20,14 @@ class Api
         if (empty($this->data)) {
             $message = "Error: Data is empty";
             $this->WAFSystem->Logger->log($message, [static::class]);
-            $this->WAFSystem->GrayList->add($client_ip, $message.' '.date("Y-m-d H:i:s"));
+            $this->WAFSystem->GrayList->add($client_ip, $message);
             $this->endJSON('block');
         }
 
         if (!isset($this->data['func'])) {
             $message = "Error: Value 'func' is not set";
             $this->WAFSystem->Logger->log($message, [static::class]);
-            $this->BlockIP($client_ip, $message.' '.date("Y-m-d H:i:s"));
+            $this->BlockIP($client_ip, $message);
             $this->endJSON('block');
         }
 
@@ -43,21 +43,21 @@ class Api
         if (!$this->CSRF->isCSRF()) {
             $message = "Error: Value _SESSION[csrf_token] is not set";
             $this->WAFSystem->Logger->log($message, [static::class]);
-            $this->WAFSystem->GrayList->add($client_ip, $message .' '.date("Y-m-d H:i:s"));
+            $this->WAFSystem->GrayList->add($client_ip, $message);
             $this->endJSON('refresh');
         }
 
         if ($this->CSRF->emptyCSRFRequest($this->data['csrf_token'])) {
             $message = "Error: csrf_token empty";
             $this->WAFSystem->Logger->log($message, [static::class]);
-            $this->WAFSystem->GrayList->add($client_ip, $message.' '.date("Y-m-d H:i:s"));
+            $this->WAFSystem->GrayList->add($client_ip, $message);
             $this->endJSON('refresh');
         }
 
         if (!$this->CSRF->validCSRF($this->data['csrf_token'])) {
             $message = "Error: Invalid csrf_token";
             $this->WAFSystem->Logger->log($message, [static::class]);
-            $this->WAFSystem->GrayList->add($client_ip, $message.' '.date("Y-m-d H:i:s"));
+            $this->WAFSystem->GrayList->add($client_ip, $message);
             $this->endJSON('refresh');
         }
     }
