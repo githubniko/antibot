@@ -108,7 +108,6 @@ class WAFSystem
         if ($this->Config->get('checks', 'useragent', false)) {
             // Валидность User_Agent
             if (!$this->WhiteListUserAgent->isValid($this->Profile->UserAgent)) {
-                $this->BlackLiskIP->add($clientIp, 'Invalid User-Agent');
                 return false;
             }
 
