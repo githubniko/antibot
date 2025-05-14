@@ -248,6 +248,7 @@ function checkBot(func) {
 	xhr.onload = function () {
 		if (xhr.status >= 200 && xhr.status < 300) {
 			var data = JSON.parse(xhr.responseText);
+
 			if (data.func == 'csrf_token') {
 				CSRF = data.csrf_token;
 				if(CSRF == undefined || CSRF == '') {
@@ -257,7 +258,6 @@ function checkBot(func) {
 				loadScript('js/fp.min.js', initFingerPrint);
 			}
 			else if (data.status == 'captcha') {
-				CSRF = data.csrf_token;
 				displayCaptcha();
 			}
 			else if (data.status == 'allow') {
@@ -293,11 +293,6 @@ function checkBot(func) {
 }
 
 function displayCaptcha() {
-	head2.textContent = "Подтвердите, что вы человек, выполнив указанное действие.";
-	form.style.display = "grid";
-	lspinner.style.display = "none";
-	blockHTTPSecurity.style.display = "none";
-
 	input.addEventListener('click', function (event) {
 		if (this.checked) {
 			ym(METRIKA_ID,'reachGoal','onclickcapcha');
@@ -311,6 +306,11 @@ function displayCaptcha() {
 			checkBot('win-close');
 		}
 	};
+
+	head2.textContent = "Подтвердите, что вы человек, выполнив указанное действие.";
+	form.style.display = "grid";
+	lspinner.style.display = "none";
+	blockHTTPSecurity.style.display = "none";
 }
 
 checkBot();
