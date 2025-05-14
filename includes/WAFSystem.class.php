@@ -187,7 +187,6 @@ class WAFSystem
         # Проверка для iframe
         if ($this->Config->init('checks', 'iframe', false, 'блокировать если открытие во if-frame') && $data['mainFrame'] != true) {
             $this->Logger->log("Open in frame");
-            $this->BlackLiskIP->add($this->Profile->IP, 'iframe');
             $Api->endJSON('block');
         }
 
