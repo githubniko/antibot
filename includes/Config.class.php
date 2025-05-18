@@ -12,6 +12,7 @@ class Config
     public $ANTIBOT_PATH;
     public $HTTP_HOST;
     public $HTTPS;
+    public $configFileName = 'config.ini';
     private $configFile;
     private $lockFile;
     private $useBooleanAsOnOff = true;
@@ -27,10 +28,10 @@ class Config
             $this->HTTPS = isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] === 'https' ? true : null;
         }
 
-
+        
         $this->BasePath = rtrim($documentRoot, "/\\") . '/' . ltrim($antibotPath, "/\\");
-        $this->configFile = $this->BasePath . 'config.ini';
-        $this->lockFile = $this->BasePath . 'config.lock';
+        $this->configFile = $this->BasePath . $this->configFileName;
+        $this->lockFile = $this->BasePath . pathinfo($this->configFileName, PATHINFO_FILENAME) .'.lock';
         $this->loadConfig();
     }
 
