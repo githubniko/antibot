@@ -27,7 +27,7 @@ class SysUpdate
         $this->branch = $this->Config->init('sysupdate', 'branch', 'master', 'master - стабильный выпуск, dev - для тестировщиков');
         $this->lastUpdate = $this->Config->init('sysupdate', 'lastupdate', '', 'дата последнего обновления системы');
 
-        if ($this->enabled) {
+        if ($this->enabled === true) {
             $lock = new Lock($this->Config->BasePath . '.sysupgrade.lock');
             $lock->Lock();
             $this->Logger->log("Start upgrade", [static::class]);
