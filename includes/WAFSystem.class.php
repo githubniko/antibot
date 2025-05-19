@@ -18,7 +18,6 @@ class WAFSystem
     public $RefererChecker;
     public $FingerPrint;
     public $GrayList;
-    public $SysUpdate;
 
     public function __construct()
     {
@@ -30,7 +29,7 @@ class WAFSystem
         $this->Config = Config::getInstance();
         $this->Profile = Profile::getInstance();
         $this->Logger = new Logger($this->Config, $this->Profile);
-        $this->SysUpdate = new SysUpdate($this->Config, $this->Logger);
+        
 
         $this->WhiteListIP = new WhiteListIP($this->Config, $this->Logger);
         $this->BlackLiskIP = new BlackListIP($this->Config, $this->Logger);
@@ -135,6 +134,7 @@ class WAFSystem
     public function isAllowed2()
     {
         $Api = Api::getInstance($this);
+        new SysUpdate($this->Config, $this->Logger); // Обновляем систему
 
         # Важен приоритет проверки
         if (!$Api->isPost()) {
