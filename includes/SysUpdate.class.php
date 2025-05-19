@@ -26,7 +26,7 @@ class SysUpdate
         $this->Lock = new Lock($this->Config->BasePath . '.sysupgrade.lock');
 
         $this->enabled = $this->Config->init('sysupdate', 'enabled', 'Off', 'On - обновит систему при следующем запуске');
-        $this->branch = $this->Config->init('sysupdate', 'branch', 'main', 'main - стабильный выпуск, dev - для тестировщиков');
+        $this->branch = $this->Config->init('sysupdate', 'branch', 'master', 'master - стабильный выпуск, dev - для тестировщиков');
         $this->lastUpdate = $this->Config->init('sysupdate', 'lastupdate', '', 'дата последнего обновления системы');
 
         if ($this->enabled) {
