@@ -4,6 +4,8 @@ namespace WAFSystem;
 
 class Config
 {
+    private $Lock;
+
     private static $instances = [];
     private $config = [];
     private $comments = [];
@@ -14,7 +16,6 @@ class Config
     public $HTTPS;
     public $configFileName = 'config.ini';
     private $configFile;
-    private $lockFile;
     private $useBooleanAsOnOff = true;
 
     private function __construct($documentRoot, $antibotPath)
@@ -31,7 +32,7 @@ class Config
         
         $this->BasePath = rtrim($documentRoot, "/\\") . '/' . ltrim($antibotPath, "/\\");
         $this->configFile = $this->BasePath . $this->configFileName;
-        $this->lockFile = $this->BasePath . pathinfo($this->configFileName, PATHINFO_FILENAME) .'.lock';
+        $this->Lock = new Lock($this->BasePath . pathinfo($this->configFileName, PATHINFO_FILENAME) .'.lock');
         $this->loadConfig();
     }
 
@@ -252,7 +253,7 @@ class Config
             $content .= "\n";
         }
 
-        $lock = $this->acquireLock();
+        $this->Lock->Lock();
         try {
             $tempFile = tempnam(dirname($this->configFile), 'tmp_');
 
@@ -267,39 +268,8 @@ class Config
 
             chmod($this->configFile, 0644);
         } finally {
-            $this->releaseLock($lock);
+            $this->Lock->Unlock();
         }
-    }
-
-    private function acquireLock()
-    {
-        $maxWait = 5;
-        $startTime = time();
-        $lock = null;
-
-        while (time() - $startTime < $maxWait) {
-            $lock = fopen($this->lockFile, 'w+');
-            if (flock($lock, LOCK_EX | LOCK_NB)) {
-                return $lock;
-            }
-
-            if (is_resource($lock)) {
-                fclose($lock);
-            }
-
-            usleep(100000);
-        }
-
-        throw new \RuntimeException("Could not acquire config file lock after $maxWait seconds");
-    }
-
-    private function releaseLock($lock)
-    {
-        if (is_resource($lock)) {
-            flock($lock, LOCK_UN);
-            fclose($lock);
-        }
-        @unlink($this->lockFile);
     }
 
     public function getAll()
