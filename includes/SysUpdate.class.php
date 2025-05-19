@@ -85,7 +85,6 @@ class SysUpdate
         if($this->lastCommitDate == null) {
             return true;
         }
-        echo $this->lastCommitDate . ' ' . strtotime($this->lastUpdate);
         if (!empty($this->lastUpdate) && $this->lastCommitDate <= strtotime($this->lastUpdate)) {
             return false;
         }
@@ -143,8 +142,8 @@ class SysUpdate
         // Извлекаем файлы (пропускаем корневую папку 'antibot-main')
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $filename = $zip->getNameIndex($i);
-            echo $filePath = $baseDir . '/' . str_replace("{$this->repoName}-{$this->branch}/", '', $filename);
-            echo '<br>';
+            $filePath = $baseDir . '/' . str_replace("{$this->repoName}-{$this->branch}/", '', $filename);
+
             if (substr($filename, -1) === '/') {
                 if (!is_dir($filePath)) {
                     mkdir($filePath, 0755, true);
