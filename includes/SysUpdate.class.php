@@ -13,7 +13,6 @@ class SysUpdate
     private $enabled = false;
     private $lastUpdate = null;
     private $lastCommitDate = null;
-    private $lockFile;
 
     private $Config;
     private $Logger;
@@ -163,7 +162,6 @@ class SysUpdate
         $zip->close();
         unlink($zipFile);
 
-        $this->Logger->log("Проект успешно обновлён!", [static::class]);
         return true;
     }
 
