@@ -16,20 +16,20 @@ class SysUpdate
 
     private $Config;
     private $Logger;
-    private $Lock;
 
     public function __construct(Config $config, Logger $logger)
     {
         $this->Config = $config;
         $this->Logger = $logger;
-        $this->Lock = new Lock($this->Config->BasePath . '.sysupgrade.lock');
+        
 
         $this->enabled = $this->Config->init('sysupdate', 'enabled', 'Off', 'On - обновит систему при следующем запуске');
         $this->branch = $this->Config->init('sysupdate', 'branch', 'master', 'master - стабильный выпуск, dev - для тестировщиков');
         $this->lastUpdate = $this->Config->init('sysupdate', 'lastupdate', '', 'дата последнего обновления системы');
 
         if ($this->enabled) {
-            $this->Lock->Lock();
+            $lock = new Lock($this->Config->BasePath . '.sysupgrade.lock');
+            $lock->Lock();
             $this->Logger->log("Start upgrade", [static::class]);
             if ($this->isUpdate()) {
                 $this->Logger->log("Found new version", [static::class]);
@@ -43,7 +43,7 @@ class SysUpdate
             }
             $this->Config->set('sysupdate', 'enabled', 'Off');
             $this->Logger->log("End upgrade", [static::class]);
-            $this->Lock->Unlock();
+            $lock->Unlock();
         }
     }
 
