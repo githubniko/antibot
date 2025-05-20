@@ -18,6 +18,7 @@ class WAFSystem
     public $RefererChecker;
     public $FingerPrint;
     public $GrayList;
+    public $HTTPChecker;
 
     public function __construct()
     {
@@ -29,7 +30,7 @@ class WAFSystem
         $this->Config = Config::getInstance();
         $this->Profile = Profile::getInstance();
         $this->Logger = new Logger($this->Config, $this->Profile);
-        
+
 
         $this->WhiteListIP = new WhiteListIP($this->Config, $this->Logger);
         $this->BlackLiskIP = new BlackListIP($this->Config, $this->Logger);
@@ -42,6 +43,7 @@ class WAFSystem
         $this->RefererChecker = new RefererChecker($this->Config, $this->Logger);
         $this->FingerPrint = new FingerPrint($this->Config, $this->Logger);
         $this->GrayList = new GrayList($this->Config, $this->Logger);
+        $this->HTTPChecker = new HTTPChecker($this->Config, $this->Logger);
     }
 
     public function run()
@@ -62,6 +64,19 @@ class WAFSystem
 
         $this->Logger->log("" . $this->Profile->REQUEST_URI);
         $this->Logger->log("REF: " . $this->Profile->Referer);
+
+        if ($this->HTTPChecker->enabled)
+            $this->Logger->log("Protocol: " . $this->Profile->Protocol);
+
+        // 0. Проверка протокола
+        if ($this->HTTPChecker->enabled) {
+            if ($this->HTTPChecker->Checking($this->Profile->Protocol)) {
+                if ($this->HTTPChecker->action == 'ALLOW') {
+                    $this->Logger->log("Protocol allowed");
+                    return true;
+                }
+            }
+        }
 
         // 1. Проверка URL в белом списке
         if ($this->RequestChecker->isListed($this->Profile->REQUEST_URI)) {
@@ -128,6 +143,18 @@ class WAFSystem
             $this->CaptchaHandler->showBlockPage();
         }
 
+        // 9. Проверка протокола
+        if ($this->HTTPChecker->enabled) {
+            if ($this->HTTPChecker->Checking($this->Profile->Protocol)) {
+                if ($this->HTTPChecker->action == 'BLOCK') {
+                    if($this->HTTPChecker->addBlacklistIP) {
+                        $this->BlackLiskIP->add($clientIp, $this->Profile->Protocol);
+                    }
+                    $this->CaptchaHandler->showBlockPage();
+                }
+            }
+        }
+
         return false;
     }
 
@@ -168,6 +195,16 @@ class WAFSystem
         if ($this->FingerPrint->isFP($this->Profile->FingerPrint)) {
             $this->BlackLiskIP->add($this->Profile->IP, 'FP ' . $this->Profile->FingerPrint);
             $Api->endJSON('block');
+        }
+        
+        # Показ капчи для Протоколов
+        if ($this->HTTPChecker->enabled) {
+            if ($this->HTTPChecker->Checking($this->Profile->Protocol)) {
+                if ($this->HTTPChecker->action == 'CAPTCHA') {
+                    $this->Logger->log("Show captcha for protocol: ".$this->Profile->Protocol);
+                    $Api->endJSON('captcha');
+                }
+            }
         }
 
         if ($this->Config->init('checks', 'ipv6', true, 'капча для IPv6') && filter_var($this->Profile->IP, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {

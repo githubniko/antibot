@@ -130,6 +130,12 @@ class Config
     private function parseValue($value)
     {
         if (preg_match('/^["\'](.*)["\']$/', $value, $matches)) {
+            # для массивов
+            if(preg_match('/\,/', $matches[1])) {
+                $str = str_replace(' ', '', $matches[1]);
+                return explode(',', $str);
+            }
+
             return $matches[1];
         }
 
