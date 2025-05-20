@@ -119,6 +119,13 @@ function checkBot(func) {
 			else if (data.status == 'block') {
 				setTimeout(refresh, 1000);
 			}
+			else if (data.status == 'fail') {
+				form.style.display = "grid";
+				lspinner.style.display = "none";
+				blockHTTPSecurity.style.display = "none";
+				blockFail.style.display = "grid";
+				blockInput.style.display = "none";
+			}
 			else if (data.status == 'refresh') {
 				setTimeout(refresh, 1000);
 			}
@@ -152,10 +159,19 @@ function displayCaptcha() {
 		}
 	};
 
+	displayNone();
 	head2.textContent = "Подтвердите, что вы человек, выполнив указанное действие.";
 	form.style.display = "grid";
+	blockInput.style.display = "grid";
+}
+
+function displayNone()
+{
 	lspinner.style.display = "none";
 	blockHTTPSecurity.style.display = "none";
+	blockInput.style.display = "none";
+	blockVerifying.style.display = "none";
+	input.checked = '';
 }
 
 checkBot();

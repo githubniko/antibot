@@ -886,8 +886,8 @@
 								</path>
 							</svg>
 							<div id="failure-msg"><span id="fail-text">Сбой</span>
-								<div id="having-trouble-message" class="error-message"><span id="fr-helper">Проблемы?</span><a href="#refresh"
-										id="fr-helper-link">Send Feedback</a></div>
+								<div id="having-trouble-message" class="error-message"><span id="fr-helper">Проблемы?</span><a href="javascript:location.reload();"
+										id="fr-helper-link">Refresh</a></div>
 							</div>
 						</div>
 						<div id="expired" class="cb-container" role="alert" style="display: none;">

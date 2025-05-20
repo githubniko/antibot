@@ -21,14 +21,14 @@ class Api
             $message = "Error: Data is empty";
             $this->WAFSystem->Logger->log($message, [static::class]);
             $this->WAFSystem->GrayList->add($client_ip, $message);
-            $this->endJSON('block');
+            $this->endJSON('fail');
         }
 
         if (!isset($this->data['func'])) {
             $message = "Error: Value 'func' is not set";
             $this->WAFSystem->Logger->log($message, [static::class]);
-            $this->BlockIP($client_ip, $message);
-            $this->endJSON('block');
+            $this->WAFSystem->GrayList->add($client_ip, $message);
+            $this->endJSON('fail');
         }
 
         if ($this->data['func'] == 'csrf_token') {
@@ -41,24 +41,24 @@ class Api
         }
 
         if (!$this->CSRF->isCSRF()) {
-            $message = "Error: Value _SESSION[csrf_token] is not set";
+            $message = "Error: Cookies are disabled, _SESSION[csrf_token] is not set";
             $this->WAFSystem->Logger->log($message, [static::class]);
             $this->WAFSystem->GrayList->add($client_ip, $message);
-            $this->endJSON('refresh');
+            $this->endJSON('captcha');
         }
 
         if ($this->CSRF->emptyCSRFRequest($this->data['csrf_token'])) {
             $message = "Error: csrf_token empty";
             $this->WAFSystem->Logger->log($message, [static::class]);
             $this->WAFSystem->GrayList->add($client_ip, $message);
-            $this->endJSON('refresh');
+            $this->endJSON('captcha');
         }
 
         if (!$this->CSRF->validCSRF($this->data['csrf_token'])) {
             $message = "Error: Invalid csrf_token";
             $this->WAFSystem->Logger->log($message, [static::class]);
             $this->WAFSystem->GrayList->add($client_ip, $message);
-            $this->endJSON('refresh');
+            $this->endJSON('captcha');
         }
     }
 
