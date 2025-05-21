@@ -58,6 +58,7 @@ telegram.org    # Телеграм бот, для чтения мета
 odnoklassniki.ru # Для чтения метатегов
 mail.ru         # Сервисы mail.ru, vk.com
 googleusercontent.com # Discord +https://discordapp.com
+letsencrypt.org # Беслатные SSL-сертификаты
 
 EOT;
         return $defaultContent;
