@@ -143,18 +143,11 @@ class WAFSystem
             return true;
         }
 
-        // 8. Проверка Tor
-        if ($this->TorChecker->isTor($clientIp)) {
-            $this->Logger->log("The IP is Tor exit node");
-            $this->BlackLiskIP->add($clientIp, 'Tor');
-            $this->CaptchaHandler->showBlockPage();
-        }
-
         // 9. Проверка протокола
         if ($this->HTTPChecker->enabled) {
             if ($this->HTTPChecker->Checking($this->Profile->Protocol)) {
                 if ($this->HTTPChecker->action == 'BLOCK') {
-                    if($this->HTTPChecker->addBlacklistIP) {
+                    if ($this->HTTPChecker->addBlacklistIP) {
                         $this->BlackLiskIP->add($clientIp, $this->Profile->Protocol);
                     }
                     $this->CaptchaHandler->showBlockPage();
@@ -191,6 +184,10 @@ class WAFSystem
             $Api->endJSON(''); // возможно тут нужно добавлять пользователя в черный список
         }
 
+        /* 
+        * ALLOW
+        **/
+
         # Запрос на установку метки
         if ($data['func'] == 'set-marker') {
             $this->Logger->log("Successfully passed the captcha");
@@ -198,17 +195,48 @@ class WAFSystem
             $Api->endJSON('allow');
         }
 
+        /* 
+        * BLOCK
+        **/
+
         # Блокировка по FingerPrint
         if ($this->FingerPrint->isFP($this->Profile->FingerPrint)) {
             $this->BlackLiskIP->add($this->Profile->IP, 'FP ' . $this->Profile->FingerPrint);
             $Api->endJSON('block');
         }
+
+        # Проверка для iframe
+        if ($this->Config->init('checks', 'iframe', false, 'блокировать если открытие во if-frame') && $data['mainFrame'] != true) {
+            $this->Logger->log("Open in frame");
+            $Api->endJSON('block');
+        }
+
+        /* 
+        * BLOCK OR CAPTCHA
+        **/
+
+        # Тор IP
+        if ($this->TorChecker->enabled) {
+            if ($this->TorChecker->isTor($this->Profile->IP)) {
+                $this->Logger->log("IP is TOR exit node");
+                if ($this->TorChecker->action == 'BLOCK') {
+                    $this->BlackLiskIP->add($this->Profile->IP, 'tor');
+                    $Api->endJSON('block');
+                } elseif ($this->TorChecker->action == 'CAPTHA') {
+                    $Api->endJSON('captcha');
+                }
+            }
+        }
         
+        /* 
+        * CAPTCHA
+        **/
+
         # Показ капчи для Протоколов
         if ($this->HTTPChecker->enabled) {
             if ($this->HTTPChecker->Checking($this->Profile->Protocol)) {
                 if ($this->HTTPChecker->action == 'CAPTCHA') {
-                    $this->Logger->log("Show captcha for protocol: ".$this->Profile->Protocol);
+                    $this->Logger->log("Show captcha for protocol: " . $this->Profile->Protocol);
                     $Api->endJSON('captcha');
                 }
             }
@@ -224,12 +252,6 @@ class WAFSystem
         if ($this->Config->init('checks', 'mobile', true, 'капча для мобильных девайсов') && (int)$data['screenWidth'] < $screen_width) {
             $this->Logger->log("Screen resolution is less than {$screen_width}px");
             $Api->endJSON('captcha');
-        }
-
-        # Проверка для iframe
-        if ($this->Config->init('checks', 'iframe', false, 'блокировать если открытие во if-frame') && $data['mainFrame'] != true) {
-            $this->Logger->log("Open in frame");
-            $Api->endJSON('block');
         }
 
         # Показ капчи для Прямых заходов
