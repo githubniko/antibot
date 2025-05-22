@@ -1,8 +1,6 @@
 <?php
-
 namespace WAFSystem;
 
-include_once 'ListBase.class.php';
 
 class RequestChecker extends ListBase
 {

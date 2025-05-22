@@ -1,10 +1,5 @@
 <?php
-
 namespace WAFSystem;
-
-use Exception;
-
-include_once 'ListBase.class.php';
 
 class TorChecker extends ListBase
 {

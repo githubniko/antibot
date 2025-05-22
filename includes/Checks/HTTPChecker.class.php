@@ -1,5 +1,4 @@
 <?php
-
 namespace WAFSystem;
 
 class HTTPChecker
