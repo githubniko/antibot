@@ -19,7 +19,7 @@ class WAFSystem
     public $WhiteListUserAgent;
     public $RequestChecker;
     public $Marker;
-    public $CaptchaHandler;
+    public $Template;
     public $IndexBot;
     public $TorChecker;
     public $RefererChecker;
@@ -44,7 +44,7 @@ class WAFSystem
         $this->WhiteListUserAgent = new WhiteListUserAgent($this->Config, $this->Logger);
         $this->RequestChecker = new RequestChecker($this->Config, $this->Logger);
         $this->Marker = new Marker($this->Config, $this->Profile, $this->Logger);
-        $this->CaptchaHandler = new CaptchaHandler($this->Config, $this->Profile, $this->Logger);
+        $this->Template = new Template($this->Config, $this->Profile, $this->Logger);
         $this->IndexBot = new IndexBot($this->Config, $this->Profile, $this->Logger);
         $this->TorChecker = new TorChecker($this->Config, $this->Logger);
         $this->RefererChecker = new RefererChecker($this->Config, $this->Logger);
@@ -57,11 +57,11 @@ class WAFSystem
     {
         try {
             if (!$this->isAllowed()) {
-                $this->CaptchaHandler->showCaptcha();
+                $this->Template->showCaptcha();
             }
         } catch (\Exception $e) {
             $this->Logger->log("System error: " . $e->getMessage());
-            $this->CaptchaHandler->showCaptcha();
+            $this->Template->showCaptcha();
         }
     }
 
@@ -94,7 +94,7 @@ class WAFSystem
         // 2. Проверка IP в черном списке
         if ($this->BlackLiskIP->isListed($clientIp)) {
             $this->Logger->log("IP address found on blacklist: $clientIp");
-            $this->CaptchaHandler->showBlockPage();
+            $this->Template->showBlockPage();
         }
 
         // 3. Проверка куки маркера
@@ -150,7 +150,7 @@ class WAFSystem
                     if ($this->HTTPChecker->addBlacklistIP) {
                         $this->BlackLiskIP->add($clientIp, $this->Profile->Protocol);
                     }
-                    $this->CaptchaHandler->showBlockPage();
+                    $this->Template->showBlockPage();
                 }
             }
         }
