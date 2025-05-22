@@ -1,4 +1,12 @@
 <?php
+/*
+ * @author EgorNiKO <niko_egor@mail.ru>
+ * @repository https://github.com/githubniko/antibot
+ *
+ * @copyright Copyright (c) 2025, EgorNiKO. All rights reserved.
+ * @license MIT License
+ */
+
 @include "vars.inc.php";
 include "includes/function.inc.php";
 
