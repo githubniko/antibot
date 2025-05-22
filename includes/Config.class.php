@@ -10,6 +10,7 @@ class Config
     private $config = [];
     private $comments = [];
     public $BasePath;
+    public $CachePath; // папка для хранения временные файлов
     public $DOCUMENT_ROOT;
     public $ANTIBOT_PATH;
     public $HTTP_HOST;
@@ -31,8 +32,14 @@ class Config
 
         
         $this->BasePath = rtrim($documentRoot, "/\\") . '/' . ltrim($antibotPath, "/\\");
+        $this->CachePath = $this->BasePath . 'cache/';
         $this->configFile = $this->BasePath . $this->configFileName;
         $this->Lock = new Lock($this->BasePath . pathinfo($this->configFileName, PATHINFO_FILENAME) .'.lock');
+
+        if(!is_dir($this->CachePath)) {
+            mkdir($this->CachePath, 0755, true);
+        }
+
         $this->loadConfig();
     }
 
