@@ -55,23 +55,22 @@ function loadScript(pathFile, callback) {
 	var script = document.createElement('script');
 	script.src = HTTP_ANTIBOT_PATH + pathFile;
 	script.async = true;
-	script.onload = callback; 
+	script.onload = callback;
 	script.onerror = function () {
 		console.error('Error load: ' + pathFile);
 	};
 	document.head.appendChild(script);
 }
 
-function initFingerPrint()
-{
+function initFingerPrint() {
 	if (typeof FingerprintJS !== 'undefined') {
 		FingerprintJS.load()
-         .then(fp => fp.get())
-         .then(result => {
-            FINGERPRINT = result.visitorId;
-			checkBot('checks');
-		 });
-		
+			.then(fp => fp.get())
+			.then(result => {
+				FINGERPRINT = result.visitorId;
+				checkBot('checks');
+			});
+
 	} else {
 		console.error(callback + 'FingerprintJS no load');
 	}
@@ -100,7 +99,7 @@ function checkBot(func) {
 
 			if (data.func == 'csrf_token') {
 				CSRF = data.csrf_token;
-				if(CSRF == undefined || CSRF == '') {
+				if (CSRF == undefined || CSRF == '') {
 					console.log('Error getting csrf_token');
 					return;
 				}
@@ -147,7 +146,9 @@ function checkBot(func) {
 function displayCaptcha() {
 	input.addEventListener('click', function (event) {
 		if (this.checked) {
-			ym(METRIKA_ID,'reachGoal','onclickcapcha');
+			if (METRIKA_ID != '') {
+				try { ym(METRIKA_ID, 'reachGoal', 'onclickcapcha'); } catch (e) { }
+			}
 			blockInput.style.display = "none";
 			blockVerifying.style.display = "";
 			checkBot('set-marker');
@@ -165,13 +166,37 @@ function displayCaptcha() {
 	blockInput.style.display = "grid";
 }
 
-function displayNone()
-{
+function displayNone() {
 	lspinner.style.display = "none";
 	blockHTTPSecurity.style.display = "none";
 	blockInput.style.display = "none";
 	blockVerifying.style.display = "none";
 	input.checked = '';
+}
+
+function ymc(metrika, ip) {
+	if (typeof ym === 'function') return;
+
+	try {
+		(function (m, e, t, r, i, k, a) {
+			m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+			m[i].l = 1 * new Date();
+			for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
+			k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+		})
+			(window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+		ym(metrika, "init", {
+			clickmap: true,
+			trackLinks: true,
+			accurateTrackBounce: true,
+			webvisor: true,
+			params: { ip: ip }
+		});
+	} catch (e) { }
+}
+if (METRIKA_ID != '') {
+	ymc(METRIKA_ID, REMOTE_ADDR);
 }
 
 checkBot();
