@@ -35,7 +35,7 @@ class WAFSystem
     private function initializeComponents()
     {
         $this->Config = Config::getInstance();
-        $this->Profile = Profile::getInstance();
+        $this->Profile = Profile::getInstance($this->Config);
         $this->Logger = new Logger($this->Config, $this->Profile);
 
 
@@ -73,13 +73,13 @@ class WAFSystem
         $this->Logger->log("REF: " . $this->Profile->Referer);
 
         if ($this->HTTPChecker->enabled)
-            $this->Logger->log("Protocol: " . $this->Profile->Protocol);
+            $this->Logger->log("Protocol: " . $this->Profile->HttpVersion);
 
         // 0. Проверка протокола
         if ($this->HTTPChecker->enabled) {
-            if ($this->HTTPChecker->Checking($this->Profile->Protocol)) {
+            if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
                 if ($this->HTTPChecker->action == 'ALLOW') {
-                    $this->Logger->log("Protocol allowed");
+                    $this->Logger->log("Version HTTP allowed");
                     return true;
                 }
             }
