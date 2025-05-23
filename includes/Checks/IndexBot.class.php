@@ -5,6 +5,7 @@ class IndexBot extends ListBase
 {
     private $Profile;
     public $listName = 'indexbot_rules';
+    private $Dns;
 
     public function __construct(Config $config, Profile $profile, Logger $logger)
     {
@@ -17,13 +18,16 @@ class IndexBot extends ListBase
             $config->set('lists', $this->listName, $file);
         }
 
+        $cacheDir = $config->CachePath.'dns';
+        $driver = new \DnsCache\FileCacheDriver($cacheDir);
+        $this->Dns = new \DnsCache\DnsCache($driver);
         parent::__construct($file, $config, $logger);
     }
 
     # Функция проверяет ip на индексирующего бота
     public function isIndexbot($client_ip)
     {
-        $hostname = gethostbyaddr($client_ip); // Выполняем обратный DNS-запрос
+        $hostname = $this->Dns->getHostByAddr($client_ip); // Выполняем обратный DNS-запрос
         $this->Logger->log('PTR: ' . $hostname);
         return $this->isListed($hostname);
     }
@@ -68,7 +72,7 @@ EOT;
 
         if (preg_match("/\.$reg$/i", $hostname, $match) === 1) {
             // Выполняем прямой DNS-запрос в зависимости от типа IP
-            $resolvedRecords = dns_get_record($hostname, $this->Profile->isIPv6 ? DNS_AAAA : DNS_A);
+            $resolvedRecords = $this->Dns->getRecord($hostname, $this->Profile->isIPv6 ? DNS_AAAA : DNS_A);
 
             // Проверяем, совпадает ли исходный IP с одним из разрешенных
             if (!empty($resolvedRecords)) {
