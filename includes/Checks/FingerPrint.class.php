@@ -2,8 +2,6 @@
 
 namespace WAFSystem;
 
-include_once 'ListBase.class.php';
-
 class FingerPrint extends ListBase
 {
     public $listName = 'blacklist_fingerprint';

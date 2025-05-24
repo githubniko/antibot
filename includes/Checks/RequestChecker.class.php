@@ -1,7 +1,6 @@
 <?php
 namespace WAFSystem;
 
-
 class RequestChecker extends ListBase
 {
     public $listName = 'whitelist_url';
