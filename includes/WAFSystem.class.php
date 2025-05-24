@@ -139,7 +139,6 @@ class WAFSystem
         // 7. Проверка поисковых ботов
         if ($this->IndexBot->isIndexbot($clientIp)) {
             $this->Logger->log("Indexing robot");
-            $this->WhiteListIP->add($clientIp, 'indexbot');
             return true;
         }
 
