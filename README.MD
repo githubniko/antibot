@@ -205,5 +205,6 @@ rotate = 7 ; Количество файлов ротации
 EgorNiKO
 
 * GitHub: [https://github.com/githubniko/antibot](https://github.com/githubniko/antibot)
-* Telegram: [https://egorniko.ru/r/D5](https://egorniko.ru/r/D5) (обсуждения и новости проекта)
+* Telegram: [AntibotWAG Channel](https://egorniko.ru/r/D5) (новости проекта)
+* Telegram: [AntibotWAF Chat](https://egorniko.ru/r/D8) (обсуждение проекта)
 * [https://dzen.ru/a/Z_lToDqVzXV8-7Jt](https://dzen.ru/a/Z_lToDqVzXV8-7Jt) — статья о том, как я защищал сайт от ПФ ботов.
