@@ -144,10 +144,10 @@ class WAFSystem
 
         // 9. Проверка протокола
         if ($this->HTTPChecker->enabled) {
-            if ($this->HTTPChecker->Checking($this->Profile->Protocol)) {
+            if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
                 if ($this->HTTPChecker->action == 'BLOCK') {
                     if ($this->HTTPChecker->addBlacklistIP) {
-                        $this->BlackLiskIP->add($clientIp, $this->Profile->Protocol);
+                        $this->BlackLiskIP->add($clientIp, $this->Profile->HttpVersion);
                     }
                     $this->Template->showBlockPage();
                 }
@@ -233,9 +233,9 @@ class WAFSystem
 
         # Показ капчи для Протоколов
         if ($this->HTTPChecker->enabled) {
-            if ($this->HTTPChecker->Checking($this->Profile->Protocol)) {
+            if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
                 if ($this->HTTPChecker->action == 'CAPTCHA') {
-                    $this->Logger->log("Show captcha for protocol: " . $this->Profile->Protocol);
+                    $this->Logger->log("Show captcha for protocol: " . $this->Profile->HttpVersion);
                     $Api->endJSON('captcha');
                 }
             }
