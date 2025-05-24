@@ -1,5 +1,8 @@
 <?php
+
 namespace WAFSystem;
+
+use Exception;
 
 class IndexBot extends ListBase
 {
@@ -18,7 +21,7 @@ class IndexBot extends ListBase
             $config->set('lists', $this->listName, $file);
         }
 
-        $cacheDir = $config->CachePath.'dns';
+        $cacheDir = $config->CachePath . 'dns';
         $driver = new \DnsCache\FileCacheDriver($cacheDir);
         $this->Dns = new \DnsCache\DnsCache($driver);
         parent::__construct($file, $config, $logger);
@@ -27,7 +30,12 @@ class IndexBot extends ListBase
     # Функция проверяет ip на индексирующего бота
     public function isIndexbot($client_ip)
     {
-        $hostname = $this->Dns->getHostByAddr($client_ip); // Выполняем обратный DNS-запрос
+        try {
+            $hostname = $this->Dns->getHostByAddr($client_ip); // Выполняем обратный DNS-запрос
+        } catch (\Exception $e) {
+            $this->Logger->log($e->getMessage(), [static::class]);
+            throw new Exception($e->getMessage());
+        }
         $this->Logger->log('PTR: ' . $hostname);
         return $this->isListed($hostname);
     }
@@ -71,8 +79,13 @@ EOT;
         mb_regex_encoding('UTF-8');   //кодировка строки
 
         if (preg_match("/\.$reg$/i", $hostname, $match) === 1) {
-            // Выполняем прямой DNS-запрос в зависимости от типа IP
-            $resolvedRecords = $this->Dns->getRecord($hostname, $this->Profile->isIPv6 ? DNS_AAAA : DNS_A);
+            try {
+                // Выполняем прямой DNS-запрос в зависимости от типа IP
+                $resolvedRecords = $this->Dns->getRecord($hostname, $this->Profile->isIPv6 ? DNS_AAAA : DNS_A);
+            } catch (\Exception $e) {
+                $this->Logger->log($e->getMessage(), [static::class]);
+                throw new Exception($e->getMessage());
+            }
 
             // Проверяем, совпадает ли исходный IP с одним из разрешенных
             if (!empty($resolvedRecords)) {

@@ -27,7 +27,7 @@ class DnsCache
         $key = $this->generateKey($host, $type);
         $cached = $this->driver->get($key);
 
-        if ($cached !== null) {
+        if ($cached !== false) {  // false означает отсутствие записи
             return $cached['records'];
         }
 
