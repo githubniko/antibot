@@ -10,15 +10,8 @@ class FileCacheDriver implements CacheDriverInterface
     {
         $this->cacheDir = rtrim($cacheDir, '/') . '/';
 
-        // Защита от потенциальных конфликтов
-        if (basename($this->cacheDir) === 'rdns') {
-            throw new \InvalidArgumentException(
-                "Cache directory name 'rdns' is reserved for internal use"
-            );
-        }
-
-        if (!file_exists($this->cacheDir)) {
-            mkdir($this->cacheDir, 0777, true);
+        if (!file_exists($this->cacheDir) && !mkdir($this->cacheDir, 0777, true)) {
+            throw new \RuntimeException("Failed to create cache directory");
         }
     }
 
@@ -34,13 +27,29 @@ class FileCacheDriver implements CacheDriverInterface
     public function set($key, array $data, $ttl)
     {
         $path = $this->getPath($key);
-        $tmpPath = $path . '.tmp';
-
-        if (file_put_contents($tmpPath, json_encode($data), LOCK_EX) === false) {
-            return false;
+        $dir = dirname($path);
+        $tmpPath = tempnam($dir, 'tmp_');
+        if ($tmpPath === false) {
+            throw new \RuntimeException("Failed to create temp file");
         }
 
-        return rename($tmpPath, $path);
+        try {
+            // Записываем данные с блокировкой
+            if (file_put_contents($tmpPath, json_encode($data), LOCK_EX) === false) {
+                throw new \RuntimeException("Failed to write to temp file");
+            }
+            
+            // Атомарное перемещение
+            if (!rename($tmpPath, $path)) {
+                throw new \RuntimeException("Failed to rename temp file");
+            }
+            
+            return true;
+        } catch (\Exception $e) {
+            @unlink($tmpPath);
+            error_log("Cache write error: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function delete($key)
@@ -71,10 +80,12 @@ class FileCacheDriver implements CacheDriverInterface
         // Создаем двухуровневую структуру папок
         $subDir = $this->cacheDir . substr(md5($safeKey), 0, 2) . '/';
 
-        if (!file_exists($subDir))
-            mkdir($subDir, 0777, true);
+        // Атомарное создание поддиректории
+        if (!file_exists($subDir) && !mkdir($subDir, 0777, true)) {
+            throw new \RuntimeException("Failed to create subdirectory: " . $subDir);
+        }
 
-        return $subDir . $key . '.json';
+        return $subDir . $safeKey . '.json';
     }
 
     public function setReverseDns($ip, $hostname, $ttl)
