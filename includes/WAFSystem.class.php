@@ -221,7 +221,7 @@ class WAFSystem
                 if ($this->TorChecker->action == 'BLOCK') {
                     $this->BlackLiskIP->add($this->Profile->IP, 'tor');
                     $Api->endJSON('block');
-                } elseif ($this->TorChecker->action == 'CAPTHA') {
+                } elseif ($this->TorChecker->action == 'CAPTCHA') {
                     $Api->endJSON('captcha');
                 }
             }
