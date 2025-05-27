@@ -96,13 +96,14 @@ function checkBot(func) {
 	xhr.onload = function () {
 		if (xhr.status >= 200 && xhr.status < 300) {
 			var data = JSON.parse(xhr.responseText);
+			
+			CSRF = data.csrf_token;
+			if (CSRF == undefined || CSRF == '') {
+				console.log('Error getting csrf_token');
+				return;
+			}
 
 			if (data.func == 'csrf_token') {
-				CSRF = data.csrf_token;
-				if (CSRF == undefined || CSRF == '') {
-					console.log('Error getting csrf_token');
-					return;
-				}
 				loadScript('js/fp.min.js', initFingerPrint);
 			}
 			else if (data.status == 'captcha') {

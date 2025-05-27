@@ -2,6 +2,8 @@
 
 namespace WAFSystem;
 
+use Exception;
+
 // ... Реализация работы с капчей
 class Api
 {
@@ -33,29 +35,13 @@ class Api
 
         if ($this->data['func'] == 'csrf_token') {
             $this->WAFSystem->Logger->rotateIfNeeded(); // делаем ротация логов, пока пользователь ожидает проверку
-            echo json_encode([
-                'func' => $this->data['func'],
-                'csrf_token' => $this->CSRF->createCSRF()
-            ]);
-            exit;
+            $this->endJSON('ok');
         }
 
-        if (!$this->CSRF->isCSRF()) {
-            $message = "Error: Cookies are disabled, _SESSION[csrf_token] is not set";
-            $this->WAFSystem->Logger->log($message, [static::class]);
-            $this->WAFSystem->GrayList->add($client_ip, $message);
-            $this->endJSON('captcha');
-        }
-
-        if ($this->CSRF->emptyCSRFRequest($this->data['csrf_token'])) {
-            $message = "Error: csrf_token empty";
-            $this->WAFSystem->Logger->log($message, [static::class]);
-            $this->WAFSystem->GrayList->add($client_ip, $message);
-            $this->endJSON('captcha');
-        }
-
-        if (!$this->CSRF->validCSRF($this->data['csrf_token'])) {
-            $message = "Error: Invalid csrf_token";
+        try {
+            $this->CSRF->validCSRF($this->data['csrf_token'], $_SERVER['REQUEST_METHOD']);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
             $this->WAFSystem->Logger->log($message, [static::class]);
             $this->WAFSystem->GrayList->add($client_ip, $message);
             $this->endJSON('captcha');
@@ -73,7 +59,7 @@ class Api
 
     public function endJSON($status, $data = [])
     {
-        $res = array('status' => $status);
+        $res = ['status' => $status];
         if (!session_id()) {
             $res = "Critical error: Session session_start() not started.";
             $this->WAFSystem->Logger->log($res, [static::class]);
@@ -86,7 +72,8 @@ class Api
         }
 
         $res = array_merge([
-            'func' => $this->data['func']
+            'func' => $this->data['func'],
+            'csrf_token' => $this->CSRF->createCSRF()
         ], $res);
 
         if (sizeof($data) > 0)
@@ -96,7 +83,7 @@ class Api
         exit;
     }
 
-    
+
 
     /**
      * Проверяем метод отправки запроса

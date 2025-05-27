@@ -2,40 +2,63 @@
 
 namespace WAFSystem;
 
-class CSRF {
+class CSRF
+{
+    private $csrf_token_key = 'csrf_tokens'; // название массива токенов
+    private $expireTime = 3600; // время жизни токена
+    private $tokenPattern = '/^[a-f0-9]{64}$/'; // Шаблон валидации токена (64 hex-символа)
 
-    public function getCSRF()
+    public function __construct()
     {
-        if (!$this->isCSRF())
-            $this->createCSRF();
-        return $_SESSION['csrf_token'];
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            throw new \RuntimeException('Session is not active');
+        }
+
+        if (!isset($_SESSION[$this->csrf_token_key])) {
+            $_SESSION[$this->csrf_token_key] = [];
+        }
     }
 
     public function createCSRF()
     {
-        return $_SESSION['csrf_token'] = $this->genKey();
+        $this->cleanExpiredTokens(); // Очищаем устаревшие токены
+        $token = $this->genKey();
+        $_SESSION[$this->csrf_token_key][$token] = [
+            'expire' => time() + $this->expireTime,
+            'session_id' => session_id()
+        ];
+
+        return $token;
     }
 
-    public function isCSRF()
+    public function validCSRF($csrf_token, $requestMethod = 'POST')
     {
-        return !empty($_SESSION['csrf_token']);
-    }
-/**
- * Проверяет, пустой csrf_token
- */
-    public function emptyCSRFRequest($csrf_token)
-    {
-        return isset($csrf_token) && empty($csrf_token);
-    }
+        if (strtoupper($requestMethod) === 'GET') {
+            throw new \Exception('CSRF tokens should not be used in GET requests');
+        }
 
-    public function validCSRF($csrf_token)
-    {
-        if (!$this->isCSRF())
-            return false;
+        // Проверка формата (64 hex-символа для 32 байт)
+        if (!preg_match($this->tokenPattern, $csrf_token)) {
+            throw new \Exception('Error: Invalid token');
+        }
 
-        if ($this->getCSRF() != $csrf_token)
-            return false;
+        if (!isset($_SESSION[$this->csrf_token_key][$csrf_token])) {
+            throw new \Exception('Error: Token not found');
+        }
 
+        $tokenData = $_SESSION[$this->csrf_token_key][$csrf_token];
+        if ($tokenData['expire'] < time()) {
+            unset($_SESSION[$this->csrf_token_key][$csrf_token]);
+            throw new \Exception('Error: Token expired');
+        }
+
+        if ($tokenData['session_id'] !== session_id()) {
+            unset($_SESSION[$this->csrf_token_key][$csrf_token]);
+            throw new \Exception('Error: Session mismatch');
+        }
+
+        // Удаляем токен после успешной проверки
+        unset($_SESSION[$this->csrf_token_key][$csrf_token]);
         return true;
     }
 
@@ -43,23 +66,43 @@ class CSRF {
      * Удаляет CSRF-токен
      * Возвращает true в случае успеха
      */
-    public function removeCSRF()
+    public function removeCSRF($csrf_token)
     {
-        if ($this->isCSRF())
-            unset($_SESSION['csrf_token']);
-        return !$this->isCSRF();
+        if (!preg_match($this->tokenPattern, $csrf_token)) {
+            throw new \InvalidArgumentException('Invalid token format');
+        }
+
+        unset($_SESSION[$this->csrf_token_key][$csrf_token]);
+        return true;
+    }
+
+    /**
+     * Возвращает все активные CSRF-токены (только для отладки)
+     */
+    public function debugGetTokens()
+    {
+        $this->cleanExpiredTokens();
+        return $_SESSION[$this->csrf_token_key];
     }
 
     # альтернатива random_bytes() для PHP < 7.0.0
-    private function random_bytes_php5($length) {
+    private function random_bytes_php5($length)
+    {
         if (function_exists('openssl_random_pseudo_bytes')) {
             $bytes = openssl_random_pseudo_bytes($length, $strong);
             if ($strong === true) {
                 return $bytes;
             }
+            trigger_error('OpenSSL produced non-strong bytes', E_USER_WARNING);
         }
-        // Если openssl недоступен, можно использовать менее безопасные варианты
-        throw new \RuntimeException('Не удалось сгенерировать криптографически безопасные данные');
+
+        $bytes = '';
+        for ($i = 0; $i < $length; $i++) {
+            $bytes .= chr(mt_rand(0, 255));
+        }
+        trigger_error('Used fallback random generator (not cryptographically secure)', E_USER_WARNING);
+
+        return $bytes;
     }
 
     # генерирует случайный код
@@ -70,6 +113,17 @@ class CSRF {
         } else {
             return bin2hex($this->random_bytes_php5(32));
         }
-        
+    }
+
+    /**
+     * Очищает устаревшие токены
+     */
+    private function cleanExpiredTokens()
+    {
+        foreach ($_SESSION[$this->csrf_token_key] as $token => $data) {
+            if ($data['expire'] < time()) {
+                unset($_SESSION[$this->csrf_token_key][$token]);
+            }
+        }
     }
 }
