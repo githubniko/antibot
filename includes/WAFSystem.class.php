@@ -68,6 +68,10 @@ class WAFSystem
     private function isAllowed()
     {
         $clientIp = $this->Profile->IP;
+        if (PHP_SAPI === 'cli') { // разрешаем локальный запуск PHP
+            $this->Logger->log("Script is run from the command line: ". $_SERVER['PHP_SELF']);
+            return true;
+        }
 
         $this->Logger->log("" . $this->Profile->REQUEST_URI);
         $this->Logger->log("REF: " . $this->Profile->Referer);
