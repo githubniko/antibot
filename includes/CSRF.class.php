@@ -25,7 +25,8 @@ class CSRF
         $token = $this->genKey();
         $_SESSION[$this->csrf_token_key][$token] = [
             'expire' => time() + $this->expireTime,
-            'session_id' => session_id()
+            'session_id' => session_id(),
+            'created_at' => time()
         ];
 
         return $token;
@@ -33,20 +34,23 @@ class CSRF
 
     public function validCSRF($csrf_token, $requestMethod = 'POST')
     {
+        $this->checkSessionAndCookies();
+
         if (strtoupper($requestMethod) === 'GET') {
             throw new \Exception('CSRF tokens should not be used in GET requests');
         }
 
         // Проверка формата (64 hex-символа для 32 байт)
         if (!preg_match($this->tokenPattern, $csrf_token)) {
-            throw new \Exception('Error: Invalid token');
+            throw new \Exception('Error: Invalid token format');
         }
 
         if (!isset($_SESSION[$this->csrf_token_key][$csrf_token])) {
-            throw new \Exception('Error: Token not found');
+            throw new \Exception('Error: Token not found. Possible reasons: cookies disabled, session expired, or token already used');
         }
 
         $tokenData = $_SESSION[$this->csrf_token_key][$csrf_token];
+
         if ($tokenData['expire'] < time()) {
             unset($_SESSION[$this->csrf_token_key][$csrf_token]);
             throw new \Exception('Error: Token expired');
@@ -54,7 +58,7 @@ class CSRF
 
         if ($tokenData['session_id'] !== session_id()) {
             unset($_SESSION[$this->csrf_token_key][$csrf_token]);
-            throw new \Exception('Error: Session mismatch');
+            throw new \Exception('Error: Session mismatch. Possible session hijacking attempt');
         }
 
         // Удаляем токен после успешной проверки
@@ -124,6 +128,23 @@ class CSRF
             if ($data['expire'] < time()) {
                 unset($_SESSION[$this->csrf_token_key][$token]);
             }
+        }
+    }
+
+    /**
+     * Проверяет активность сессии и поддержку кук
+     * @throws \RuntimeException
+     */
+    private function checkSessionAndCookies()
+    {
+        // Проверка активности сессии
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            throw new \RuntimeException('Session is not active');
+        }
+
+        // Проверка поддержки кук
+        if (empty($_COOKIE[session_name()])) {
+            throw new \RuntimeException('Cookies are disabled or session cookie not set');
         }
     }
 }
