@@ -26,7 +26,7 @@ class Marker
         if ($time == null)
             $time = time() + $this->expireDays * 86400;
 
-        $cookie_value = $this->Config->get('cookie', 'cookie_name', '');
+        $cookie_value = $this->profile->genKey();
         if (version_compare(PHP_VERSION, '7.3.0') >= 0) {
             setcookie($this->profile->RayIDSecret, $cookie_value, [
                 'expires' => $time,
@@ -47,10 +47,7 @@ class Marker
 
     function isValid()
     {
-        if (
-            isset($_COOKIE[$this->profile->RayIDSecret])
-            && $_COOKIE[$this->profile->RayIDSecret] == $this->Config->get('cookie', 'cookie_name', '')
-        ) {
+        if (isset($_COOKIE[$this->profile->RayIDSecret])) {
             return true;
         }
         return false;

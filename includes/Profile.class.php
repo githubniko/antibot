@@ -7,7 +7,8 @@ class Profile
     private $Config;
 
     private static $_instances = null;
-    
+    private $salt = '';
+
     public $RayID;
     public $RayIDSecret;
     public $Host;
@@ -23,7 +24,7 @@ class Profile
     {
         $this->Config = $config;
         $HeadProxy = new HeaderProxy($config);
-        
+
         $this->Host = isset($_SERVER['HTTP_HOST']) ?  $_SERVER['HTTP_HOST'] : '';
         $this->IP = $HeadProxy->getIPAddr();
         $this->HttpVersion = $HeadProxy->getHttpVersion();
@@ -33,6 +34,7 @@ class Profile
 
         $this->isIPv6 = filter_var($this->IP, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
 
+        $this->salt = $this->Config->get('cookie', 'cookie_name', '');
         $this->RayID = $this->getRayID();
         $this->RayIDSecret = $this->getRayIDSecret();
     }
@@ -72,12 +74,12 @@ class Profile
     # генерирует идентификатор пользователя для идентификации в лог-файле
     private function getRayID()
     {
-        return substr(md5($this->Host . $this->IP . $this->UserAgent), 0, 16);
+        return substr(md5($this->salt . $this->Host . $this->IP . $this->UserAgent), 0, 16);
     }
 
     # генерирует идентификатор пользователя для маркера
     private function getRayIDSecret()
     {
-        return substr(md5($this->Host . $this->IP . $this->UserAgent), 16);
+        return substr(md5($this->salt . $this->Host . $this->IP . $this->UserAgent), 16);
     }
 }
