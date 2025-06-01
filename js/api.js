@@ -80,9 +80,14 @@ function checkBot(func) {
 	var xhr = new XMLHttpRequest();
 
 	var data = JSON.stringify({ // Данные для отправки
+		clientWidth: document.documentElement.clientWidth,
+		clientHeight: document.documentElement.clientHeight,
 		screenWidth: window.screen.width,
 		screenHeight: window.screen.height,
 		pixelRatio: window.devicePixelRatio || 1,
+		colorDepth: window.screen.colorDepth,
+		pixelDepth: window.screen.pixelDepth,
+		tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
 		referer: document.referrer,
 		mainFrame: window.top === window.self,
 		func: func == undefined ? 'csrf_token' : func,
@@ -96,7 +101,7 @@ function checkBot(func) {
 	xhr.onload = function () {
 		if (xhr.status >= 200 && xhr.status < 300) {
 			var data = JSON.parse(xhr.responseText);
-			
+
 			CSRF = data.csrf_token;
 			if (CSRF == undefined || CSRF == '') {
 				console.log('Error getting csrf_token');
