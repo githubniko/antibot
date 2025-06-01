@@ -26,6 +26,10 @@ class Template
         if ($this->Config->get('main', 'header404')) {
             header("HTTP/1.0 404 Not Found");
         }
+        header('X-Robots-Tag: noindex');
+        header('Pragma: no-cache');
+        header('Expires: Thu, 18 Aug 1994 05:00:00 GMT');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
         $this->Logger->log("Displaying the verification page");
         require $this->Config->BasePath . "templates/template.inc.php";
@@ -36,6 +40,10 @@ class Template
     function showBlockPage()
     {
         header("HTTP/1.0 403 Forbidden");
+        header('X-Robots-Tag: noindex');
+        header('Pragma: no-cache');
+        header('Expires: Thu, 18 Aug 1994 05:00:00 GMT');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         $this->Logger->log("Display the blocking page");
         require $this->Config->BasePath . "templates/template_block.inc.php";
         exit;
