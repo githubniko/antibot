@@ -76,10 +76,25 @@ function initFingerPrint() {
 	}
 }
 
+function getObjectBrowser(name) {
+	let result = Object.create(null);
+	for (var prop in name) {
+		if (name[prop] instanceof Object || name[prop] === '' || name[prop] === null) continue;
+		result[prop] = name[prop];
+	}
+	return result;
+}
+
 function checkBot(func) {
 	var xhr = new XMLHttpRequest();
 
-	var data = JSON.stringify({ // Данные для отправки
+	var visitortime = new Date();
+	let arr = { // Данные для отправки
+		datetime: {
+			now: visitortime,
+			timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown',
+			offsetHours: -(visitortime.getTimezoneOffset() / 60),
+		},
 		clientWidth: document.documentElement.clientWidth,
 		clientHeight: document.documentElement.clientHeight,
 		screenWidth: window.screen.width,
@@ -87,13 +102,18 @@ function checkBot(func) {
 		pixelRatio: window.devicePixelRatio || 1,
 		colorDepth: window.screen.colorDepth,
 		pixelDepth: window.screen.pixelDepth,
-		tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+		screen: getObjectBrowser(window.screen),
+		java: window.java ? 1 : 0,
+		navigator: getObjectBrowser(navigator),
+		window: getObjectBrowser(window),
 		referer: document.referrer,
 		mainFrame: window.top === window.self,
 		func: func == undefined ? 'csrf_token' : func,
 		fingerPrint: FINGERPRINT,
 		csrf_token: CSRF,
-	});
+	};
+
+	var data = JSON.stringify(arr);
 
 	xhr.open('POST', HTTP_ANTIBOT_PATH + 'xhr.php', true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
