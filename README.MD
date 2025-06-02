@@ -103,6 +103,16 @@ phpinfo();
 
 ![1748032992338](images/README/1748032992338.png)
 
+```
+[header_proxy]
+enabled = On
+header_ip = HTTP_CF_CONNECTING_IP
+header_http_version = SERVER_PROTOCOL
+header_protocol = HTTP_X_FORWARDED_PROTO
+```
+
+PS Для платной версии Cloudflare могут быть другие значения.
+
 ## Белый список
 
 Файл /lists/whilelist_ip содержит список исключений ip-адресов.
