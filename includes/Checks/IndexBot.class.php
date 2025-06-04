@@ -55,6 +55,7 @@ class IndexBot extends ListBase
 yandex.ru
 googlebot.com
 google.com
+googlezip.net   # Chrome Privacy Preserving Prefetch Proxy https://foxi.biz/viewtopic.php?id=294
 yandex.ru
 yandex.net
 yandex.com
