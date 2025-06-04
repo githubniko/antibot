@@ -1,4 +1,5 @@
 <html lang="en-US" dir="ltr">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Один момент…</title>
@@ -121,6 +122,7 @@
                 stroke-width: 0
             }
         }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -227,7 +229,7 @@
         body.theme-light #challenge-error-text {
             background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgZmlsbD0ibm9uZSI+PHBhdGggZmlsbD0iI2ZjNTc0YSIgZD0iTTE2IDNhMTMgMTMgMCAxIDAgMTMgMTNBMTMuMDE1IDEzLjAxNSAwIDAgMCAxNiAzbTAgMjRhMTEgMTEgMCAxIDEgMTEtMTEgMTEuMDEgMTEuMDEgMCAwIDEtMTEgMTEiLz48cGF0aCBmaWxsPSIjZmM1NzRhIiBkPSJNMTcuMDM4IDE4LjYxNUgxNC44N0wxNC41NjMgOS41aDIuNzgzem0tMS4wODQgMS40MjdxLjY2IDAgMS4wNTcuMzg4LjQwNy4zODkuNDA3Ljk5NCAwIC41OTYtLjQwNy45ODQtLjM5Ny4zOS0xLjA1Ny4zODktLjY1IDAtMS4wNTYtLjM4OS0uMzk4LS4zODktLjM5OC0uOTg0IDAtLjU5Ny4zOTgtLjk4NS40MDYtLjM5NyAxLjA1Ni0uMzk3Ii8+PC9zdmc+")
         }
-		
+
         a {
             background-color: transparent;
             color: #0051c3;
@@ -269,18 +271,18 @@
             margin-right: .5rem;
             width: 2rem
         }
-		
-		#content {
-			align-items: center;
-			background-color: #fafafa;
-			border: 1px solid #e0e0e0;
-			box-sizing: border-box;
-			display: flex;
-			gap: 7px;
-			height: 65px;
-			justify-content: space-between;
-			user-select: none;
-		}
+
+        #content {
+            align-items: center;
+            background-color: #fafafa;
+            border: 1px solid #e0e0e0;
+            box-sizing: border-box;
+            display: flex;
+            gap: 7px;
+            height: 65px;
+            justify-content: space-between;
+            user-select: none;
+        }
 
         #expired-text,
         #overrun-text,
@@ -303,6 +305,7 @@
         #timeout-text {
             display: inline-block
         }
+
         .error-message {
             color: #de1303;
             font-size: 9px;
@@ -336,6 +339,7 @@
             grid-template-columns: 30px auto;
             margin-left: 16px
         }
+
         #overrun-i,
         #spinner-i {
             animation: spin 5s linear infinite;
@@ -394,75 +398,75 @@
             animation: scale .3s ease-in-out .9s both
         }
 
-		.cb-c {
-			align-items: center;
-			cursor: pointer;
-			display: flex;
-			margin-left: 16px;
-			text-align: left
-		}
+        .cb-c {
+            align-items: center;
+            cursor: pointer;
+            display: flex;
+            margin-left: 16px;
+            text-align: left
+        }
 
-		.cb-lb {
-			display: grid;
-			place-items: center
-		}
+        .cb-lb {
+            display: grid;
+            place-items: center
+        }
 
-		.cb-lb input {
-			cursor: pointer;
-			grid-area: 1/1;
-			height: 24px;
-			margin: 0;
-			opacity: 0;
-			width: 24px;
-			z-index: 9999
-		}
+        .cb-lb input {
+            cursor: pointer;
+            grid-area: 1/1;
+            height: 24px;
+            margin: 0;
+            opacity: 0;
+            width: 24px;
+            z-index: 9999
+        }
 
-		.cb-lb input:active~.cb-i,
-		.cb-lb input:focus~.cb-i {
-			border: 2px solid #c44d0e
-		}
+        .cb-lb input:active~.cb-i,
+        .cb-lb input:focus~.cb-i {
+            border: 2px solid #c44d0e
+        }
 
-		.cb-lb input:checked~.cb-i {
-			background-color: #fff;
-			border-radius: 5px;
-			opacity: 1;
-			transform: rotate(0deg) scale(1)
-		}
+        .cb-lb input:checked~.cb-i {
+            background-color: #fff;
+            border-radius: 5px;
+            opacity: 1;
+            transform: rotate(0deg) scale(1)
+        }
 
-		.cb-lb input:checked~.cb-i:after {
-			border: solid #c44d0e;
-			border-radius: 0;
-			border-width: 0 4px 4px 0;
-			height: 12px;
-			left: 5px;
-			top: 0;
-			transform: rotate(45deg) scale(1);
-			width: 6px
-		}
+        .cb-lb input:checked~.cb-i:after {
+            border: solid #c44d0e;
+            border-radius: 0;
+            border-width: 0 4px 4px 0;
+            height: 12px;
+            left: 5px;
+            top: 0;
+            transform: rotate(45deg) scale(1);
+            width: 6px
+        }
 
-		.cb-lb .cb-i {
-			animation: scale-up-center .4s cubic-bezier(.55, .085, .68, .53) both;
-			background: #fff;
-			border: 2px solid #6d6d6d;
-			border-radius: 3px;
-			box-sizing: border-box;
-			grid-area: 1/1;
-			height: 24px;
-			transition: all .1s ease-in;
-			width: 24px;
-			z-index: 9998
-		}
+        .cb-lb .cb-i {
+            animation: scale-up-center .4s cubic-bezier(.55, .085, .68, .53) both;
+            background: #fff;
+            border: 2px solid #6d6d6d;
+            border-radius: 3px;
+            box-sizing: border-box;
+            grid-area: 1/1;
+            height: 24px;
+            transition: all .1s ease-in;
+            width: 24px;
+            z-index: 9998
+        }
 
-		.cb-lb .cb-i:after {
-			border-radius: 5px;
-			content: "";
-			position: absolute
-		}
+        .cb-lb .cb-i:after {
+            border-radius: 5px;
+            content: "";
+            position: absolute
+        }
 
-		.cb-lb .cb-lb-t {
-			grid-column: 2;
-			margin-left: 8px
-		}
+        .cb-lb .cb-lb-t {
+            grid-column: 2;
+            margin-left: 8px
+        }
 
         .main-wrapper {
             align-items: center;
@@ -592,11 +596,12 @@
             .main-content {
                 margin-top: 4rem
             }
+
             .h2 {
                 font-size: 1.25rem;
                 line-height: 1.5rem
             }
-            
+
             .main-content {
                 margin-top: 4rem
             }
@@ -605,7 +610,7 @@
                 height: 1.5rem;
                 width: 1.5rem
             }
-            
+
             .h1 {
                 font-size: 1.5rem;
                 line-height: 1.75rem
@@ -716,6 +721,7 @@
             padding-left: 0;
             padding-right: 34px
         }
+
         .rtl #expired-i,
         .rtl #fail-i,
         .rtl #overrun-i,
@@ -764,32 +770,34 @@
             body #challenge-error-text {
                 background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgZmlsbD0ibm9uZSI+PHBhdGggZmlsbD0iI0IyMEYwMyIgZD0iTTE2IDNhMTMgMTMgMCAxIDAgMTMgMTNBMTMuMDE1IDEzLjAxNSAwIDAgMCAxNiAzbTAgMjRhMTEgMTEgMCAxIDEgMTEtMTEgMTEuMDEgMTEuMDEgMCAwIDEtMTEgMTEiLz48cGF0aCBmaWxsPSIjQjIwRjAzIiBkPSJNMTcuMDM4IDE4LjYxNUgxNC44N0wxNC41NjMgOS41aDIuNzgzem0tMS4wODQgMS40MjdxLjY2IDAgMS4wNTcuMzg4LjQwNy4zODkuNDA3Ljk5NCAwIC41OTYtLjQwNy45ODQtLjM5Ny4zOS0xLjA1Ny4zODktLjY1IDAtMS4wNTYtLjM4OS0uMzk4LS4zODktLjM5OC0uOTg0IDAtLjU5Ny4zOTgtLjk4NS40MDYtLjM5NyAxLjA1Ni0uMzk3Ii8+PC9zdmc+")
             }
-			
-			body {
+
+            body {
                 background-color: #222;
                 color: #d9d9d9
             }
-			#content {
-				background-color: #232323;
-				border-color: #797979;
-			}
-			.cb-lb .cb-i {
-				background-color: #222;
-				border: 2px solid #dadada
-			}
 
-			.cb-lb input:active~.cb-i,
-			.cb-lb input:focus~.cb-i {
-				border: 2px solid #fbad41
-			}
+            #content {
+                background-color: #232323;
+                border-color: #797979;
+            }
 
-			.cb-lb input:checked~.cb-i {
-				background-color: #6d6d6d
-			}
+            .cb-lb .cb-i {
+                background-color: #222;
+                border: 2px solid #dadada
+            }
 
-			.cb-lb input:checked~.cb-i:after {
-				border-color: #fbad41
-			}
+            .cb-lb input:active~.cb-i,
+            .cb-lb input:focus~.cb-i {
+                border: 2px solid #fbad41
+            }
+
+            .cb-lb input:checked~.cb-i {
+                background-color: #6d6d6d
+            }
+
+            .cb-lb input:checked~.cb-i:after {
+                border-color: #fbad41
+            }
 
             .expired-circle,
             .timeout-circle {
@@ -800,7 +808,7 @@
                 stroke: #999;
                 fill: #999
             }
-            
+
             #expired-i,
             #timeout-i {
                 border-radius: 50%;
@@ -827,69 +835,69 @@
 <body class="no-js">
     <div class="main-wrapper" role="main">
         <div class="main-content">
-            <h1 class="zone-name-title h1"><img src="/favicon.ico" class="heading-favicon"
-                    alt="Значок <?=$_SERVER['SERVER_NAME'] ?>"><?=$_SERVER['SERVER_NAME'] ?></h1>
+            <h1 class="zone-name-title h1"><?= $_SERVER['SERVER_NAME'] ?></h1>
             <p id="pSht7" class="h2 spacer-bottom">Проверяем, человек ли вы. Это может занять несколько секунд.</p>
             <div id="uHkM6" style="display: none;">
-				<div style="max-width: 300px; height: 65px;">
-					<div id="content">
-						<div id="ihOWn1" style="display: grid;">
-							<div class="cb-c" role="alert" style="display: flex;">
-								<label class="cb-lb"><input type="checkbox" id="uiEr3"><span class="cb-i"></span><span class="cb-lb-t">Подтвердите, что вы человек</span></label>
-							</div>
-						</div>
-						<div id="verifying" class="cb-container" style="display: none;">
-							<div class="spinner-container">
-								<svg id="spinner-i" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="unspun">
-									<line x1="15" x2="15" y1="1.5" y2="5.5" class="circle"></line>
-									<line x1="24.5459" x2="24.5459" y1="5.45405" y2="10.45405" transform="rotate(45 24.5459 5.45405)"
-										class="circle"></line>
-									<line x1="28.5" x2="28.5" y1="15" y2="20" transform="rotate(90 28.5 15)" class="circle"></line>
-									<line x1="24.5459" x2="24.5459" y1="24.546" y2="29.546" transform="rotate(135 24.5459 24.546)"
-										class="circle"></line>
-									<line x1="15" x2="15" y1="28.5" y2="33.5" transform="rotate(180 15 28.5)" class="circle"></line>
-									<line x1="5.4541" x2="5.4541" y1="24.5459" y2="29.5459" transform="rotate(-135 5.4541 24.5459)"
-										class="circle"></line>
-									<line x1="1.5" x2="1.5" y1="15" y2="20" transform="rotate(-90 1.5 15)" class="circle"></line>
-									<line x1="5.45408" x2="5.45408" y1="5.45404" y2="10.45404" transform="rotate(-45 5.45408 5.45404)" class="circle"></line>
-								</svg></div>
-							<div id="verifying-msg"><span id="verifying-text">Идет проверка...</span><br>
-								<div id="error-overrun" class="error-message" style="display: none;"><span id="fr-overrun">Stuck here?</span><a href="#refresh" id="fr-overrun-link">Send Feedback</a></div>
-							</div>
-						</div>
-						<div id="fail" class="cb-container" role="alert" style="display: none;">
-							<svg id="fail-i" viewBox="0 0 30 30" aria-hidden="true" fill="none">
-								<circle class="failure-circle" cx="15" cy="15" r="15" fill="none"></circle>
-								<path class="failure-cross"
-									d="M15.9288 16.2308H13.4273L13.073 7H16.2832L15.9288 16.2308ZM14.6781 19.1636C15.1853 19.1636 15.5918 19.3129 15.8976 19.6117C16.2103 19.9105 16.3666 20.2927 16.3666 20.7583C16.3666 21.2169 16.2103 21.5956 15.8976 21.8944C15.5918 22.1932 15.1853 22.3425 14.6781 22.3425C14.1778 22.3425 13.7713 22.1932 13.4586 21.8944C13.1529 21.5956 13 21.2169 13 20.7583C13 20.2997 13.1529 19.921 13.4586 19.6222C13.7713 19.3164 14.1778 19.1636 14.6781 19.1636Z">
-								</path>
-							</svg>
-							<div id="failure-msg"><span id="fail-text">Сбой</span>
-								<div id="having-trouble-message" class="error-message"><span id="fr-helper">Проблемы?</span><a href="javascript:location.reload();"
-										id="fr-helper-link">Refresh</a></div>
-							</div>
-						</div>
-						<div id="expired" class="cb-container" role="alert" style="display: none;">
-							<svg id="expired-i" viewBox="0 0 30 30" aria-hidden="true">
-								<circle class="expired-circle" cx="15" cy="15" r="15"></circle>
-								<path class="expired-p1" d="M15.3125 6H13V16.7184L19.2438 23.2108L20.9088 21.6094L15.3125 15.7877V6Z"></path>
-							</svg>
-							<div id="expiry-msg">
-								<p id="expired-text">Сессия устарела<span id="full-stop-expired-text">. </span><a href="#refresh" id="expired-refresh-link">Обновить</a></p>
-							</div>
-						</div>
-						<div id="timeout" class="cb-container" role="alert" style="display: none;">
-							<svg id="timeout-i" viewBox="0 0 30 30" aria-hidden="true">
-								<circle class="timeout-circle" cx="15" cy="15" r="15"></circle>
-								<path class="timeout-p1" d="M15.3125 6H13V16.7184L19.2438 23.2108L20.9088 21.6094L15.3125 15.7877V6Z"></path>
-							</svg>
-							<div id="timeout-msg">
-								<p id="timeout-text">Время истекло<span id="full-stop-timeout-text">. </span><a href="#refresh" id="timeout-refresh-link">Обновить</a></p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+                <div style="max-width: 300px; height: 65px;">
+                    <div id="content">
+                        <div id="ihOWn1" style="display: grid;">
+                            <div class="cb-c" role="alert" style="display: flex;">
+                                <label class="cb-lb"><input type="checkbox" id="uiEr3"><span class="cb-i"></span><span class="cb-lb-t">Подтвердите, что вы человек</span></label>
+                            </div>
+                        </div>
+                        <div id="verifying" class="cb-container" style="display: none;">
+                            <div class="spinner-container">
+                                <svg id="spinner-i" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="unspun">
+                                    <line x1="15" x2="15" y1="1.5" y2="5.5" class="circle"></line>
+                                    <line x1="24.5459" x2="24.5459" y1="5.45405" y2="10.45405" transform="rotate(45 24.5459 5.45405)"
+                                        class="circle"></line>
+                                    <line x1="28.5" x2="28.5" y1="15" y2="20" transform="rotate(90 28.5 15)" class="circle"></line>
+                                    <line x1="24.5459" x2="24.5459" y1="24.546" y2="29.546" transform="rotate(135 24.5459 24.546)"
+                                        class="circle"></line>
+                                    <line x1="15" x2="15" y1="28.5" y2="33.5" transform="rotate(180 15 28.5)" class="circle"></line>
+                                    <line x1="5.4541" x2="5.4541" y1="24.5459" y2="29.5459" transform="rotate(-135 5.4541 24.5459)"
+                                        class="circle"></line>
+                                    <line x1="1.5" x2="1.5" y1="15" y2="20" transform="rotate(-90 1.5 15)" class="circle"></line>
+                                    <line x1="5.45408" x2="5.45408" y1="5.45404" y2="10.45404" transform="rotate(-45 5.45408 5.45404)" class="circle"></line>
+                                </svg>
+                            </div>
+                            <div id="verifying-msg"><span id="verifying-text">Идет проверка...</span><br>
+                                <div id="error-overrun" class="error-message" style="display: none;"><span id="fr-overrun">Stuck here?</span><a href="#refresh" id="fr-overrun-link">Send Feedback</a></div>
+                            </div>
+                        </div>
+                        <div id="fail" class="cb-container" role="alert" style="display: none;">
+                            <svg id="fail-i" viewBox="0 0 30 30" aria-hidden="true" fill="none">
+                                <circle class="failure-circle" cx="15" cy="15" r="15" fill="none"></circle>
+                                <path class="failure-cross"
+                                    d="M15.9288 16.2308H13.4273L13.073 7H16.2832L15.9288 16.2308ZM14.6781 19.1636C15.1853 19.1636 15.5918 19.3129 15.8976 19.6117C16.2103 19.9105 16.3666 20.2927 16.3666 20.7583C16.3666 21.2169 16.2103 21.5956 15.8976 21.8944C15.5918 22.1932 15.1853 22.3425 14.6781 22.3425C14.1778 22.3425 13.7713 22.1932 13.4586 21.8944C13.1529 21.5956 13 21.2169 13 20.7583C13 20.2997 13.1529 19.921 13.4586 19.6222C13.7713 19.3164 14.1778 19.1636 14.6781 19.1636Z">
+                                </path>
+                            </svg>
+                            <div id="failure-msg"><span id="fail-text">Сбой</span>
+                                <div id="having-trouble-message" class="error-message"><span id="fr-helper">Проблемы?</span><a href="javascript:location.reload();"
+                                        id="fr-helper-link">Refresh</a></div>
+                            </div>
+                        </div>
+                        <div id="expired" class="cb-container" role="alert" style="display: none;">
+                            <svg id="expired-i" viewBox="0 0 30 30" aria-hidden="true">
+                                <circle class="expired-circle" cx="15" cy="15" r="15"></circle>
+                                <path class="expired-p1" d="M15.3125 6H13V16.7184L19.2438 23.2108L20.9088 21.6094L15.3125 15.7877V6Z"></path>
+                            </svg>
+                            <div id="expiry-msg">
+                                <p id="expired-text">Сессия устарела<span id="full-stop-expired-text">. </span><a href="#refresh" id="expired-refresh-link">Обновить</a></p>
+                            </div>
+                        </div>
+                        <div id="timeout" class="cb-container" role="alert" style="display: none;">
+                            <svg id="timeout-i" viewBox="0 0 30 30" aria-hidden="true">
+                                <circle class="timeout-circle" cx="15" cy="15" r="15"></circle>
+                                <path class="timeout-p1" d="M15.3125 6H13V16.7184L19.2438 23.2108L20.9088 21.6094L15.3125 15.7877V6Z"></path>
+                            </svg>
+                            <div id="timeout-msg">
+                                <p id="timeout-text">Время истекло<span id="full-stop-timeout-text">. </span><a href="#refresh" id="timeout-refresh-link">Обновить</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div id="InsTY1" class="spacer loading-spinner" style="display: block; visibility: visible;">
                 <div class="lds-ring">
                     <div></div>
@@ -898,30 +906,45 @@
                     <div></div>
                 </div>
             </div>
-            <div id="LfAMd3" class="core-msg spacer spacer-top">Сначала <?=$_SERVER['SERVER_NAME'] ?> необходимо проверить безопасность
+            <div id="LfAMd3" class="core-msg spacer spacer-top">Сначала <?= $_SERVER['SERVER_NAME'] ?> необходимо проверить безопасность
                 вашего подключения.</div>
             <div id="tWuBw3" style="display: none;">
                 <div id="challenge-success-text" class="h2">Проверка выполнена успешно</div>
-                <div class="core-msg spacer">Ожидание ответа <?=$_SERVER['SERVER_NAME'] ?>...</div>
+                <div class="core-msg spacer">Ожидание ответа <?= $_SERVER['SERVER_NAME'] ?>...</div>
             </div><noscript>
                 <div class="h2"><span id="challenge-error-text">Enable JavaScript and cookies to continue</span></div>
             </noscript>
         </div>
     </div>
     <script>
-    var HTTP_ANTIBOT_PATH = '<?=$this->Config->ANTIBOT_PATH; ?>';
-    var METRIKA_ID = '<?=$this->Config->get('main', 'metrika', ''); ?>';
-    var REMOTE_ADDR = '<?=$this->Profile->IP; ?>';
-	(function () {
-		var cpo = document.createElement('script');
-		cpo.src = '<?=$this->Config->ANTIBOT_PATH.'js/api.js?'.filemtime($this->Config->DOCUMENT_ROOT . $this->Config->ANTIBOT_PATH.'js/api.js'); ?>';
-		document.getElementsByTagName('head')[0].appendChild(cpo);
-	}());
-	</script>
+        var HTTP_ANTIBOT_PATH = '<?= $this->Config->ANTIBOT_PATH; ?>';
+        var METRIKA_ID = '<?= $this->Config->get('main', 'metrika', ''); ?>';
+        var REMOTE_ADDR = '<?= $this->Profile->IP; ?>';
+        (function() {
+            // Показываем favicon если есть
+            fetch('/favicon.ico')
+                .then(response => {
+                    if (response.ok) {
+                        const h1 = document.querySelector('h1');
+
+                        const img = document.createElement('img');
+                        img.src = '/favicon.ico';
+                        img.className = 'heading-favicon';
+                        img.alt = 'Значок <?= $_SERVER['SERVER_NAME'] ?>';
+                        h1.insertBefore(img, h1.firstChild);
+                    }
+                })
+                .catch(() => {}); // Игнорируем ошибки
+
+            var cpo = document.createElement('script');
+            cpo.src = '<?= $this->Config->ANTIBOT_PATH . 'js/api.js?' . filemtime($this->Config->DOCUMENT_ROOT . $this->Config->ANTIBOT_PATH . 'js/api.js'); ?>';
+            document.getElementsByTagName('head')[0].appendChild(cpo);
+        }());
+    </script>
     <div class="footer" role="contentinfo">
         <div class="footer-inner">
             <div class="clearfix diagnostic-wrapper">
-                <div class="ray-id">Ray ID: <code><?=$this->Profile->RayID; ?></code></div>
+                <div class="ray-id">Ray ID: <code><?= $this->Profile->RayID; ?></code></div>
             </div>
             <div class="text-center" id="footer-text">Производительность и безопасность на платформе <a
                     rel="noopener noreferer" href="https://github.com/githubniko/antibot"
