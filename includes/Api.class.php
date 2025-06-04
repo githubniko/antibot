@@ -11,13 +11,22 @@ class Api
     private $WAFSystem;
     private $CSRF;
     private $data; // хранит массив данных из php://input
+    private $maxData = 10000; // ограничение на размер входящего объекта
 
     public function __construct(WAFSystem $wafsystem)
     {
         $this->WAFSystem = $wafsystem;
         $this->CSRF = new CSRF();
-        $this->data = json_decode(file_get_contents('php://input'), true);
         $client_ip = $this->WAFSystem->Profile->IP;
+
+        $input = file_get_contents('php://input');
+        if (($len=strlen($input)) > $this->maxData) {
+            $message = "Error: Input data size exceeded (size: $len, max: $this->maxData)";
+            $this->WAFSystem->Logger->log($message);
+            $this->WAFSystem->GrayList->add($client_ip, $message);
+            $this->endJSON('fail');
+        }
+        $this->data = json_decode($input, true);
 
         if (empty($this->data)) {
             $message = "Error: Data is empty";
