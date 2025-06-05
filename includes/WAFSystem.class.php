@@ -79,15 +79,6 @@ class WAFSystem
         if ($this->HTTPChecker->enabled)
             $this->Logger->log("Protocol: " . $this->Profile->HttpVersion);
 
-        // 0. Проверка протокола
-        if ($this->HTTPChecker->enabled) {
-            if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
-                if ($this->HTTPChecker->action == 'ALLOW') {
-                    $this->Logger->log("Version HTTP allowed");
-                    return true;
-                }
-            }
-        }
 
         // 1. Проверка URL в белом списке
         if ($this->RequestChecker->isListed($this->Profile->REQUEST_URI)) {
@@ -150,12 +141,15 @@ class WAFSystem
         if ($this->HTTPChecker->enabled) {
             if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
                 if ($this->HTTPChecker->action == 'BLOCK') {
+                    $this->Logger->log("Version HTTP blocked");
                     if ($this->HTTPChecker->addBlacklistIP) {
                         $this->BlackLiskIP->add($clientIp, $this->Profile->HttpVersion);
                     }
                     $this->Template->showBlockPage();
                 }
-            }
+                else {} // SKIP
+            } 
+            else {} // SKIP
         }
 
         return false;
