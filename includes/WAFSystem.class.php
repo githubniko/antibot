@@ -26,6 +26,7 @@ class WAFSystem
     public $FingerPrint;
     public $GrayList;
     public $HTTPChecker;
+    public $MobileChecker;
 
     public function __construct()
     {
@@ -51,6 +52,7 @@ class WAFSystem
         $this->FingerPrint = new FingerPrint($this->Config, $this->Logger);
         $this->GrayList = new GrayList($this->Config, $this->Logger);
         $this->HTTPChecker = new HTTPChecker($this->Config, $this->Logger);
+        $this->MobileChecker = new MobileChecker($this->Config, $this->Logger);
     }
 
     public function run()
@@ -275,11 +277,20 @@ class WAFSystem
         }
 
         # Проверка для мобильных девайсов
-        $limitwidth = $this->Config->init('mobile', 'screen_width', 1920, 'px, минимальная ширина экрана. Работает совместно с [checks]->mobile');
-        $screenWidth = (float)$data['screenWidth'] * (float)$data['pixelRatio'];
-        if ($this->Config->init('checks', 'mobile', true, 'капча для мобильных девайсов') && $screenWidth < $limitwidth) {
-            $this->Logger->log("Screen resolution {$screenWidth}px is less than {$limitwidth}px");
-            $Api->endJSON('captcha');
+        if($this->MobileChecker->enabled) {
+            if($this->MobileChecker->Checking($this->Profile->isMobile, $data['screenWidth'], $data['pixelRatio'])) {
+                if($this->MobileChecker->action == 'CAPTCHA') {
+                    $this->Logger->log("Show captcha for Mobile device");
+                    $Api->endJSON('captcha');
+                } 
+                elseif ($this->MobileChecker->action == 'BLOCK') {
+                    $this->Logger->log("Mobile device blocked");
+                    $Api->endJSON('block');
+                }
+                elseif ($this->MobileChecker->action == 'SKIP') {
+                    $this->Logger->log("Mobile device skipped");
+                }
+            }
         }
 
         # Показ капчи для Прямых заходов

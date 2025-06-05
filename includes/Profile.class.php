@@ -19,6 +19,7 @@ class Profile
     public $Referer;
     public $REQUEST_URI;
     public $FingerPrint;
+    public $isMobile;
 
     private function __construct(Config $config)
     {
@@ -33,6 +34,7 @@ class Profile
         $this->REQUEST_URI = isset($_SERVER['REQUEST_URI']) ? mb_substr($_SERVER['REQUEST_URI'], 0, 512) : '';
 
         $this->isIPv6 = filter_var($this->IP, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+        $this->isMobile = isset($_SERVER['HTTP_SEC_CH_UA_MOBILE']) ? ($_SERVER['HTTP_SEC_CH_UA_MOBILE'] === '?1' ? true : false) : null; // если null, то далее определяем по косвенным признакам
 
         $this->salt = $this->Config->get('cookie', 'cookie_name', '');
         $this->RayID = $this->getRayID();
