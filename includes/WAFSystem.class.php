@@ -184,9 +184,8 @@ class WAFSystem
         /* 
         * ALLOW
         **/
-
         # Запрос на установку метки
-        if ($data['func'] == 'set-marker') {
+        if ($data['func'] == 'set-marker' && $Api->isHiddenValue()) {
             $this->Logger->log("Successfully passed the captcha");
             $this->Marker->set();
             $Api->endJSON('allow');

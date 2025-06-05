@@ -20,7 +20,7 @@ class Api
         $client_ip = $this->WAFSystem->Profile->IP;
 
         $input = file_get_contents('php://input');
-        if (($len=strlen($input)) > $this->maxData) {
+        if (($len = strlen($input)) > $this->maxData) {
             $message = "Error: Input data size exceeded (size: $len, max: $this->maxData)";
             $this->WAFSystem->Logger->log($message);
             $this->WAFSystem->GrayList->add($client_ip, $message);
@@ -78,6 +78,11 @@ class Api
 
         if ($status == 'captcha') {
             $this->WAFSystem->Logger->log("Show captcha");
+            $this->setHiddenValue();
+        }
+
+        if ($status == 'allow') {
+            $this->removeHiddenValue();
         }
 
         $res = array_merge([
@@ -92,7 +97,26 @@ class Api
         exit;
     }
 
+    /**
+     * Устанавливает ключ, при котором разблокируется запрос на установку метки
+     */
+    private function setHiddenValue()
+    {
+        $_SESSION['rndname'] = true;
+    }
 
+    private function removeHiddenValue()
+    {
+        unset($_SESSION['rndname']);
+    }
+
+    /**
+     * Проверяет наличие ключа разблокировки
+     */
+    public function isHiddenValue()
+    {
+        return isset($_SESSION['rndname']);
+    }
 
     /**
      * Проверяем метод отправки запроса
