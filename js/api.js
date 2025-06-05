@@ -46,6 +46,14 @@ function refresh() {
 	flagCloseWindow = false;
 	window.location.href = window.location.href;
 }
+function pageBlock() {
+	flagCloseWindow = false;
+	const urlString = window.location.href;
+	const url = new URL(urlString);
+	const protocol = url.protocol; // "https:"
+	const domain = url.hostname;   // "example.com"
+	window.location.href = protocol + '//' + domain + '/?awafblock';
+}
 
 /**
  * Подключает js скрипт к странице
@@ -78,23 +86,23 @@ function initFingerPrint() {
 
 function getObjectBrowser(obj, options = {}) {
 	const {
-        includeNull = false,
-        includeEmpty = false
-    } = options;
+		includeNull = false,
+		includeEmpty = false
+	} = options;
 
-    // Явно исключаем HTMLAllCollection
-    if (obj instanceof HTMLAllCollection) return undefined;
+	// Явно исключаем HTMLAllCollection
+	if (obj instanceof HTMLAllCollection) return undefined;
 
-    // Проверка на другие нежелательные объекты
-    const forbiddenTypes = [
-        '[object HTMLAllCollection]',
-        '[object HTMLCollection]',
-        '[object NodeList]'
-    ];
-    
-    if (forbiddenTypes.includes(Object.prototype.toString.call(obj))) {
-        return undefined;
-    }
+	// Проверка на другие нежелательные объекты
+	const forbiddenTypes = [
+		'[object HTMLAllCollection]',
+		'[object HTMLCollection]',
+		'[object NodeList]'
+	];
+
+	if (forbiddenTypes.includes(Object.prototype.toString.call(obj))) {
+		return undefined;
+	}
 
 	if (obj === null) return includeNull ? null : undefined;
 	if (typeof obj !== 'object') return obj;
@@ -223,7 +231,7 @@ function checkBot(func) {
 				setTimeout(refresh, 1000);
 			}
 			else if (data.status == 'block') {
-				setTimeout(refresh, 1000);
+				setTimeout(pageBlock, 1000);
 			}
 			else if (data.status == 'fail') {
 				form.style.display = "grid";

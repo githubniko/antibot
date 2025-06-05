@@ -8,6 +8,10 @@ if (basename($reuest_uri) != 'xhr.php') { // нужно для совмести�
     // Инициализация и запуск системы
     try {
         $antiBot = new \WAFSystem\WAFSystem();
+
+        if (isset($_GET['awafblock'])) // url блокировки через JS
+            $antiBot->Template->showBlockPage();
+
         $antiBot->run();
     } catch (Exception $e) {
         error_log("AntiBot system failed: " . $e->getMessage());
