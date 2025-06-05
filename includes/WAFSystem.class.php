@@ -16,7 +16,7 @@ class WAFSystem
     public $Profile;
     public $WhiteListIP;
     public $BlackLiskIP;
-    public $WhiteListUserAgent;
+    public $UserAgentChecker;
     public $RequestChecker;
     public $Marker;
     public $Template;
@@ -41,7 +41,7 @@ class WAFSystem
 
         $this->WhiteListIP = new WhiteListIP($this->Config, $this->Logger);
         $this->BlackLiskIP = new BlackListIP($this->Config, $this->Logger);
-        $this->WhiteListUserAgent = new WhiteListUserAgent($this->Config, $this->Logger);
+        $this->UserAgentChecker = new UserAgentChecker($this->Config, $this->Logger);
         $this->RequestChecker = new RequestChecker($this->Config, $this->Logger);
         $this->Marker = new Marker($this->Config, $this->Profile, $this->Logger);
         $this->Template = new Template($this->Config, $this->Profile, $this->Logger);
@@ -119,16 +119,35 @@ class WAFSystem
         }
 
         // 5. Проверка User-Agent
-        if ($this->Config->get('checks', 'useragent', false)) {
+        if ($this->UserAgentChecker->enabled) {
             // Валидность User_Agent
-            if (!$this->WhiteListUserAgent->isValid($this->Profile->UserAgent)) {
+            if (!$this->UserAgentChecker->isValid($this->Profile->UserAgent)) {
                 return false;
             }
 
             // Пропускаем исключенные User-Agent
-            if ($this->WhiteListUserAgent->isListed($this->Profile->UserAgent)) {
-                return true;
+            if ($this->UserAgentChecker->isListed($this->Profile->UserAgent)) {
+                if ($this->UserAgentChecker->action == 'ALLOW') {
+                    $this->Logger->log("User-Agent allowed");
+                    return true;
+                }
             }
+
+            if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
+                if ($this->HTTPChecker->action == 'BLOCK') {
+                    $this->Logger->log("Version HTTP blocked");
+                    if ($this->HTTPChecker->addBlacklistIP) {
+                        $this->BlackLiskIP->add($clientIp, $this->Profile->HttpVersion);
+                    }
+                    $this->Template->showBlockPage();
+                }
+                else {} // SKIP
+            } 
+            else {} // SKIP
+        }
+
+        if ($this->Config->get('checks', 'useragent', false)) {
+            
         }
 
         // 7. Проверка поисковых ботов
