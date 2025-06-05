@@ -11,7 +11,7 @@ class RequestChecker extends ListBase
 
     public function __construct(Config $config, Logger $logger)
     {
-        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled, 'исключения для указанных URL');
         $this->action = $config->init($this->modulName, 'action', $this->action, 'ALLOW - разрешить, SKIP - ничего не делать');
 
         $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");

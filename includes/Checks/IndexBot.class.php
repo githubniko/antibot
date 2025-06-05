@@ -18,7 +18,7 @@ class IndexBot extends ListBase
         $this->Logger = $logger;
         $this->Profile = $profile;
 
-        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled, 'пропускать поисковых ботов');
 
         $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
