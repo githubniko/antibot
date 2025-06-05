@@ -76,44 +76,125 @@ function initFingerPrint() {
 	}
 }
 
-function getObjectBrowser(name) {
-	let result = Object.create(null);
-	for (var prop in name) {
-		if (name[prop] instanceof Object || name[prop] === '' || name[prop] === null) continue;
-		result[prop] = name[prop];
+function getObjectBrowser(obj, options = {}) {
+	const {
+        includeNull = false,
+        includeEmpty = false
+    } = options;
+
+    // Явно исключаем HTMLAllCollection
+    if (obj instanceof HTMLAllCollection) return undefined;
+
+    // Проверка на другие нежелательные объекты
+    const forbiddenTypes = [
+        '[object HTMLAllCollection]',
+        '[object HTMLCollection]',
+        '[object NodeList]'
+    ];
+    
+    if (forbiddenTypes.includes(Object.prototype.toString.call(obj))) {
+        return undefined;
+    }
+
+	if (obj === null) return includeNull ? null : undefined;
+	if (typeof obj !== 'object') return obj;
+
+	if (obj instanceof Date) return obj.toISOString();
+	if (obj instanceof RegExp) return obj.toString();
+	if (obj instanceof HTMLElement || obj instanceof Function) return undefined;
+
+	const result = {};
+	let hasValidProperties = false;
+
+	// Создаем массив для хранения всех ключей
+	const keys = [];
+
+	// Собираем все перечисляемые свойства (включая унаследованные)
+	for (const key in obj) {
+		keys.push(key);
 	}
-	return result;
+
+	// Добавляем символьные свойства
+	const symbols = Object.getOwnPropertySymbols(obj);
+	for (const sym of symbols) {
+		keys.push(sym);
+	}
+
+	for (const key of keys) {
+		try {
+			// Пропускаем специальные свойства
+			if (key === '__proto__' || key === 'constructor') continue;
+
+			// Безопасное получение значения свойства
+			const value = (typeof key === 'symbol')
+				? obj[key]
+				: obj[key];
+
+			// Пропускаем функции и DOM-элементы
+			if (typeof value === 'function' || value instanceof HTMLElement) continue;
+
+			// Обрабатываем только примитивы
+			if (value !== null && typeof value === 'object') continue;
+
+			if (value !== undefined && (includeNull || value !== null)) {
+				// Для символов используем строковое представление
+				const resultKey = (typeof key === 'symbol')
+					? `Symbol(${key.description || ''})`
+					: key;
+
+				result[resultKey] = value;
+				hasValidProperties = true;
+			}
+		} catch (e) {
+			continue;
+		}
+	}
+
+	return hasValidProperties ? result : (includeEmpty ? {} : undefined);
 }
 
 function checkBot(func) {
 	var xhr = new XMLHttpRequest();
-
 	var visitortime = new Date();
-	let arr = { // Данные для отправки
-		datetime: {
-			now: visitortime,
-			timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown',
-			offsetHours: -(visitortime.getTimezoneOffset() / 60),
-		},
-		clientWidth: document.documentElement.clientWidth,
-		clientHeight: document.documentElement.clientHeight,
-		screenWidth: window.screen.width,
-		screenHeight: window.screen.height,
-		pixelRatio: window.devicePixelRatio || 1,
-		colorDepth: window.screen.colorDepth,
-		pixelDepth: window.screen.pixelDepth,
-		screen: getObjectBrowser(window.screen),
-		java: window.java ? 1 : 0,
-		navigator: getObjectBrowser(navigator),
-		window: getObjectBrowser(window),
-		referer: document.referrer,
-		mainFrame: window.top === window.self,
+
+	let obj = {
 		func: func == undefined ? 'csrf_token' : func,
-		fingerPrint: FINGERPRINT,
-		csrf_token: CSRF,
+		csrf_token: CSRF
 	};
 
-	var data = JSON.stringify(arr);
+	if (func !== undefined) {
+		obj2 = { // Данные для отправки
+			datetime: {
+				now: visitortime.toISOString(),
+				timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown',
+				offsetHours: -(visitortime.getTimezoneOffset() / 60),
+			},
+			clientWidth: document.documentElement.clientWidth,
+			clientHeight: document.documentElement.clientHeight,
+			screenWidth: window.screen.width,
+			screenHeight: window.screen.height,
+			pixelRatio: window.devicePixelRatio || 1,
+			colorDepth: window.screen.colorDepth,
+			pixelDepth: window.screen.pixelDepth,
+			java: window.java ? 1 : 0,
+			referer: document.referrer,
+			mainFrame: window.top === window.self,
+			document: getObjectBrowser(document),
+			window: getObjectBrowser(window),
+			navigator: getObjectBrowser(navigator),
+			screen: getObjectBrowser(window.screen),
+			fingerPrint: FINGERPRINT,
+		};
+		Object.assign(obj, obj2);
+	}
+	console.log(obj);
+
+	let data = null;
+	try {
+		data = JSON.stringify(obj);
+	} catch (e) {
+		console.error('Failed to stringify data:', e);
+	}
 
 	xhr.open('POST', HTTP_ANTIBOT_PATH + 'xhr.php', true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
