@@ -142,7 +142,11 @@ class Api
      */
     private function BlockIP($client_ip, $message)
     {
-        if (!$this->WAFSystem->WhiteListIP->isListed($client_ip) && !$this->WAFSystem->IndexBot->isIndexbot($client_ip)) {
+        if (
+            !($this->WAFSystem->WhiteListIP->isListed($client_ip)
+                || ($this->WAFSystem->IndexBot->enabled && $this->WAFSystem->IndexBot->isIndexbot($client_ip))
+            )
+        ) {
             $this->WAFSystem->BlackLiskIP->add($this->WAFSystem->Profile->IP, $message);
         }
     }

@@ -6,19 +6,24 @@ use Exception;
 
 class IndexBot extends ListBase
 {
-    private $Profile;
     public $listName = 'indexbot_rules';
-    private $Dns;
+    public $enabled = true;
 
+    private $Profile;
+    private $Dns;
+    private $modulName = 'indexbot_checker';
+    
     public function __construct(Config $config, Profile $profile, Logger $logger)
     {
         $this->Logger = $logger;
         $this->Profile = $profile;
 
-        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
+
+        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
             $file = "lists/" . $this->listName;
-            $config->set('lists', $this->listName, $file);
+            $config->set($this->modulName, $this->listName, $file);
         }
 
         $cacheDir = $config->CachePath . 'dns';
@@ -28,7 +33,7 @@ class IndexBot extends ListBase
     }
 
     # Функция проверяет ip на индексирующего бота
-    public function isIndexbot($client_ip)
+    public function Checking($client_ip)
     {
         try {
             $hostname = $this->Dns->getHostByAddr($client_ip); // Выполняем обратный DNS-запрос

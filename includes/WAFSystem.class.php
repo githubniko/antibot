@@ -153,9 +153,11 @@ class WAFSystem
         }
 
         // 7. Проверка поисковых ботов
-        if ($this->IndexBot->isIndexbot($clientIp)) {
-            $this->Logger->log("Indexing robot");
-            return true;
+        if ($this->IndexBot->enabled) {
+            if ($this->IndexBot->Checking($clientIp)) {
+                $this->Logger->log("Indexing robot");
+                return true;
+            }
         }
 
         // 9. Проверка протокола
@@ -195,7 +197,7 @@ class WAFSystem
             $Api->endJSON('block');
         }
         $this->Profile->FingerPrint = $data['fingerPrint'];
-        
+
         if ($this->FingerPrint->enabled)
             $this->Logger->log("FP:  " . $this->Profile->FingerPrint);
 
@@ -277,17 +279,15 @@ class WAFSystem
         }
 
         # Проверка для мобильных девайсов
-        if($this->MobileChecker->enabled) {
-            if($this->MobileChecker->Checking($this->Profile->isMobile, $data['screenWidth'], $data['pixelRatio'])) {
-                if($this->MobileChecker->action == 'CAPTCHA') {
+        if ($this->MobileChecker->enabled) {
+            if ($this->MobileChecker->Checking($this->Profile->isMobile, $data['screenWidth'], $data['pixelRatio'])) {
+                if ($this->MobileChecker->action == 'CAPTCHA') {
                     $this->Logger->log("Show captcha for Mobile device");
                     $Api->endJSON('captcha');
-                } 
-                elseif ($this->MobileChecker->action == 'BLOCK') {
+                } elseif ($this->MobileChecker->action == 'BLOCK') {
                     $this->Logger->log("Mobile device blocked");
                     $Api->endJSON('block');
-                }
-                elseif ($this->MobileChecker->action == 'SKIP') {
+                } elseif ($this->MobileChecker->action == 'SKIP') {
                     $this->Logger->log("Mobile device skipped");
                 }
             }
