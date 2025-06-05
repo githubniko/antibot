@@ -40,8 +40,8 @@ class WAFSystem
         $this->Logger = new Logger($this->Config, $this->Profile);
 
 
-        $this->WhiteListIP = new WhiteListIP($this->Config, $this->Logger);
         $this->BlackLiskIP = new BlackListIP($this->Config, $this->Logger);
+        $this->WhiteListIP = new WhiteListIP($this->Config, $this->Logger);
         $this->UserAgentChecker = new UserAgentChecker($this->Config, $this->Logger);
         $this->RequestChecker = new RequestChecker($this->Config, $this->Logger);
         $this->Marker = new Marker($this->Config, $this->Profile, $this->Logger);
@@ -88,17 +88,18 @@ class WAFSystem
                 if ($this->RequestChecker->action == 'ALLOW') {
                     $this->Logger->log("REQUEST_URI allowed");
                     return true;
-                }
-                else {
+                } else {
                     $this->Logger->log("REQUEST_URI skipped");
                 }
             }
         }
 
         // 2. Проверка IP в черном списке
-        if ($this->BlackLiskIP->isListed($clientIp)) {
-            $this->Logger->log("IP address found on blacklist: $clientIp");
-            $this->Template->showBlockPage();
+        if ($this->BlackLiskIP->enabled) {
+            if ($this->BlackLiskIP->isListed($clientIp)) {
+                $this->Logger->log("IP address found on blacklist: $clientIp");
+                $this->Template->showBlockPage();
+            }
         }
 
         // 3. Проверка куки маркера
@@ -108,9 +109,11 @@ class WAFSystem
         }
 
         // 4. Проверка IP в белом списке
-        if ($this->WhiteListIP->isListed($clientIp)) {
-            $this->Logger->log("IP address found in whitelist: $clientIp");
-            return true;
+        if ($this->WhiteListIP->enabled) {
+            if ($this->WhiteListIP->isListed($clientIp)) {
+                $this->Logger->log("IP address found in whitelist: $clientIp");
+                return true;
+            }
         }
 
         // Пропускаем посетителей с Прямым заходом
@@ -280,9 +283,21 @@ class WAFSystem
             }
         }
 
-        if ($this->Config->init('checks', 'ipv6', true, 'капча для IPv6') && filter_var($this->Profile->IP, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            $this->Logger->log("Show captcha for IPv6");
-            $Api->endJSON('captcha');
+        if ($this->BlackLiskIP->enabled) {
+            if ($this->BlackLiskIP->isIPv6($this->Profile->IP)) {
+                if($this->BlackLiskIP->ipv6 == 'BLOCK') {
+                    $this->Logger->log("IPv6 blocked");
+                    $Api->endJSON('block');
+                }
+                elseif($this->BlackLiskIP->ipv6 == 'CAPTCHA') {
+                    $this->Logger->log("IPv6 captcha");
+                    $Api->endJSON('captcha');
+                } 
+                else {
+                    $this->Logger->log("IPv6 skipped");
+                }
+                
+            }
         }
 
         # Проверка для мобильных девайсов

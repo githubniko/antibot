@@ -4,14 +4,20 @@ namespace WAFSystem;
 class BlackListIP extends ListBase
 {
     public $listName = 'blacklist_ip';
+    public $enabled = true;
+    public $ipv6 = 'CAPTCHA';
+    
+    private $modulName = 'ip_checks';
 
     public function __construct(Config $config, Logger $logger)
     {
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
+        $this->ipv6  = $config->init($this->modulName, 'ipv6', $this->ipv6, 'CAPTCHA - капча, BLOCK - заблокировать, SKIP - ничего не делать');
 
-        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
             $file = "lists/" . $this->listName;
-            $config->set('lists', $this->listName, $file);
+            $config->set($this->modulName, $this->listName, $file);
         }
 
         parent::__construct($file, $config, $logger);
@@ -41,5 +47,10 @@ EOT;
         if (inet_pton($value1) === inet_pton($value2))
            return true;
         return false;
+    }
+
+    public function isIPv6($ip)
+    {
+        return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
     }
 }

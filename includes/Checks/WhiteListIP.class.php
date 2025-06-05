@@ -4,14 +4,18 @@ namespace WAFSystem;
 class WhiteListIP extends ListBase
 {
     public $listName = 'whitelist_ip';
+    public $enabled = true;
+    
+    private $modulName = 'ip_checks';
 
     public function __construct(Config $config, Logger $logger)
     {
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
 
-        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
             $file = "lists/" . $this->listName;
-            $config->set('lists', $this->listName, $file);
+            $config->set($this->modulName, $this->listName, $file);
         }
 
         parent::__construct($file, $config, $logger);
