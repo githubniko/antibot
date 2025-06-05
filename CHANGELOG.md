@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1] - 2025-06-05
+
+### Added
+- Исключение для бота DuckDuckGo-Favicons-Bot
+- Исключение для бота bing.com
+- Исключение для бота msedge.net
+
 ## [0.4.0] - 2025-06-05
 
 ### Added

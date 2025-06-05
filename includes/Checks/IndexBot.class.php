@@ -64,7 +64,9 @@ googlezip.net   # Chrome Privacy Preserving Prefetch Proxy https://foxi.biz/view
 yandex.ru
 yandex.net
 yandex.com
-msn.com         # Поисковыик bing.com +http://www.bing.com/bingbot.htm
+msn.com         # Поисковик bing.com +http://www.bing.com/bingbot.htm
+bing.com        # Поисковик bing.com +http://www.bing.com/bingbot.htm
+msedge.net      # Запросы Edge
 petalsearch.com # Сервисы Huawei +https://webmaster.petalsearch.com/site/petalbot
 apple.com       # http://www.apple.com/go/applebot
 baidu.com       # Китайский поисковик +http://www.baidu.com/search/spider.html
@@ -74,6 +76,7 @@ odnoklassniki.ru # Для чтения метатегов
 mail.ru         # Сервисы mail.ru, vk.com
 googleusercontent.com # Discord +https://discordapp.com
 letsencrypt.org # Беслатные SSL-сертификаты
+duckduckgo.com  # DuckDuckGo-Favicons-Bot
 
 EOT;
         return $defaultContent;
