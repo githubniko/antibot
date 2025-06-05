@@ -15,7 +15,7 @@ class UserAgentChecker extends ListBase
 
     public function __construct(Config $config, Logger $logger)
     {
-        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled, 'блокировка, если User-Agent отсутствуте или пустой');
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
         $this->action = $config->init($this->modulName, 'action', $this->action, 'ALLOW - разрешить, SKIP - ничего не делать');
         $this->minLength = $config->init($this->modulName, 'min_length', $this->minLength, 'минимальная длина user-agent');
         $this->maxLength = $config->init($this->modulName, 'max_length', $this->maxLength, 'максимальная длина user-agent');
