@@ -27,6 +27,7 @@ class WAFSystem
     public $GrayList;
     public $HTTPChecker;
     public $MobileChecker;
+    public $IFrameChecker;
 
     public function __construct()
     {
@@ -39,20 +40,21 @@ class WAFSystem
         $this->Profile = Profile::getInstance($this->Config);
         $this->Logger = new Logger($this->Config, $this->Profile);
 
+        $this->GrayList = new GrayList($this->Config, $this->Logger);
+        $this->Marker = new Marker($this->Config, $this->Profile, $this->Logger);
+        $this->Template = new Template($this->Config, $this->Profile, $this->Logger);
 
         $this->BlackLiskIP = new BlackListIP($this->Config, $this->Logger);
         $this->WhiteListIP = new WhiteListIP($this->Config, $this->Logger);
-        $this->UserAgentChecker = new UserAgentChecker($this->Config, $this->Logger);
-        $this->RequestChecker = new RequestChecker($this->Config, $this->Logger);
-        $this->Marker = new Marker($this->Config, $this->Profile, $this->Logger);
-        $this->Template = new Template($this->Config, $this->Profile, $this->Logger);
         $this->IndexBot = new IndexBot($this->Config, $this->Profile, $this->Logger);
-        $this->TorChecker = new TorChecker($this->Config, $this->Logger);
+        $this->RequestChecker = new RequestChecker($this->Config, $this->Logger);
         $this->RefererChecker = new RefererChecker($this->Config, $this->Logger);
+        $this->UserAgentChecker = new UserAgentChecker($this->Config, $this->Logger);
+        $this->TorChecker = new TorChecker($this->Config, $this->Logger);
         $this->FingerPrint = new FingerPrint($this->Config, $this->Logger);
-        $this->GrayList = new GrayList($this->Config, $this->Logger);
         $this->HTTPChecker = new HTTPChecker($this->Config, $this->Logger);
         $this->MobileChecker = new MobileChecker($this->Config, $this->Logger);
+        $this->IFrameChecker = new IFrameChecker($this->Config, $this->Logger);
     }
 
     public function run()
@@ -247,9 +249,20 @@ class WAFSystem
         }
 
         # Проверка для iframe
-        if ($this->Config->init('checks', 'iframe', false, 'блокировать если открытие во if-frame') && $data['mainFrame'] != true) {
-            $this->Logger->log("Open in frame");
-            $Api->endJSON('block');
+        if ($this->IFrameChecker->enabled) {
+            if ($this->IFrameChecker->Checking($data['mainFrame'])) {
+                if ($this->IFrameChecker->action == 'BLOCK') {
+                    $this->Logger->log("IFrame blocked");
+                    $Api->endJSON('block');
+                } 
+                elseif ($this->IFrameChecker->action == 'CAPTCHA') {
+                    $this->Logger->log("IFrame captcha");
+                    $Api->endJSON('captcha');
+                }
+                else {
+                    $this->Logger->log("IFrame skipped");
+                }
+            }
         }
 
         /* 
@@ -285,18 +298,15 @@ class WAFSystem
 
         if ($this->BlackLiskIP->enabled) {
             if ($this->BlackLiskIP->isIPv6($this->Profile->IP)) {
-                if($this->BlackLiskIP->ipv6 == 'BLOCK') {
+                if ($this->BlackLiskIP->ipv6 == 'BLOCK') {
                     $this->Logger->log("IPv6 blocked");
                     $Api->endJSON('block');
-                }
-                elseif($this->BlackLiskIP->ipv6 == 'CAPTCHA') {
+                } elseif ($this->BlackLiskIP->ipv6 == 'CAPTCHA') {
                     $this->Logger->log("IPv6 captcha");
                     $Api->endJSON('captcha');
-                } 
-                else {
+                } else {
                     $this->Logger->log("IPv6 skipped");
                 }
-                
             }
         }
 

@@ -9,6 +9,8 @@ if (basename($reuest_uri) != 'xhr.php') { // нужно для совмести�
     try {
         $antiBot = new \WAFSystem\WAFSystem();
 
+        $antiBot->IFrameChecker->HeaderBlock(); // блокировка отображения во IFrame
+
         if (isset($_GET['awafblock'])) // url блокировки через JS
             $antiBot->Template->showBlockPage();
 
