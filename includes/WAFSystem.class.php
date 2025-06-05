@@ -83,9 +83,16 @@ class WAFSystem
 
 
         // 1. Проверка URL в белом списке
-        if ($this->RequestChecker->isListed($this->Profile->REQUEST_URI)) {
-            $this->Logger->log("REQUEST_URI whitelist");
-            return true;
+        if ($this->RequestChecker->enabled) {
+            if ($this->RequestChecker->isListed($this->Profile->REQUEST_URI)) {
+                if ($this->RequestChecker->action == 'ALLOW') {
+                    $this->Logger->log("REQUEST_URI allowed");
+                    return true;
+                }
+                else {
+                    $this->Logger->log("REQUEST_URI skipped");
+                }
+            }
         }
 
         // 2. Проверка IP в черном списке

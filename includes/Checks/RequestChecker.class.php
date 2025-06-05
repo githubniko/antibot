@@ -4,34 +4,23 @@ namespace WAFSystem;
 class RequestChecker extends ListBase
 {
     public $listName = 'whitelist_url';
+    public $enabled = true;
+    public $action = 'ALLOW';
+
+    private $modulName = 'request_checker';
 
     public function __construct(Config $config, Logger $logger)
     {
-        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
+        $this->action = $config->init($this->modulName, 'action', $this->action, 'ALLOW - разрешить, SKIP - ничего не делать');
+
+        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
             $file = "lists/" . $this->listName;
-            $config->set('lists', $this->listName, $file);
+            $config->set($this->modulName, $this->listName, $file);
         }
 
         parent::__construct($file, $config, $logger);
-    }
-
-    /**
-     * Проверяет соответствие URI шаблону
-     */
-    private function matchPattern($pattern, $uri)
-    {
-        // Экранируем слеши для регулярки
-        $pattern = str_replace('/', '\/', $pattern);
-
-        // Простая проверка на наличие спецсимволов regex
-        if (!preg_match('/[\.\*\?\+\^\$\{\}\(\)\|\[\]]/', $pattern)) {
-            // Если нет спецсимволов - простое сравнение
-            return stripos($uri, $pattern) !== false;
-        }
-
-        // Полноценная проверка по regex
-        return preg_match("/$pattern/i", $uri) === 1;
     }
 
     protected function createDefaultFileContent()
@@ -53,8 +42,7 @@ EOT;
 
     protected function Comparison($value1, $value2) 
     {
-        if ($this->matchPattern($value1, $value1))
-           return true;
-        return false;
+        $pattern = str_replace('/', '\/', $value1); // Экранируем слеши для регулярки
+        return preg_match("/$pattern/iu", $value2) === 1;
     }
 }
