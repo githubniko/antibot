@@ -5,36 +5,39 @@ namespace WAFSystem;
 class FingerPrint extends ListBase
 {
     public $listName = 'blacklist_fingerprint';
+    public $enabled = true;
+    public $addBlacklistIP = false;
+    public $action = 'BLOCK';
+
+    private $modulName = 'fingerprint_checker';
 
     public function __construct(Config $config, Logger $logger)
     {
-        $this->Config = $config;
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
+        $this->action = $config->init($this->modulName, 'action', $this->action, 'BLOCK - заблокировать, SKIP - ничего не делать');
+        $this->addBlacklistIP = $config->init($this->modulName, 'add_blacklist_ip', $this->addBlacklistIP, 'On - добавить ip в черный список, работает совместно с BLOCK');
 
-        $this->Config->init('checks', 'fingerprint', true, 'блокировка по FingerPrint');
 
-        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        // $this->Config->init('checks', 'fingerprint', true, 'блокировка по FingerPrint');
+
+        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
             $file = "lists/" . $this->listName;
-            $config->set('lists', $this->listName, $file);
+            $config->set($this->modulName, $this->listName, $file);
         }
 
         parent::__construct($file, $config, $logger);
     }
 
-    # Функция проверяет ip на индексирующего бота
-    public function isFP($fp)
+    public function Checking($fp)
     {
-        if ($this->Config->get('checks', 'fingerprint', false)) {
-            $this->Logger->log("FP:  " . $fp);
-            return $this->isListed($fp);
-        }
+        return $this->isListed($fp);
     }
 
     protected function createDefaultFileContent()
     {
         $defaultContent = <<<EOT
-# Список исключений по FINGERPRINT
-# При совпадении, ip будет добавлять с blacklist
+# Список FingerPrint
 # Символ # используется как комментарий.
 # 
 

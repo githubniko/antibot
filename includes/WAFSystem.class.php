@@ -193,6 +193,9 @@ class WAFSystem
             $Api->endJSON('block');
         }
         $this->Profile->FingerPrint = $data['fingerPrint'];
+        
+        if ($this->FingerPrint->enabled)
+            $this->Logger->log("FP:  " . $this->Profile->FingerPrint);
 
         # Запрос по событию Закрыл страницу или вкладку
         if ($data['func'] == 'win-close') {
@@ -215,9 +218,18 @@ class WAFSystem
         **/
 
         # Блокировка по FingerPrint
-        if ($this->FingerPrint->isFP($this->Profile->FingerPrint)) {
-            $this->BlackLiskIP->add($this->Profile->IP, 'FP ' . $this->Profile->FingerPrint);
-            $Api->endJSON('block');
+        if ($this->FingerPrint->enabled) {
+            if ($this->FingerPrint->Checking($this->Profile->FingerPrint)) {
+                if ($this->FingerPrint->action == 'BLOCK') {
+                    $this->Logger->log("FingerPrint blocked");
+                    if ($this->FingerPrint->addBlacklistIP) {
+                        $this->BlackLiskIP->add($this->Profile->IP, 'FP ' . $this->Profile->FingerPrint);
+                    }
+                    $Api->endJSON('block');
+                } else {
+                    $this->Logger->log("FingerPrint skipped");
+                }
+            }
         }
 
         # Проверка для iframe
