@@ -144,7 +144,7 @@ class CSRF
 
         // Проверка поддержки кук
         if (empty($_COOKIE[session_name()])) {
-            throw new \RuntimeException('Cookies are disabled, or session cookie not set, iframe cross domain');
+            throw new \RuntimeException('Cookies are disabled, or session cookie not set');
         }
     }
 }

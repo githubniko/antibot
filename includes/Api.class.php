@@ -47,6 +47,11 @@ class Api
             $this->endJSON('ok');
         }
 
+        if (empty($_COOKIE[session_name()] && $this->data['mainFrame'] == false)) { // если сессия отсутствует и запуск в iframe
+            $this->WAFSystem->Logger->log("IFrame cross domain: ". $this->data['document']['referrer']);
+            $this->endJSON('fail');
+        }
+
         try {
             $this->CSRF->validCSRF($this->data['csrf_token'], $_SERVER['REQUEST_METHOD']);
         } catch (Exception $e) {

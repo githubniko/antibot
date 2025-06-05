@@ -167,7 +167,8 @@ function checkBot(func) {
 
 	let obj = {
 		func: func == undefined ? 'csrf_token' : func,
-		csrf_token: CSRF
+		csrf_token: CSRF,
+		mainFrame: window.top === window.self,
 	};
 
 	if (func !== undefined) {
@@ -186,7 +187,6 @@ function checkBot(func) {
 			pixelDepth: window.screen.pixelDepth,
 			java: window.java ? 1 : 0,
 			referer: document.referrer,
-			mainFrame: window.top === window.self,
 			document: getObjectBrowser(document),
 			window: getObjectBrowser(window),
 			navigator: getObjectBrowser(navigator),
