@@ -14,7 +14,7 @@ class HTTPChecker
     {
         $this->Config = $config;
 
-        $this->enabled = $this->Config->init('checks', 'http_checker', $this->enabled, 'проверка версии HTTP-протокола');
+        $this->enabled = $this->Config->init('http_checker', 'enabled', $this->enabled, 'проверка версии HTTP-протокола');
         $this->protocols = $this->Config->init('http_checker', 'protocols', ['HTTP/1.0'], 'перечисления протоколов через запятую, HTTP/1.0,HTTP/1.1');
         $this->action = $this->Config->init('http_checker', 'action', $this->action, 'CAPTCHA - капча, BLOCK - заблокировать, SKIP - ничего не делать');
         $this->addBlacklistIP = $this->Config->init('http_checker', 'add_blacklist_ip', $this->addBlacklistIP, 'On - добавить ip в черный список, работает совместно с BLOCK');
