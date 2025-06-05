@@ -27,7 +27,7 @@ class Api
             $this->endJSON('fail');
         }
         $this->data = json_decode($input, true);
-
+        
         if (empty($this->data)) {
             $message = "Error: Data is empty";
             $this->WAFSystem->Logger->log($message, [static::class]);
@@ -47,7 +47,7 @@ class Api
             $this->endJSON('ok');
         }
 
-        if (empty($_COOKIE[session_name()] && $this->data['mainFrame'] == false)) { // если сессия отсутствует и запуск в iframe
+        if (empty($_COOKIE[session_name()]) && $this->data['mainFrame'] !== true) { // если сессия отсутствует и запуск в iframe
             $this->WAFSystem->Logger->log("IFrame cross domain: ". $this->data['document']['referrer']);
             $this->endJSON('fail');
         }
