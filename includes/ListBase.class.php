@@ -86,7 +86,7 @@ abstract class ListBase
                 $lineValue = $this->extractFromLine($line);
                 if (!empty($lineValue)) {
                     if ($this->Comparison($lineValue, $value)) {
-                        $this->Logger->log("Value found in list: ". $lineValue ." (" . $this->path .")");
+                        $this->Logger->log("Value found in list: ". $lineValue ." (" . $this->path .")", [static::class]);
                         return true;
                     }
                 }
