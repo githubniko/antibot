@@ -4,14 +4,14 @@ namespace WAFSystem;
 class GrayList extends ListBase
 {
     public $listName = 'graylist';
+    private $modulName = 'main';
 
     public function __construct(Config $config, Logger $logger)
     {
-
-        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
             $file = "lists/" . $this->listName;
-            $config->set('lists', $this->listName, $file);
+            $config->set($this->modulName, $this->listName, $file);
         }
 
         parent::__construct($file, $config, $logger);
