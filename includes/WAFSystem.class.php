@@ -69,7 +69,7 @@ class WAFSystem
     {
         $clientIp = $this->Profile->IP;
         if (PHP_SAPI === 'cli') { // разрешаем локальный запуск PHP
-            $this->Logger->log("Script is run from the command line: ". $_SERVER['PHP_SELF']);
+            $this->Logger->log("Script is run from the command line: " . $_SERVER['PHP_SELF']);
             return true;
         }
 
@@ -105,17 +105,18 @@ class WAFSystem
         }
 
         // Пропускаем посетителей с Прямым заходом
-        if ($this->RefererChecker->isDirect($this->Profile->Referer, 'ALLOW')) {
-            $this->Logger->log("Direct entry permitted");
-            $this->Marker->set();
-            return true;
-        }
-
-        // Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
-        if ($this->RefererChecker->isReferer($this->Profile->Referer, 'ALLOW')) {
-            $this->Logger->log("HTTP_REFERER allowed");
-            $this->Marker->set();
-            return true;
+        if ($this->RefererChecker->enabled) {
+            if ($this->RefererChecker->isDirect($this->Profile->Referer, 'ALLOW')) {
+                $this->Logger->log("DIRECT allowed");
+                $this->Marker->set();
+                return true;
+            }
+            // Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
+            if ($this->RefererChecker->isReferer($this->Profile->Referer, 'ALLOW')) {
+                $this->Logger->log("HTTP_REFERER allowed");
+                $this->Marker->set();
+                return true;
+            }
         }
 
         // 5. Проверка User-Agent
@@ -140,14 +141,13 @@ class WAFSystem
                         $this->BlackLiskIP->add($clientIp, $this->Profile->HttpVersion);
                     }
                     $this->Template->showBlockPage();
-                }
-                else {} // SKIP
-            } 
-            else {} // SKIP
+                } else {
+                } // SKIP
+            } else {
+            } // SKIP
         }
 
         if ($this->Config->get('checks', 'useragent', false)) {
-            
         }
 
         // 7. Проверка поисковых ботов
@@ -165,10 +165,10 @@ class WAFSystem
                         $this->BlackLiskIP->add($clientIp, $this->Profile->HttpVersion);
                     }
                     $this->Template->showBlockPage();
-                }
-                else {} // SKIP
-            } 
-            else {} // SKIP
+                } else {
+                } // SKIP
+            } else {
+            } // SKIP
         }
 
         return false;
@@ -242,7 +242,7 @@ class WAFSystem
                 }
             }
         }
-        
+
         /* 
         * CAPTCHA
         **/
@@ -271,15 +271,16 @@ class WAFSystem
         }
 
         # Показ капчи для Прямых заходов
-        if ($this->RefererChecker->isDirect($data['referer'], 'CAPTCHA')) {
-            $this->Logger->log("Show captcha for direct transition");
-            $Api->endJSON('captcha');
-        }
-
-        # Показ капчи для Прямых заходов
-        if ($this->RefererChecker->isReferer($data['referer'], 'CAPTCHA')) {
-            $this->Logger->log("Show captcha if there is a referrer");
-            $Api->endJSON('captcha');
+        if ($this->RefererChecker->enabled) {
+            if ($this->RefererChecker->isDirect($data['referer'], 'CAPTCHA')) {
+                $this->Logger->log("Show captcha for DIRECT");
+                $Api->endJSON('captcha');
+            }
+            # Показ капчи для Прямых заходов
+            if ($this->RefererChecker->isReferer($data['referer'], 'CAPTCHA')) {
+                $this->Logger->log("Show captcha if there is a REFERRER");
+                $Api->endJSON('captcha');
+            }
         }
 
         $this->Logger->log("Passed all filters");

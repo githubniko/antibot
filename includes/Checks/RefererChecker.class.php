@@ -1,28 +1,35 @@
 <?php
+
 namespace WAFSystem;
 
 class RefererChecker
 {
-    private $Config;
+    public $enabled = true;
+    public $direct = 'CAPTCHA';
+    public $referer = 'ALLOW';
+
+    private $modulName = 'referer_checker';
+    private $HTTP_HOST = '';
+
 
     public function __construct(Config $config, Logger $logger)
     {
-        $this->Config = $config;
-
-        $config->init('checks', 'direct', 'CAPTCHA', 'ALLOW - разрешить прямые заходы, CAPTCHA - капча, SKIP - пропустить правило');
-        $config->init('checks', 'referer', 'ALLOW', 'ALLOW - разрешить при наличии реферера, CAPTCHA - капча, SKIP - пропустить правило');
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
+        $this->direct = $config->init($this->modulName, 'direct', 'CAPTCHA', 'ALLOW - разрешить прямые заходы, CAPTCHA - капча, SKIP - пропустить правило');
+        $this->referer = $config->init($this->modulName, 'referer', 'ALLOW', 'ALLOW - разрешить при наличии реферера, CAPTCHA - капча, SKIP - пропустить правило');
+        $this->HTTP_HOST = $config->HTTP_HOST;
     }
 
     public function isDirect($referer, $action = 'ALLOW')
     {
-        return $this->Config->get('checks', 'direct') == $action
-            && (empty($referer) || mb_eregi("^http(s*):\/\/" . $this->Config->HTTP_HOST, $referer));
+        return $this->direct == $action
+            && (empty($referer) || mb_eregi("^http(s*):\/\/" . $this->HTTP_HOST, $referer));
     }
 
     public function isReferer($referer, $action = 'ALLOW')
     {
         return
-            $this->Config->get('checks', 'referer') == $action
-            && (!empty($referer) && !mb_eregi("^http(s*):\/\/" . $this->Config->HTTP_HOST, $referer));
+            $this->referer == $action
+            && (!empty($referer) && !mb_eregi("^http(s*):\/\/" . $this->HTTP_HOST, $referer));
     }
 }
