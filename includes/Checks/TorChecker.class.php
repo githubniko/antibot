@@ -4,28 +4,31 @@ namespace WAFSystem;
 class TorChecker extends ListBase
 {
     public $listName = 'blacklist_tor';
+
+    private $modulName = 'tor_checks';
     private $cacheTime; // int Время жизни кэша в секундах (по умолчанию 3600)
     private $timeout = 2; // int Таймаут запроса в секундах (по умолчанию 2)
     private $url = 'https://www.dan.me.uk/torlist/?exit'; // Список загружаемых листов для HTTP-метода
     public $enabled = false;
     public $action = 'BLOCK';
+    
 
     public function __construct(Config $config, Logger $logger, $cacheTime = 3600)
     {
         $this->Config = $config;
         $this->cacheTime = $cacheTime;
 
-        $this->enabled = $this->Config->init('tor_checks', 'enabled', $this->enabled, 'блокировать вход с ip tor-сетей');
-        $this->action = $this->Config->init('tor_checks', 'action', $this->action, 'CAPTCHA - капча, BLOCK - заблокировать, SKIP - пропустить правило');
-        $this->url = $this->Config->init('tor_checks', 'url', $this->url, 'список загружаемых листов для HTTP-метода');
-        $this->timeout = $this->Config->init('tor_checks', 'timeout', $this->timeout, 'таймаут ожидания ответа в секундах');
-        $this->cacheTime = $this->Config->init('tor_checks', 'cache_time', $this->cacheTime, 'секунд, интервал обновления списка');
+        $this->enabled = $this->Config->init($this->modulName, 'enabled', $this->enabled, 'блокировать вход с ip tor-сетей');
+        $this->action = $this->Config->init($this->modulName, 'action', $this->action, 'CAPTCHA - капча, BLOCK - заблокировать, SKIP - пропустить правило');
+        $this->url = $this->Config->init($this->modulName, 'url', $this->url, 'список загружаемых листов для HTTP-метода');
+        $this->timeout = $this->Config->init($this->modulName, 'timeout', $this->timeout, 'таймаут ожидания ответа в секундах');
+        $this->cacheTime = $this->Config->init($this->modulName, 'cache_time', $this->cacheTime, 'секунд, интервал обновления списка');
 
 
-        $file = ltrim($config->get('lists', $this->listName, ''), "/\\");
+        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
             $file = "lists/" . $this->listName;
-            $config->set('lists', $this->listName, $file);
+            $config->set($this->modulName, $this->listName, $file);
         }
 
         parent::__construct($file, $config, $logger);
@@ -60,9 +63,6 @@ EOT;
 
     public function isTor($ip)
     {
-        if (!$this->Config->get('checks', 'tor', false))
-            return;
-
         $result = false;
 
         # Обновления списка TOR-адресов
