@@ -97,7 +97,9 @@ class SysUpdate
         $zipFile = $baseDir . "/{$this->repoName}-{$this->branch}.zip";
 
 
-        $zipContent = file_get_contents(is_file($zipFile) ? $zipFile : $zipUrl);
+        $curl = new \Utility\Curl();
+        $zipContent = $curl->fetch(is_file($zipFile) ? $zipFile : $zipUrl);
+
         if ($zipContent === false) {
             $this->Logger->log("Не удалось скачать архив с GitHub.", [static::class]);
             return false;
