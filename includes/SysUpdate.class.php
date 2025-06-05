@@ -42,6 +42,7 @@ class SysUpdate
                 }
             }
             $this->Config->set('sysupdate', 'enabled', 'Off');
+            $this->Config->set('sysupdate', 'version', file_get_contents($this->Config->BasePath . 'VERSION'));
             $this->Logger->log("End upgrade", [static::class]);
             $lock->Unlock();
         }
