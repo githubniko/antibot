@@ -207,7 +207,7 @@ function checkBot(func) {
 	xhr.open('POST', HTTP_ANTIBOT_PATH + 'xhr.php', true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
 
-	xhr.onload = function () {
+	xhr.onload = async function () {
 		if (xhr.status >= 200 && xhr.status < 300) {
 			var data = JSON.parse(xhr.responseText);
 
@@ -221,6 +221,12 @@ function checkBot(func) {
 				loadScript('js/fp.min.js', initFingerPrint);
 			}
 			else if (data.status == 'captcha') {
+				lspinner.style.display = "none";
+				form.style.display = "grid";
+				blockInput.style.display = "none";
+				blockVerifying.style.display = "";
+
+				// loadScript('js/benchmark.js', null);
 				displayCaptcha();
 			}
 			else if (data.status == 'allow') {
@@ -310,6 +316,9 @@ function ymc(metrika, ip) {
 		});
 	} catch (e) { }
 }
+
+
+
 if (METRIKA_ID != '') {
 	ymc(METRIKA_ID, REMOTE_ADDR);
 }
