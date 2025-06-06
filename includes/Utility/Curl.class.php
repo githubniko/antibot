@@ -12,6 +12,7 @@ class Curl
     {
         $this->timeout = $timeout;
         $this->verifySsl = $verifySsl;
+
         $this->curlOptions = [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
@@ -24,6 +25,22 @@ class Curl
             CURLOPT_USERAGENT => 'AntibotWAF/2.0',
             CURLOPT_FAILONERROR => true,
         ];
+
+        # Указываем CA-сертификат для CGI режима
+        if (PHP_SAPI != 'apache2handler ') {
+            $caPaths = [
+                '/etc/ssl/certs/ca-certificates.crt',    // Ubuntu/Debian
+                '/etc/pki/tls/certs/ca-bundle.crt',      // RHEL/CentOS
+                '/usr/local/etc/openssl/cert.pem',        // macOS (Homebrew)
+            ];
+
+            foreach ($caPaths as $path) {
+                if (file_exists($path)) {
+                    $this->curlOptions[CURLOPT_CAINFO] = $path;
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -37,13 +54,16 @@ class Curl
     public function fetch($url, $headers = [])
     {
         $len = 51; // длина сокращения url (для логирования)
-        $urlShort = strlen($url) <= $len ? substr($url, 0, $len). '...' : $url;
-        
+        $urlShort = strlen($url) <= $len ? substr($url, 0, $len) . '...' : $url;
+
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new \InvalidArgumentException("Invalid URL provided ". $urlShort);
+            throw new \InvalidArgumentException("Invalid URL provided " . $urlShort);
         }
 
         $ch = curl_init();
+        $verboseStream = fopen('php://temp', 'w+');
+        curl_setopt($ch, CURLOPT_VERBOSE, true);
+        curl_setopt($ch, CURLOPT_STDERR, $verboseStream);
 
         try {
             $options = $this->curlOptions + [
@@ -56,21 +76,28 @@ class Curl
             $response = curl_exec($ch);
 
             if ($response === false) {
+                rewind($verboseStream);
+                $debug = stream_get_contents($verboseStream);
+
                 $error = curl_error($ch);
                 $errno = curl_errno($ch);
                 throw new \RuntimeException(
-                    sprintf('curl %s: [%d] %s', $urlShort, $errno, $error),
+                    sprintf("curl %s: [%d] %s\n" . $debug, $urlShort, $errno, $error),
                     $errno
                 );
             }
 
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($httpCode >= 400) {
+                rewind($verboseStream);
+                $debug = stream_get_contents($verboseStream);
                 throw new \RuntimeException(
-                    sprintf('curl %s HTTP error %d: %s', $urlShort, $httpCode, $response),
+                    sprintf("curl %s HTTP error %d: %s\n" . $debug, $urlShort, $httpCode, $response),
                     $httpCode
                 );
             }
+
+
 
             return $response;
         } finally {

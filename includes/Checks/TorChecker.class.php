@@ -1,4 +1,5 @@
 <?php
+
 namespace WAFSystem;
 
 class TorChecker extends ListBase
@@ -6,23 +7,20 @@ class TorChecker extends ListBase
     public $listName = 'blacklist_tor';
 
     private $modulName = 'tor_checks';
-    private $cacheTime; // int Время жизни кэша в секундах (по умолчанию 3600)
+    private $cacheTime = 14400; // int Время жизни кэша в секундах (по умолчанию 14400)
     private $timeout = 2; // int Таймаут запроса в секундах (по умолчанию 2)
     private $url = 'https://www.dan.me.uk/torlist/?exit'; // Список загружаемых листов для HTTP-метода
     public $enabled = false;
     public $action = 'BLOCK';
-    
 
-    public function __construct(Config $config, Logger $logger, $cacheTime = 3600)
+
+    public function __construct(Config $config, Logger $logger)
     {
-        $this->Config = $config;
-        $this->cacheTime = $cacheTime;
-
-        $this->enabled = $this->Config->init($this->modulName, 'enabled', $this->enabled, 'блокировать вход с ip tor-сетей');
-        $this->action = $this->Config->init($this->modulName, 'action', $this->action, 'CAPTCHA - капча, BLOCK - заблокировать, SKIP - пропустить правило');
-        $this->url = $this->Config->init($this->modulName, 'url', $this->url, 'список загружаемых листов для HTTP-метода');
-        $this->timeout = $this->Config->init($this->modulName, 'timeout', $this->timeout, 'таймаут ожидания ответа в секундах');
-        $this->cacheTime = $this->Config->init($this->modulName, 'cache_time', $this->cacheTime, 'секунд, интервал обновления списка');
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled, 'блокировать вход с ip tor-сетей');
+        $this->action = $config->init($this->modulName, 'action', $this->action, 'CAPTCHA - капча, BLOCK - заблокировать, SKIP - пропустить правило');
+        $this->url = $config->init($this->modulName, 'url', $this->url, 'список загружаемых листов для HTTP-метода');
+        $this->timeout = $config->init($this->modulName, 'timeout', $this->timeout, 'таймаут ожидания ответа в секундах');
+        $this->cacheTime = $config->init($this->modulName, 'cache_time', $this->cacheTime, 'секунд, интервал обновления списка');
 
 
         $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
@@ -133,6 +131,11 @@ EOT;
     private function DownloadList()
     {
         $Curl = new \Utility\Curl($this->timeout);
-        return $Curl->fetch($this->url);
+        try {
+            $res =  $Curl->fetch($this->url);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+        return $res;
     }
 }
