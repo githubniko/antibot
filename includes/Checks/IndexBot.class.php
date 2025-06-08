@@ -55,7 +55,6 @@ class IndexBot extends ListBase
     {
         $defaultContent = <<<EOT
 # Список PTR индексирующих роботов. Указывается домен первого уровня.
-# IP-адреса автоматически добавляются в whilelist для улучшения производительности.
 
 yandex.ru
 googlebot.com
