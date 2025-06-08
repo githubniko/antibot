@@ -147,21 +147,6 @@ class WAFSystem
                     return true;
                 }
             }
-
-            if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
-                if ($this->HTTPChecker->action == 'BLOCK') {
-                    $this->Logger->log("Version HTTP blocked");
-                    if ($this->HTTPChecker->addBlacklistIP) {
-                        $this->BlackLiskIP->add($clientIp, $this->Profile->HttpVersion);
-                    }
-                    $this->Template->showBlockPage();
-                } else {
-                } // SKIP
-            } else {
-            } // SKIP
-        }
-
-        if ($this->Config->get('checks', 'useragent', false)) {
         }
 
         // 7. Проверка поисковых ботов
@@ -181,10 +166,10 @@ class WAFSystem
                         $this->BlackLiskIP->add($clientIp, $this->Profile->HttpVersion);
                     }
                     $this->Template->showBlockPage();
-                } else {
-                } // SKIP
-            } else {
-            } // SKIP
+                } else if($this->HTTPChecker->action == 'SKIP') {
+                    $this->Logger->log("Version HTTP skipped");
+                }
+            }
         }
 
         return false;
