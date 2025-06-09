@@ -53,8 +53,6 @@ EOT;
 
     protected function Comparison($value1, $value2) 
     {
-        if (inet_pton($value1) === inet_pton($value2))
-           return true;
-        return false;
+        return \Utility\Network::isInRange($value2, $value1);
     }
 }
