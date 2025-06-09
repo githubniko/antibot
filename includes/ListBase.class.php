@@ -7,7 +7,7 @@ namespace WAFSystem;
  */
 abstract class ListBase
 {
-    protected $absolutePath; 
+    protected $absolutePath;
     protected $path; // путь от корня проекта
     protected $listName; // название листа в конфиг-файле
     protected $Config;
@@ -25,7 +25,7 @@ abstract class ListBase
     }
 
     /**
-     * Проверяет наличие заначения в листе
+     * Проверяет наличие значения в листе
      */
     public function isListed($value)
     {
@@ -33,7 +33,7 @@ abstract class ListBase
             $this->Logger->log("Error: The value '$value' failed validation", [static::class]);
             return false;
         }
-        
+
         return $this->checkInList($value);
     }
 
@@ -47,8 +47,8 @@ abstract class ListBase
             return;
         }
 
-        if ($this->isListed($value)) {            
-            return; 
+        if ($this->isListed($value)) {
+            return;
         }
 
         $entry = $this->formatEntry($value, $comment);
@@ -62,7 +62,7 @@ abstract class ListBase
      */
     protected function formatEntry($value, $comment)
     {
-        return $value . (empty($comment) ? '' : " # ".date("Y-m-d H:i:s").' '. trim($comment)) . PHP_EOL;
+        return $value . (empty($comment) ? '' : " # " . date("Y-m-d H:i:s") . ' ' . trim($comment)) . PHP_EOL;
     }
 
     /**
@@ -86,7 +86,7 @@ abstract class ListBase
                 $lineValue = $this->extractFromLine($line);
                 if (!empty($lineValue)) {
                     if ($this->Comparison($lineValue, $value)) {
-                        $this->Logger->log("Value found in list: ". $lineValue ." (" . $this->path .")", [static::class]);
+                        $this->Logger->log("Value found in list: " . $lineValue . " (" . $this->path . ")", [static::class]);
                         return true;
                     }
                 }
@@ -113,12 +113,20 @@ abstract class ListBase
     protected function initListFile()
     {
         if (!file_exists($this->absolutePath)) {
-            $defaultContent = $this->createDefaultFileContent();
-            file_put_contents($this->absolutePath, $defaultContent);
+            $this->saveListFile();
             $this->Logger->logMessage("New list file created: " . $this->absolutePath);
 
             $this->eventInitListFile();
         }
+    }
+
+    /**
+     * Записывает данные в лист
+     */
+    protected function saveListFile()
+    {
+        $defaultContent = $this->createDefaultFileContent();
+        file_put_contents($this->absolutePath, $defaultContent);
     }
 
     /**
@@ -144,8 +152,11 @@ abstract class ListBase
     }
 
     protected function eventInitListFile() {} // Событие срабатывает после создании файла листа. Нужно, если требуется сделать первую запись в лист сразу после создания, например внести белые ip-адреса серверов
-    protected function validate($value) { return true; } // Проверяет извеченное из листа значение
+    protected function validate($value)
+    {
+        return true;
+    } // Проверяет извеченное из листа значение
 
     abstract protected function createDefaultFileContent(); // Метод для первоначального заполнения листа, например примерами/шаблонами
-    
+
 }

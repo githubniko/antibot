@@ -22,7 +22,6 @@ class TorChecker extends ListBase
         $this->timeout = $config->init($this->modulName, 'timeout', $this->timeout, 'таймаут ожидания ответа в секундах');
         $this->cacheTime = $config->init($this->modulName, 'cache_time', $this->cacheTime, 'секунд, интервал обновления списка');
 
-
         $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
             $file = "lists/" . $this->listName;
@@ -34,16 +33,13 @@ class TorChecker extends ListBase
 
     protected function createDefaultFileContent()
     {
-        # Загружаем начальную версию TOR-адресов
+        # Загружаем списки TOR
         try {
             $defaultContent = $this->DownloadList();
         } catch (\Exception $e) {
-            $this->Logger->log($e->getMessage(), [static::class]);
-            $defaultContent = <<<EOT
-# TOR список IP-адресов (автоматическое обновление)
-
-EOT;
+            throw $e;
         }
+
         return $defaultContent;
     }
 
@@ -64,28 +60,32 @@ EOT;
         $result = false;
 
         # Обновления списка TOR-адресов
-        try {
-            if (!file_exists($this->absolutePath)) {
-                # Создаем файл листа, если не существует
-                $this->createDefaultFileContent();
-                $this->initListFile();
-            } else {
-                # Пересоздаем, если устарел
-                $cacheTime = filemtime($this->absolutePath);
+        $cacheTime = @filemtime($this->absolutePath);
+        $isFile = is_file($this->absolutePath);
 
-                if (time() - $cacheTime > $this->cacheTime) {
-                    $this->createDefaultFileContent();
-                    $this->initListFile();
-                }
+        try {
+            if (
+                !$isFile || // для первого запуска
+                ($isFile && time() - $cacheTime > $this->cacheTime) // для обновления
+            ) {
+                $this->createDefaultFileContent();
+                $this->saveListFile();
             }
-            $result = $this->isListed($ip);
         } catch (\Exception $e) {
-            $this->Logger->log("HTTP method error", [static::class]);
-            # Пробуем DNS метод, есть HTTP не сработал
+            $this->Logger->log("HTTP method error: " . $e->getMessage(), [static::class]);
+            $new_time = time();
+            touch($this->absolutePath, $new_time, $new_time); // изменяем время файла, чтобы не было частых обращений к серверу списков
+        }
+
+        # Если файл содержит данные, то проверяем по нему
+        if (is_file($this->absolutePath) && filesize($this->absolutePath) > 200) { // Если файл пуст, то
+            $result = $this->isListed($ip);
+        } else {
+            # Пробуем DNS метод
             try {
                 $result = $this->checkViaDns($ip, $this->timeout);
             } catch (\Exception $e) {
-                throw new \Exception("All Tor check methods failed: (" . $e->getMessage() . ")");
+                $this->Logger->log("All Tor check methods failed: (" . $e->getMessage() . ")");
             }
         }
 
@@ -109,14 +109,19 @@ EOT;
             $reversedIp = implode('.', array_reverse(explode('.', $ip)));
             $dnsQuery = $reversedIp . '.dnsel.torproject.org';
 
+            $cacheDir = $this->Config->CachePath . 'dnstor';
+            $driver = new \DnsCache\FileCacheDriver($cacheDir);
+            $Dns = new \DnsCache\DnsCache($driver);
+
             try {
-                $records = dns_get_record($dnsQuery, DNS_A);
+                $records = $Dns->getRecord($dnsQuery, DNS_A);
 
                 if (!empty($records) && isset($records[0]['ip']) && $records[0]['ip'] === '127.0.0.2') {
                     return true;
                 }
             } catch (\Exception $e) {
-                throw "Error: DNS is not available ";
+                throw $e;
+                // throw new Exception("Error: DNS is not available ");
             }
 
             return false;
@@ -131,11 +136,7 @@ EOT;
     private function DownloadList()
     {
         $Curl = new \Utility\Curl($this->timeout);
-        try {
-            $res =  $Curl->fetch($this->url);
-        } catch (\Exception $e) {
-            throw $e;
-        }
+        $res = $Curl->fetch($this->url);
         return $res;
     }
 }
