@@ -12,11 +12,13 @@ abstract class ListBase
     protected $listName; // название листа в конфиг-файле
     protected $Config;
     protected $Logger;
+    protected $Lock;
 
     public function __construct($pathFile, Config $config, Logger $logger)
     {
         $this->Config = $config;
         $this->Logger = $logger;
+        $this->Lock = new Lock($this->Config->BasePath . '.' . $this->listName . '.lock');
 
         $this->absolutePath = $config->BasePath . $pathFile;
         $this->path = $pathFile;
@@ -42,19 +44,25 @@ abstract class ListBase
      */
     public function add($value, $comment = '')
     {
-        if (!$this->validate($value)) {
-            $this->Logger->log("Error: The value '$value' failed validation", [static::class]);
-            return;
+        $this->Lock->Lock();
+        try {
+            if (!$this->validate($value)) {
+                $this->Logger->log("Error: The value '$value' failed validation", [static::class]);
+                return;
+            }
+
+
+            if ($this->isListed($value)) {
+                return;
+            }
+
+            $entry = $this->formatEntry($value, $comment);
+            $this->saveEntry($entry);
+
+            $this->Logger->logMessage("Value added to list: " . $value . " (" . $this->path . ")");
+        } finally {
+            $this->Lock->Unlock();
         }
-
-        if ($this->isListed($value)) {
-            return;
-        }
-
-        $entry = $this->formatEntry($value, $comment);
-        $this->saveEntry($entry);
-
-        $this->Logger->logMessage("Value added to list: " . $value . " (" . $this->path . ")");
     }
 
     /**
@@ -112,11 +120,16 @@ abstract class ListBase
      */
     protected function initListFile()
     {
-        if (!file_exists($this->absolutePath)) {
-            $this->saveListFile();
-            $this->Logger->logMessage("New list file created: " . $this->absolutePath);
+        $this->Lock->Lock();
+        try {
+            if (!file_exists($this->absolutePath)) {
+                $this->saveListFile();
+                $this->Logger->logMessage("New list file created: " . $this->absolutePath);
 
-            $this->eventInitListFile();
+                $this->eventInitListFile();
+            }
+        } finally {
+            $this->Lock->Unlock();
         }
     }
 
