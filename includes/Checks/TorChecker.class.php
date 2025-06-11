@@ -2,6 +2,8 @@
 
 namespace WAFSystem;
 
+use Exception;
+
 class TorChecker extends ListBase
 {
     public $listName = 'blacklist_tor';
@@ -37,7 +39,8 @@ class TorChecker extends ListBase
         try {
             $defaultContent = $this->DownloadList();
         } catch (\Exception $e) {
-            throw $e;
+            $this->Logger->log($e->getMessage(), [static::class]);
+            return "";
         }
 
         return $defaultContent;
@@ -68,7 +71,9 @@ class TorChecker extends ListBase
                 !$isFile || // для первого запуска
                 ($isFile && time() - $cacheTime > $this->cacheTime) // для обновления
             ) {
-                $this->createDefaultFileContent();
+                if(empty($this->createDefaultFileContent())) {
+                    throw new Exception("error download list");
+                }
                 $this->saveListFile();
             }
         } catch (\Exception $e) {

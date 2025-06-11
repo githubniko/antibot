@@ -27,7 +27,7 @@ class Curl
         ];
 
         # Указываем CA-сертификат для CGI режима
-        if (PHP_SAPI != 'apache2handler ') {
+        if (PHP_SAPI != 'apache2handler') {
             $caPaths = [
                 '/etc/ssl/certs/ca-certificates.crt',    // Ubuntu/Debian
                 '/etc/pki/tls/certs/ca-bundle.crt',      // RHEL/CentOS
@@ -35,7 +35,7 @@ class Curl
             ];
 
             foreach ($caPaths as $path) {
-                if (file_exists($path)) {
+                if ($this->fileExistsBeyondOpenBasedir($path)) {
                     $this->curlOptions[CURLOPT_CAINFO] = $path;
                     break;
                 }
@@ -105,5 +105,24 @@ class Curl
                 curl_close($ch);
             }
         }
+    }
+
+    private function fileExistsBeyondOpenBasedir($path) {
+        // Попробуем через is_readable (иногда обходит ограничения)
+        if (is_readable($path)) return true;
+        
+        // Попробуем через команду shell (если разрешено exec)
+        if (function_exists('exec')) {
+            exec("[ -r '$path' ] && echo 1 || echo 0", $output);
+            if (!empty($output) && $output[0] == '1') return true;
+        }
+        
+        // Попробуем через curl (если URL-доступен)
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            $headers = @get_headers($path);
+            return $headers && strpos($headers[0], '200') !== false;
+        }
+        
+        return false;
     }
 }
