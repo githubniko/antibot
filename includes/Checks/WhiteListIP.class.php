@@ -15,7 +15,7 @@ class WhiteListIP extends ListBase
         $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
             $file = "lists/" . $this->listName;
-            $config->set($this->modulName, $this->listName, $file);
+            $config->set($this->modulName, $this->listName, $file, 'белый список');
         }
 
         parent::__construct($file, $config, $logger);
