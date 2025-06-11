@@ -78,7 +78,6 @@ class WAFSystem
         }
 
         $this->Logger->log("" . $this->Profile->REQUEST_URI);
-        $this->Logger->log("REF: " . $this->Profile->Referer);
 
         if ($this->HTTPChecker->enabled)
             $this->Logger->log("Protocol: " . $this->Profile->HttpVersion);
@@ -120,6 +119,8 @@ class WAFSystem
 
         // Пропускаем посетителей с Прямым заходом
         if ($this->RefererChecker->enabled) {
+            $this->Logger->log("REF: " . $this->Profile->Referer);
+            
             if ($this->RefererChecker->isDirect($this->Profile->Referer, 'ALLOW')) {
                 $this->Logger->log("DIRECT allowed");
                 $this->Marker->set();
