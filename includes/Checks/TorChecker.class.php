@@ -12,6 +12,7 @@ class TorChecker extends ListBase
     private $cacheTime = 86400; // int Время жизни кэша в секундах (по умолчанию 1 сутки)
     private $timeout = 2; // int Таймаут запроса в секундах (по умолчанию 2)
     private $url = 'https://www.dan.me.uk/torlist/?exit'; // Список загружаемых листов для HTTP-метода
+
     public $enabled = false;
     public $action = 'BLOCK';
 
@@ -71,10 +72,15 @@ class TorChecker extends ListBase
                 !$isFile || // для первого запуска
                 ($isFile && time() - $cacheTime > $this->cacheTime) // для обновления
             ) {
-                if(empty($this->createDefaultFileContent())) {
-                    throw new Exception("error download list");
+                $this->Lock->Lock();
+                try {
+                    if (empty($this->createDefaultFileContent())) {
+                        throw new Exception("error download list");
+                    }
+                    $this->saveListFile();
+                } finally {
+                    $this->Lock->Unlock();
                 }
-                $this->saveListFile();
             }
         } catch (\Exception $e) {
             $this->Logger->log("HTTP method error: " . $e->getMessage(), [static::class]);
