@@ -40,7 +40,10 @@ class WhiteListIP extends ListBase
     {
         $defaultContent = <<<EOT
 # Белый список IP-адресов
-# Формат: IP # комментарий
+# Формат: 
+#  IP # комментарий
+#  IP/mask # комментарий
+#  IP-IP # комментарий
 
 EOT;
         return $defaultContent;

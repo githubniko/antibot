@@ -31,7 +31,10 @@ class BlackListIP extends ListBase
     {
         $defaultContent = <<<EOT
 # Черный список IP-адресов
-# Формат: IP # комментарий
+# Формат: 
+#  IP # комментарий
+#  IP/mask # комментарий
+#  IP-IP # комментарий
 
 EOT;
         return $defaultContent;
