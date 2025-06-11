@@ -8,7 +8,7 @@ class UserAgentChecker extends ListBase
     public $action = 'ALLOW';
     public $enabled = true;
     
-    private $modulName = 'useragent_checks';
+    private $modulName = 'useragent_checker';
     private $minLength = 5;
     private $maxLength = 512;
     

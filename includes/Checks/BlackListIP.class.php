@@ -7,7 +7,7 @@ class BlackListIP extends ListBase
     public $enabled = true;
     public $ipv6 = 'CAPTCHA';
     
-    private $modulName = 'ip_checks';
+    private $modulName = 'ip_checker';
 
     public function __construct(Config $config, Logger $logger)
     {

@@ -6,7 +6,7 @@ class WhiteListIP extends ListBase
     public $listName = 'whitelist_ip';
     public $enabled = true;
     
-    private $modulName = 'ip_checks';
+    private $modulName = 'ip_checker';
 
     public function __construct(Config $config, Logger $logger)
     {

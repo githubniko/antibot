@@ -6,7 +6,7 @@ class TorChecker extends ListBase
 {
     public $listName = 'blacklist_tor';
 
-    private $modulName = 'tor_checks';
+    private $modulName = 'tor_checker';
     private $cacheTime = 86400; // int Время жизни кэша в секундах (по умолчанию 1 сутки)
     private $timeout = 2; // int Таймаут запроса в секундах (по умолчанию 2)
     private $url = 'https://www.dan.me.uk/torlist/?exit'; // Список загружаемых листов для HTTP-метода
