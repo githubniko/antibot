@@ -66,6 +66,31 @@ abstract class ListBase
     }
 
     /**
+     * Читает список в массив
+     */
+    public function readToArray()
+    {
+        $arr = [];
+        $file = fopen($this->absolutePath, 'r');
+        if (!$file) {
+            $this->Logger->logMessage("Error reading file: " . $this->absolutePath, [static::class]);
+            return false;
+        }
+
+        try {
+            while (($line = fgets($file)) !== false) {
+                $lineValue = $this->extractFromLine($line);
+                if (!empty($lineValue)) {
+                    array_push($arr, $lineValue);
+                }
+            }
+        } finally {
+            fclose($file);
+        }
+        return $arr;
+    }
+
+    /**
      * Метод задает шаблон заполнения листа
      */
     protected function formatEntry($value, $comment)
