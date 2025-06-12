@@ -93,21 +93,6 @@ class WAFSystem
             return true;
         }
 
-        # Пропускаем посетителей с Прямыми заходом
-        if ($this->RefererChecker->enabled) {
-            $this->Logger->log("REF: " . $this->Profile->Referer);
-
-            if ($this->RefererChecker->isDirect($this->Profile->Referer, 'ALLOW')) {
-                $this->Logger->log("DIRECT allowed");
-                return true;
-            }
-            // Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
-            if ($this->RefererChecker->isReferer($this->Profile->Referer, 'ALLOW')) {
-                $this->Logger->log("HTTP_REFERER allowed");
-                return true;
-            }
-        }
-
         # Разрешенные IP
         if ($this->WhiteListIP->enabled) {
             if ($this->WhiteListIP->isListed($clientIp)) {
@@ -133,6 +118,21 @@ class WAFSystem
                     $this->Logger->log("User-Agent allowed");
                     return true;
                 }
+            }
+        }
+
+        # Пропускаем посетителей с Прямыми заходом
+        if ($this->RefererChecker->enabled) {
+            $this->Logger->log("REF: " . $this->Profile->Referer);
+
+            if ($this->RefererChecker->isDirect($this->Profile->Referer, 'ALLOW')) {
+                $this->Logger->log("DIRECT allowed");
+                return true;
+            }
+            // Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
+            if ($this->RefererChecker->isReferer($this->Profile->Referer, 'ALLOW')) {
+                $this->Logger->log("HTTP_REFERER allowed");
+                return true;
             }
         }
 
