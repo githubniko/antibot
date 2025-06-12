@@ -17,14 +17,16 @@ class UserAgentChecker extends ListBase
     {
         $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
         $this->action = $config->init($this->modulName, 'action', $this->action, 'ALLOW - разрешить, SKIP - ничего не делать');
-        $this->minLength = $config->init($this->modulName, 'min_length', $this->minLength, 'минимальная длина user-agent');
-        $this->maxLength = $config->init($this->modulName, 'max_length', $this->maxLength, 'максимальная длина user-agent');
 
         $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
             $file = "lists/" . $this->listName;
             $config->set($this->modulName, $this->listName, $file);
         }
+        
+        $this->minLength = $config->init($this->modulName, 'min_length', $this->minLength, 'минимальная длина user-agent');
+        $this->maxLength = $config->init($this->modulName, 'max_length', $this->maxLength, 'максимальная длина user-agent');
+
         parent::__construct($file, $config, $logger);
     }
 
