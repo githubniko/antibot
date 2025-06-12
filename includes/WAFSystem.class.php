@@ -28,6 +28,7 @@ class WAFSystem
     public $HTTPChecker;
     public $MobileChecker;
     public $IFrameChecker;
+    public $ASNChecker;
 
     public function __construct()
     {
@@ -55,6 +56,7 @@ class WAFSystem
         $this->HTTPChecker = new HTTPChecker($this->Config, $this->Logger);
         $this->MobileChecker = new MobileChecker($this->Config, $this->Logger);
         $this->IFrameChecker = new IFrameChecker($this->Config, $this->Logger);
+        $this->ASNChecker = new ASNChecker($this->Config, $this->Logger);
     }
 
     public function run()
@@ -103,6 +105,16 @@ class WAFSystem
             }
         }
 
+        // Проверка ASN
+        if ($this->ASNChecker->enabled) {
+            if ($this->ASNChecker->action == 'BLOCK') {
+                if ($this->ASNChecker->Checking($this->Profile->IP)) {
+                    $this->Logger->log("ASN blocked");
+                    $this->Template->showBlockPage();
+                }
+            }
+        }
+
         // 3. Проверка куки маркера
         if ($this->Marker->isValid()) {
             $this->Logger->log("Tag found");
@@ -120,7 +132,7 @@ class WAFSystem
         // Пропускаем посетителей с Прямым заходом
         if ($this->RefererChecker->enabled) {
             $this->Logger->log("REF: " . $this->Profile->Referer);
-            
+
             if ($this->RefererChecker->isDirect($this->Profile->Referer, 'ALLOW')) {
                 $this->Logger->log("DIRECT allowed");
                 $this->Marker->set();
@@ -167,7 +179,7 @@ class WAFSystem
                         $this->BlackLiskIP->add($clientIp, $this->Profile->HttpVersion);
                     }
                     $this->Template->showBlockPage();
-                } else if($this->HTTPChecker->action == 'SKIP') {
+                } else if ($this->HTTPChecker->action == 'SKIP') {
                     $this->Logger->log("Version HTTP skipped");
                 }
             }
@@ -240,12 +252,10 @@ class WAFSystem
                 if ($this->IFrameChecker->action == 'BLOCK') {
                     $this->Logger->log("IFrame blocked");
                     $Api->endJSON('block');
-                } 
-                elseif ($this->IFrameChecker->action == 'CAPTCHA') {
+                } elseif ($this->IFrameChecker->action == 'CAPTCHA') {
                     $this->Logger->log("IFrame captcha");
                     $Api->endJSON('captcha');
-                }
-                else {
+                } else {
                     $this->Logger->log("IFrame skipped");
                 }
             }
@@ -268,17 +278,15 @@ class WAFSystem
             }
         }
 
-        /* 
-        * CAPTCHA
-        **/
-
-        # Показ капчи для Протоколов
-        if ($this->HTTPChecker->enabled) {
-            if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
-                if ($this->HTTPChecker->action == 'CAPTCHA') {
-                    $this->Logger->log("Show captcha for protocol: " . $this->Profile->HttpVersion);
+        # Проверка ASN
+        if ($this->ASNChecker->enabled) {
+            if ($this->ASNChecker->action == 'CAPTCHA') {
+                if ($this->ASNChecker->Checking($this->Profile->IP)) {
+                    $this->Logger->log("Show captcha for ASN");
                     $Api->endJSON('captcha');
                 }
+            } elseif ($this->ASNChecker->action == 'SKIP') {
+                $this->Logger->log("ASN skipped");
             }
         }
 
@@ -292,6 +300,20 @@ class WAFSystem
                     $Api->endJSON('captcha');
                 } else {
                     $this->Logger->log("IPv6 skipped");
+                }
+            }
+        }
+
+        /* 
+        * CAPTCHA
+        **/
+
+        # Показ капчи для Протоколов
+        if ($this->HTTPChecker->enabled) {
+            if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
+                if ($this->HTTPChecker->action == 'CAPTCHA') {
+                    $this->Logger->log("Show captcha for protocol: " . $this->Profile->HttpVersion);
+                    $Api->endJSON('captcha');
                 }
             }
         }
@@ -323,6 +345,8 @@ class WAFSystem
                 $Api->endJSON('captcha');
             }
         }
+
+
 
         $this->Logger->log("Passed all filters");
         $this->Marker->set();
