@@ -140,10 +140,7 @@ EOT;
         $this->Lock->Lock();
         $this->Logger->log("Start ASN update", static::class);
 
-        # Пересоздаем базу данных
-        rename($this->dbPath, $this->dbPath . '.back');
-        $this->db = $this->getDBConnection();
-        $this->eventInitListFile();
+        $this->RecreateDB();
 
         try {
             $countASN = $countNetwork = 0;
@@ -196,6 +193,7 @@ EOT;
         } catch (\Exception $e) {
             $this->Logger->log($e->getMessage(), static::class);
             rename($this->dbPath . '.back', $this->dbPath);
+            $this->db = $this->getDBConnection(); // переподключаемся
         } finally {
             @unlink($this->dbPath . '.back');
 
@@ -233,5 +231,16 @@ EOT;
         $db->exec('PRAGMA synchronous = NORMAL');
         $db->exec('PRAGMA temp_store = MEMORY');
         return $db;
+    }
+
+    private function RecreateDB()
+    {
+        # Пересоздаем базу данных
+        if ($this->db instanceof \SQLite3) {
+            $this->db->close();
+        }
+        rename($this->dbPath, $this->dbPath . '.back');
+        $this->db = $this->getDBConnection();
+        $this->eventInitListFile();
     }
 }
