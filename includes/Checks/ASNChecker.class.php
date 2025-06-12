@@ -41,12 +41,6 @@ class ASNChecker extends ListBase
 
     protected function eventInitListFile()
     {
-        if (function_exists('sqlite_open')) {
-            $msg = 'Sqlite PHP extension loaded';
-            $this->Logger->log($msg, static::class);
-            throw new \Exception($msg);
-        }
-
         $this->Lock->Lock();
         try {
             $this->db->exec('
@@ -225,6 +219,12 @@ EOT;
 
     private function getDBConnection()
     {
+        if (function_exists('sqlite_open')) {
+            $msg = 'Sqlite PHP extension loaded';
+            $this->Logger->log($msg, static::class);
+            throw new \Exception($msg);
+        }
+        
         $db = new \SQLite3($this->dbPath);
         // Оптимизации для производительности
         $db->exec('PRAGMA journal_mode = WAL');
