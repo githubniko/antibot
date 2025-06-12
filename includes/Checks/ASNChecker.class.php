@@ -5,7 +5,7 @@ namespace WAFSystem;
 class ASNChecker extends ListBase
 {
     public $listName = 'blacklist_asn';
-    public $enabled = true;
+    public $enabled = false;
     public $action = 'CAPTCHA';
     private $url = 'https://raw.githubusercontent.com/ipverse/asn-ip/master/as/'; // база ASN-IP https://github.com/ipverse/asn-ip
     private $updateTime = 86400; // int Время опроса базы ASN-IP (по умолчанию 1 сутки)
