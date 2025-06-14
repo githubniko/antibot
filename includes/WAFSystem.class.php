@@ -120,11 +120,10 @@ class WAFSystem
                 }
             }
         }
-
-        # Пропускаем посетителей с Прямыми заходом
+        
         if ($this->RefererChecker->enabled) {
             $this->Logger->log("REF: " . $this->Profile->Referer);
-
+            # Пропускаем посетителей с Прямыми заходом
             if ($this->RefererChecker->isDirect($this->Profile->Referer, 'ALLOW')) {
                 $this->Logger->log("DIRECT allowed");
                 $this->Marker->set();

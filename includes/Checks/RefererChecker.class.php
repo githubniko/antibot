@@ -23,13 +23,13 @@ class RefererChecker
     public function isDirect($referer, $action = 'ALLOW')
     {
         return $this->direct == $action
-            && (empty($referer) || mb_eregi("^http(s*):\/\/" . $this->HTTP_HOST, $referer));
+            && (empty($referer) || mb_eregi("^http(s*):\/\/" . $this->HTTP_HOST, $referer)); // если реф пуст или содержит локальный домен
     }
 
     public function isReferer($referer, $action = 'ALLOW')
     {
         return
             $this->referer == $action
-            && (!empty($referer) && !mb_eregi("^http(s*):\/\/" . $this->HTTP_HOST, $referer));
+            && (!empty($referer) && !mb_eregi("^http(s*):\/\/" . $this->HTTP_HOST, $referer)); // если реф не пуст и содержит чужой домен
     }
 }
