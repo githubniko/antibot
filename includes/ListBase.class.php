@@ -24,6 +24,8 @@ abstract class ListBase
         $this->absolutePath = $config->BasePath . $pathFile;
         $this->path = $pathFile;
 
+        $this->Lock->waitForUnlock(); // ждем разрешение класса блокировки процесса
+        
         $this->initListFile();
     }
 
