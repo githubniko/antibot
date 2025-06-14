@@ -1,7 +1,9 @@
 <?php
 
-$reuest_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
-if (basename($reuest_uri) != 'xhr.php') { // нужно для совместимости с подключением через .htaccess
+$request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+
+if (basename($request_uri) != 'xhr.php' && !isset($isInclude)) { // нужно для совместимости с подключением через .htaccess
+    $isInclude = true; // блокирует повторное подключение (совместимость с подключением через .htaccess)
 
     include "includes/autoload.php";
 
@@ -9,9 +11,9 @@ if (basename($reuest_uri) != 'xhr.php') { // нужно для совмести�
     try {
         $antiBot = new \WAFSystem\WAFSystem();
 
-        $antiBot->IFrameChecker->HeaderBlock(); // блокировка отображения во IFrame
+        $antiBot->IFrameChecker->HeaderBlock(); // блокировка отображения в IFrame
 
-        if (isset($_GET['awafblock'])) // url блокировки через JS
+        if (isset($_GET['awafblock'])) // переменная блокировки через JS
             $antiBot->Template->showBlockPage();
 
         $antiBot->run();
