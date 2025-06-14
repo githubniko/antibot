@@ -1,6 +1,7 @@
 *.cache
 *.log
 *.ini
+*.lock
 lists/*
 logs/*
 cache/*
