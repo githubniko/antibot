@@ -148,6 +148,8 @@ EOT;
                 $arrASN = [];
                 $arrNetwork = [];
 
+                $this->db->exec('DELETE FROM ip_asn');
+
                 $arr = $this->readToArray(); // читаем список ASN
                 if (sizeof($arr) > 0) {
                     foreach ($arr as $value) {
