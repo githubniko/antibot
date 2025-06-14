@@ -127,11 +127,13 @@ class WAFSystem
 
             if ($this->RefererChecker->isDirect($this->Profile->Referer, 'ALLOW')) {
                 $this->Logger->log("DIRECT allowed");
+                $this->Marker->set();
                 return true;
             }
             // Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
             if ($this->RefererChecker->isReferer($this->Profile->Referer, 'ALLOW')) {
                 $this->Logger->log("HTTP_REFERER allowed");
+                $this->Marker->set();
                 return true;
             }
         }
