@@ -40,6 +40,8 @@ class ASNChecker extends ListBase
 
         parent::__construct($file, $config, $logger);
 
+        
+
         # если файл удален внучную и таблица стерлась, то создаем заново
         $tableCheck = $this->db->query("SELECT name FROM sqlite_master WHERE name='ip_asn'");
         if ($tableCheck === false || $tableCheck->fetchArray() === false) {
@@ -99,7 +101,7 @@ EOT;
 
     public function Checking($ip)
     {
-        $this->Lock->waitForUnlock(); // ждем разрешения класска блокировки процесса
+        $this->Lock->waitForUnlock(); // ждем разрешение класса блокировки процесса
 
         if ($this->validate($ip) === false) {
             $msg = "Not valid ip address";
@@ -203,17 +205,12 @@ EOT;
                     $this->Logger->log("" . implode(", ", $arrASN) . "\n" . implode("\n", $arrNetwork), static::class);
                 }
             } catch (\Exception $e) {
-                $this->Logger->log($e->getMessage(), static::class);
-                rename($this->dbPath . '.back', $this->dbPath);
-                //$this->db = $this->getDBConnection(); // переподключаемся
+                $this->Logger->log("Error update database: ". $e->getMessage(), static::class);
             } finally {
-                @unlink($this->dbPath . '.back');
-
                 # Устанавливаем такое же время модификации как и файл листа
                 $new_time = filemtime($this->dbPath);
                 touch($this->absolutePath, $new_time, $new_time);
 
-                $this->Logger->log("End ASN update", static::class);
                 $this->Lock->Unlock();
             }
         }
