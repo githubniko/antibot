@@ -13,6 +13,7 @@ abstract class ListBase
     protected $Config;
     protected $Logger;
     protected $Lock;
+    public $enabled = true;
 
     public function __construct($pathFile, Config $config, Logger $logger)
     {
@@ -145,6 +146,8 @@ abstract class ListBase
      */
     protected function initListFile()
     {
+        if (!$this->enabled) return;
+
         $this->Lock->Lock();
         try {
             if (!file_exists($this->absolutePath)) {
