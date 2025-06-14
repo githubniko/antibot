@@ -19,7 +19,7 @@ abstract class ListBase
     {
         $this->Config = $config;
         $this->Logger = $logger;
-        $this->Lock = new Lock($this->Config->BasePath . '.' . $this->listName . '.lock');
+        $this->Lock = new Lock($this->Config->CachePath . 'lock/.' . $this->listName . '.lock');
 
         $this->absolutePath = $config->BasePath . $pathFile;
         $this->path = $pathFile;
