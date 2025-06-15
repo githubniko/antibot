@@ -34,7 +34,7 @@ class Config
         $this->BasePath = rtrim($documentRoot, "/\\") . '/' . ltrim($antibotPath, "/\\");
         $this->CachePath = $this->BasePath . 'cache/';
         $this->configFile = $this->BasePath . $this->configFileName;
-        $this->Lock = new Lock($this->BasePath . pathinfo($this->configFileName, PATHINFO_FILENAME) .'.lock');
+        $this->Lock = new Lock($this->CachePath . 'lock/.' . pathinfo($this->configFileName, PATHINFO_FILENAME) .'.lock');
 
         if(!is_dir($this->CachePath)) {
             mkdir($this->CachePath, 0755, true);
