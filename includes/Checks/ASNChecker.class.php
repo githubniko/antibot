@@ -33,14 +33,14 @@ class ASNChecker extends ListBase
         $this->timeout = $config->init($this->modulName, 'timeout', $this->timeout, 'таймаут ожидания ответа в секундах');
         $this->updateTime = $config->init($this->modulName, 'updateTime', $this->updateTime, 'время опроса базы ASN-IP в секундах');
 
+        if (!$this->enabled) return; // выходим, если модуль выключен
+
         $this->cachePath = $config->CachePath . '';
         $this->dbPath = $this->cachePath . $this->listName . '.db';
 
         $this->db = new \Utility\SQLiteWrapper($this->dbPath, $logger);
 
         parent::__construct($file, $config, $logger);
-
-        
 
         # если файл удален внучную и таблица стерлась, то создаем заново
         $tableCheck = $this->db->query("SELECT name FROM sqlite_master WHERE name='ip_asn'");

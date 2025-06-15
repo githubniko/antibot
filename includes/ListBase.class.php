@@ -24,6 +24,8 @@ abstract class ListBase
         $this->absolutePath = $config->BasePath . $pathFile;
         $this->path = $pathFile;
 
+        if (!$this->enabled) return; // выходим, если модуль выключен
+        
         $this->Lock->waitForUnlock(); // ждем разрешение класса блокировки процесса
         
         $this->initListFile();
@@ -148,8 +150,6 @@ abstract class ListBase
      */
     protected function initListFile()
     {
-        if (!$this->enabled) return;
-
         $this->Lock->Lock();
         try {
             if (!file_exists($this->absolutePath)) {
