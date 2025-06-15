@@ -15,8 +15,8 @@ class RefererChecker
     public function __construct(Config $config, Logger $logger)
     {
         $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
-        $this->direct = $config->init($this->modulName, 'direct', 'CAPTCHA', 'ALLOW - разрешить прямые заходы, CAPTCHA - капча, SKIP - пропустить правило');
-        $this->referer = $config->init($this->modulName, 'referer', 'ALLOW', 'ALLOW - разрешить при наличии реферера, CAPTCHA - капча, SKIP - пропустить правило');
+        $this->direct = $config->init($this->modulName, 'direct', $this->direct, 'ALLOW - разрешить прямые заходы, CAPTCHA - капча, SKIP - пропустить правило');
+        $this->referer = $config->init($this->modulName, 'referer', $this->referer, 'ALLOW - разрешить при наличии реферера, CAPTCHA - капча, SKIP - пропустить правило');
         $this->HTTP_HOST = $config->HTTP_HOST;
     }
 
