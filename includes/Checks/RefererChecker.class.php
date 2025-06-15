@@ -6,7 +6,7 @@ class RefererChecker
 {
     public $enabled = true;
     public $direct = 'CAPTCHA';
-    public $referer = 'ALLOW';
+    public $referer = 'SKIP';
 
     private $modulName = 'referer_checker';
     private $HTTP_HOST = '';
