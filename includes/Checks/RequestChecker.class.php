@@ -35,6 +35,7 @@ class RequestChecker extends ListBase
 # ^/admin/ - только если начинается с /admin/
 # \.(css|js|png)$ - файлы с указанными расширениями
 # /admin/.*\.json$ # Админские JSON-запросы
+favicon.ico
 
 EOT;
         return $defaultContent;
