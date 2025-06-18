@@ -317,10 +317,30 @@ function ymc(metrika, ip) {
 	} catch (e) { }
 }
 
+/**
+ * Проверяет на включенные куки
+ * @returns 
+ */
+function сheckCookie() 
+{
+    document.cookie = "testcookie=1; SameSite=Lax; path=/";
+    const cookiesEnabled = document.cookie.includes("testcookie=");
+    document.cookie = "testcookie=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    
+    return cookiesEnabled;
+}
 
 
 if (METRIKA_ID != '') {
 	ymc(METRIKA_ID, REMOTE_ADDR);
 }
 
-checkBot();
+if(!сheckCookie()) {
+	displayNone();
+	noscript = document.querySelectorAll('noscript');
+	const div = document.createElement('div');
+	div.innerHTML = noscript[0].innerHTML;
+	noscript[0].replaceWith(div);
+} else {
+	checkBot();
+}
