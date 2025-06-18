@@ -11,6 +11,8 @@ namespace WAFSystem;
 
 class WAFSystem
 {
+    public $enabled = true;
+
     public $Config;
     public $Logger;
     public $Profile;
@@ -38,6 +40,11 @@ class WAFSystem
     private function initializeComponents()
     {
         $this->Config = Config::getInstance();
+
+        # вкл/выкл защиты
+        $this->enabled = $this->Config->init('main', 'enabled', $this->enabled, 'вкл/выкл');
+        if(!$this->enabled) return;
+
         $this->Profile = Profile::getInstance($this->Config);
         $this->Logger = new Logger($this->Config, $this->Profile);
 
