@@ -31,6 +31,7 @@ class WAFSystem
     public $MobileChecker;
     public $IFrameChecker;
     public $ASNChecker;
+    public $ASNWhite;
 
     public function __construct()
     {
@@ -43,7 +44,7 @@ class WAFSystem
 
         # вкл/выкл защиты
         $this->enabled = $this->Config->init('main', 'enabled', $this->enabled, 'вкл/выкл');
-        if(!$this->enabled) return;
+        if (!$this->enabled) return;
 
         $this->Profile = Profile::getInstance($this->Config);
         $this->Logger = new Logger($this->Config, $this->Profile);
@@ -64,6 +65,7 @@ class WAFSystem
         $this->MobileChecker = new MobileChecker($this->Config, $this->Logger);
         $this->IFrameChecker = new IFrameChecker($this->Config, $this->Logger);
         $this->ASNChecker = new ASNChecker($this->Config, $this->Logger);
+        $this->ASNWhite = new ASNChecker($this->Config, $this->Logger, ['modulName'=>'asn_whitelist', 'listName' => 'whitelist_asn', 'action' => 'ALLOW']);
     }
 
     public function run()
@@ -107,7 +109,17 @@ class WAFSystem
                 return true;
             }
         }
-        
+
+        # Разрешенные ASN
+        if ($this->ASNWhite->enabled) {
+            if ($this->ASNWhite->action == 'ALLOW') {
+                if ($this->ASNWhite->Checking($this->Profile->IP)) {
+                    $this->Logger->log("ASN allowed");
+                    return true;
+                }
+            }
+        }
+
         # Разрешенные URL
         if ($this->RequestChecker->enabled) {
             if ($this->RequestChecker->action == 'ALLOW') {
@@ -127,7 +139,7 @@ class WAFSystem
                 }
             }
         }
-        
+
         if ($this->RefererChecker->enabled) {
             $this->Logger->log("REF: " . $this->Profile->Referer);
             # Пропускаем посетителей с Прямыми заходом
@@ -308,7 +320,7 @@ class WAFSystem
             }
         }
 
-        
+
 
         # Показ капчи для Прямых заходов
         if ($this->RefererChecker->enabled) {

@@ -2,6 +2,8 @@
 
 namespace WAFSystem;
 
+use Exception;
+
 class ASNChecker extends ListBase
 {
     public $listName = 'blacklist_asn';
@@ -16,12 +18,23 @@ class ASNChecker extends ListBase
 
     private $modulName = 'asn_checker';
 
-    public function __construct(Config $config, Logger $logger)
+    public function __construct(Config $config, Logger $logger, $params = [])
     {
         $this->Logger = $logger;
 
+        if (sizeof($params) > 0) {
+            foreach ($params as $key => $value) {
+                if (isset($this->{$key})) {
+                    if (empty($value))
+                        throw new Exception($key . ' cannot be empty.');
+                    $this->{$key} = $value;
+                }
+            }
+        }
+
         $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
-        $this->action  = $config->init($this->modulName, 'action', $this->action, 'CAPTCHA - капча, BLOCK - заблокировать, SKIP - ничего не делать');
+        if ($this->action != 'ALLOW')
+            $this->action  = $config->init($this->modulName, 'action', $this->action, 'ALLOW - разрешить, CAPTCHA - капча, BLOCK - заблокировать, SKIP - ничего не делать');
 
         $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
         if (empty($file)) {
@@ -80,7 +93,7 @@ class ASNChecker extends ListBase
                 $this->db->exec('CREATE INDEX IF NOT EXISTS idx_ipv4_range ON ip_asn_v4 (ip_beg, ip_end)');
                 $this->db->exec('CREATE INDEX IF NOT EXISTS idx_ipv6_range ON ip_asn_v6 (ip_beg, ip_end)');
                 # Устанавливаем одинаковое время модификации
-                
+
                 touch($this->absolutePath, filemtime($this->dbPath));
             } finally {
                 $this->Lock->Unlock();
@@ -174,7 +187,7 @@ EOT;
                                 $this->Logger->log("Invalid JSON or missing 'subnets' in response: $res", static::class);
                                 continue;
                             }
-                            
+
                             if (sizeof($obj->subnets->ipv4) > 0) {
                                 foreach ($obj->subnets->ipv4 as $cidr) {
                                     if (\Utility\Network::isValidCidr($cidr) == false) // Валидация входящих данных
@@ -186,7 +199,7 @@ EOT;
                                     $countNetwork++;
                                     array_push($arrNetwork, $cidr);
                                 }
-                            } 
+                            }
                             if (sizeof($obj->subnets->ipv6) > 0) {
 
                                 foreach ($obj->subnets->ipv6 as $cidr) {
