@@ -43,7 +43,7 @@ class ASNChecker extends ListBase
         parent::__construct($file, $config, $logger);
 
         # если файл удален внучную и таблица стерлась, то создаем заново
-        $tableCheck = $this->db->query("SELECT name FROM sqlite_master WHERE name='ip_asn'");
+        $tableCheck = $this->db->query("SELECT name FROM sqlite_master WHERE name='ip_asn_v4' OR name='ip_asn_v6'");
         if ($tableCheck === false || $tableCheck->fetchArray() === false) {
             $this->eventInitListFile();
         }
@@ -59,24 +59,29 @@ class ASNChecker extends ListBase
                     throw new \Exception($msg);
                 }
 
-                $tableCheck = $this->db->query("SELECT name FROM sqlite_master WHERE name='ip_asn'");
-                if ($tableCheck->fetchArray() === false) {
-                    $this->db->exec('
-                    CREATE TABLE ip_asn (
-                        is_ipv6 BOOLEAN NOT NULL,
-                        ip_beg BLOB NOT NULL,  -- Храним как 16-байтовый blob для IPv6
-                        ip_end BLOB NOT NULL,
-                        PRIMARY KEY (is_ipv6, ip_beg, ip_end)
-                    ) WITHOUT ROWID;
-                ');
+                // Создаем таблицу для IPv4
+                $this->db->exec('
+                        CREATE TABLE IF NOT EXISTS ip_asn_v4 (
+                            ip_beg BLOB NOT NULL,
+                            ip_end BLOB NOT NULL,
+                            PRIMARY KEY (ip_beg, ip_end)
+                        ) WITHOUT ROWID;
+                    ');
 
-                    // Индексы для обоих типов адресов
-                    $this->db->exec('CREATE INDEX IF NOT EXISTS idx_ipv4_range ON ip_asn (ip_beg, ip_end) WHERE is_ipv6 = 0');
-                    $this->db->exec('CREATE INDEX IF NOT EXISTS idx_ipv6_range ON ip_asn (ip_beg, ip_end) WHERE is_ipv6 = 1');
-                }
+                // Создаем таблицу для IPv6
+                $this->db->exec('
+                        CREATE TABLE IF NOT EXISTS ip_asn_v6 (
+                            ip_beg BLOB NOT NULL,
+                            ip_end BLOB NOT NULL,
+                            PRIMARY KEY (ip_beg, ip_end)
+                        ) WITHOUT ROWID;
+                    ');
+
+                $this->db->exec('CREATE INDEX IF NOT EXISTS idx_ipv4_range ON ip_asn_v4 (ip_beg, ip_end)');
+                $this->db->exec('CREATE INDEX IF NOT EXISTS idx_ipv6_range ON ip_asn_v6 (ip_beg, ip_end)');
                 # Устанавливаем одинаковое время модификации
-                $new_time = filemtime($this->dbPath);
-                touch($this->absolutePath, $new_time, $new_time);
+                
+                touch($this->absolutePath, filemtime($this->dbPath));
             } finally {
                 $this->Lock->Unlock();
             }
@@ -108,10 +113,8 @@ EOT;
             $this->Logger->log($msg, static::class);
             throw new \Exception($msg);
         }
-
         $updateTimeDB = filemtime($this->dbPath);
         $updateTimeList = filemtime($this->absolutePath);
-
         if ($updateTimeList > $updateTimeDB) { // обновляем базу, если изменился список ASN
             $this->Logger->log("ASN list modified (" . $this->path . ")", static::class);
             $this->updateCacheDB();
@@ -123,19 +126,13 @@ EOT;
         // Определяем тип IP
         $is_ipv6 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
         $ip_bin = $is_ipv6 ? inet_pton($ip) : pack('N', ip2long($ip));
+        $table = $is_ipv6 ? 'ip_asn_v6' : 'ip_asn_v4';
 
-        $result = $this->db->query(
-            '
-            SELECT 1 FROM ip_asn 
-            WHERE is_ipv6 = :is_ipv6
-            AND :ip >= ip_beg 
-            AND :ip <= ip_end
-            LIMIT 1',
-            [
-                ':is_ipv6' => [$is_ipv6, SQLITE3_INTEGER],
-                ':ip' => [$ip_bin, SQLITE3_BLOB]
-            ]
-        );
+        $result = $this->db->query("
+            SELECT 1 FROM $table 
+            WHERE :ip >= ip_beg AND :ip <= ip_end
+            LIMIT 1
+        ", [':ip' => [$ip_bin, SQLITE3_BLOB]]);
 
         return $result->fetchArray() !== false;
     }
@@ -150,9 +147,10 @@ EOT;
                 $arrASN = [];
                 $arrNetwork = [];
 
-                $this->db->exec('DELETE FROM ip_asn');
+                $this->db->exec('DELETE FROM ip_asn_v4');
+                $this->db->exec('DELETE FROM ip_asn_v6');
 
-                $arr = $this->readToArray(); // читаем список ASN
+                $arr = $this->readToArray(); // читаем список ASN                
                 if (sizeof($arr) > 0) {
                     foreach ($arr as $value) {
                         if (!\Utility\Network::validateASN($value)) {
@@ -172,6 +170,11 @@ EOT;
                         if ($res) {
                             # Вносим данные в кеш-базу
                             $obj = json_decode($res);
+                            if ($obj === null || !isset($obj->subnets)) {
+                                $this->Logger->log("Invalid JSON or missing 'subnets' in response: $res", static::class);
+                                continue;
+                            }
+                            
                             if (sizeof($obj->subnets->ipv4) > 0) {
                                 foreach ($obj->subnets->ipv4 as $cidr) {
                                     if (\Utility\Network::isValidCidr($cidr) == false) // Валидация входящих данных
@@ -183,7 +186,9 @@ EOT;
                                     $countNetwork++;
                                     array_push($arrNetwork, $cidr);
                                 }
-                            } elseif (sizeof($obj->subnets->ipv6) > 0) {
+                            } 
+                            if (sizeof($obj->subnets->ipv6) > 0) {
+
                                 foreach ($obj->subnets->ipv6 as $cidr) {
                                     if (\Utility\Network::isValidCidr($cidr) == false) // Валидация входящих данных
                                         continue;
@@ -205,7 +210,7 @@ EOT;
                     $this->Logger->log("" . implode(", ", $arrASN) . "\n" . implode("\n", $arrNetwork), static::class);
                 }
             } catch (\Exception $e) {
-                $this->Logger->log("Error update database: ". $e->getMessage(), static::class);
+                $this->Logger->log("Error update database: " . $e->getMessage(), static::class);
             } finally {
                 # Устанавливаем такое же время модификации как и файл листа
                 $new_time = filemtime($this->dbPath);
@@ -220,12 +225,13 @@ EOT;
     {
         $range = \Utility\Network::ipToRange($ipOrCidr); // Преобразуем IP/CIDR в диапазон
 
-        $result = $this->db->query('
-            INSERT OR IGNORE INTO ip_asn 
-            (is_ipv6, ip_beg, ip_end) 
-            VALUES (:is_ipv6, :ip_beg, :ip_end)
-        ', [
-            ':is_ipv6' => [$range['is_ipv6'], SQLITE3_INTEGER],
+        $table = $range['is_ipv6'] ? 'ip_asn_v6' : 'ip_asn_v4';
+
+        $result = $this->db->query("
+        INSERT OR IGNORE INTO $table 
+        (ip_beg, ip_end) 
+        VALUES (:ip_beg, :ip_end)
+    ", [
             ':ip_beg' => [$range['beg'], SQLITE3_BLOB],
             ':ip_end' => [$range['end'], SQLITE3_BLOB]
         ]);
