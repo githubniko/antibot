@@ -15,7 +15,7 @@ class WAFSystem
     public $Logger;
     public $Profile;
     public $WhiteListIP;
-    public $BlackLiskIP;
+    public $BlackListIP;
     public $UserAgentChecker;
     public $RequestChecker;
     public $Marker;
@@ -45,7 +45,7 @@ class WAFSystem
         $this->Marker = new Marker($this->Config, $this->Profile, $this->Logger);
         $this->Template = new Template($this->Config, $this->Profile, $this->Logger);
 
-        $this->BlackLiskIP = new BlackListIP($this->Config, $this->Logger);
+        $this->BlackListIP = new BlackListIP($this->Config, $this->Logger);
         $this->WhiteListIP = new WhiteListIP($this->Config, $this->Logger);
         $this->IndexBot = new IndexBot($this->Config, $this->Profile, $this->Logger);
         $this->RequestChecker = new RequestChecker($this->Config, $this->Logger);
@@ -148,9 +148,9 @@ class WAFSystem
         ##### BLOCK #####
 
         # Блокировка IPv6
-        if ($this->BlackLiskIP->enabled) {
-            if ($this->BlackLiskIP->ipv6 == 'BLOCK') {
-                if ($this->BlackLiskIP->isIPv6($this->Profile->IP)) {
+        if ($this->BlackListIP->enabled) {
+            if ($this->BlackListIP->ipv6 == 'BLOCK') {
+                if ($this->BlackListIP->isIPv6($this->Profile->IP)) {
                     $this->Logger->log("IPv6 blocked");
                     $this->Template->showBlockPage();
                 }
@@ -160,8 +160,8 @@ class WAFSystem
         # Блокировка IP
         # ПРАВИЛО НЕ БУДЕТ СРАБАТЫВАТЬ, ЕСЛИ У ПОСЕТИТЕЛЯ УСТАНОВЛЕНА МЕТКА
         # НУЖНО РЕАЛИЗОВАТЬ МЕХАНИЗМ СБРОСА МЕТКИ ДЛЯ КОНКРЕТНОГО ПОСЕТИТЕЛЯ
-        if ($this->BlackLiskIP->enabled) {
-            if ($this->BlackLiskIP->isListed($clientIp)) {
+        if ($this->BlackListIP->enabled) {
+            if ($this->BlackListIP->isListed($clientIp)) {
                 $this->Logger->log("IP address found on blacklist: $clientIp");
                 $this->Template->showBlockPage();
             }
@@ -181,7 +181,7 @@ class WAFSystem
                 if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
                     $this->Logger->log("Version HTTP blocked");
                     if ($this->HTTPChecker->addBlacklistIP) {
-                        $this->BlackLiskIP->add($clientIp, $this->Profile->HttpVersion);
+                        $this->BlackListIP->add($clientIp, $this->Profile->HttpVersion);
                     }
                     $this->Template->showBlockPage();
                 }
@@ -219,7 +219,7 @@ class WAFSystem
         # Блокировка плохих запросов
         if (!$Api->isPost()) {
             $this->Logger->log("Not a POST request");
-            $this->BlackLiskIP->add($this->Profile->IP, 'Not a POST request');
+            $this->BlackListIP->add($this->Profile->IP, 'Not a POST request');
             $Api->endJSON('block');
         }
 
@@ -270,7 +270,7 @@ class WAFSystem
                 if ($this->FingerPrint->Checking($this->Profile->FingerPrint)) {
                     $this->Logger->log("FingerPrint blocked");
                     if ($this->FingerPrint->addBlacklistIP) {
-                        $this->BlackLiskIP->add($this->Profile->IP, 'FP ' . $this->Profile->FingerPrint);
+                        $this->BlackListIP->add($this->Profile->IP, 'FP ' . $this->Profile->FingerPrint);
                     }
                     $Api->endJSON('block');
                 }
@@ -292,9 +292,9 @@ class WAFSystem
         **/
 
         # Проверка IPv6
-        if ($this->BlackLiskIP->enabled) {
-            if ($this->BlackLiskIP->ipv6 == 'CAPTCHA') {
-                if ($this->BlackLiskIP->isIPv6($this->Profile->IP)) {
+        if ($this->BlackListIP->enabled) {
+            if ($this->BlackListIP->ipv6 == 'CAPTCHA') {
+                if ($this->BlackListIP->isIPv6($this->Profile->IP)) {
                     $this->Logger->log("IPv6 captcha");
                     $Api->endJSON('captcha');
                 }
