@@ -33,18 +33,24 @@ class ASNChecker extends ListBase
         }
 
         $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
-        if ($this->action != 'ALLOW')
-            $this->action  = $config->init($this->modulName, 'action', $this->action, 'ALLOW - разрешить, CAPTCHA - капча, BLOCK - заблокировать, SKIP - ничего не делать');
 
-        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
-        if (empty($file)) {
+        $listName = $config->get($this->modulName, $this->listName);
+        $file = ltrim($listName, "/\\");
+        if ($listName === NULL) {
             $file = "lists/" . $this->listName;
             $config->set($this->modulName, $this->listName, $file, 'список');
         }
+        
+        if(empty($listName)) {
+            $this->enabled = false;
+            return;
+        }
 
-        $this->url = $config->init($this->modulName, 'url', $this->url, 'база ASN-IP');
-        $this->timeout = $config->init($this->modulName, 'timeout', $this->timeout, 'таймаут ожидания ответа в секундах');
-        $this->updateTime = $config->init($this->modulName, 'updateTime', $this->updateTime, 'время опроса базы ASN-IP в секундах');
+        if ($this->action == 'CAPTCHA') {
+            $this->url = $config->init($this->modulName, 'url', $this->url, 'база ASN-IP');
+            $this->timeout = $config->init($this->modulName, 'timeout', $this->timeout, 'таймаут ожидания ответа в секундах');
+            $this->updateTime = $config->init($this->modulName, 'updateTime', $this->updateTime, 'время опроса базы ASN-IP в секундах');
+        }
 
         if (!$this->enabled) return; // выходим, если модуль выключен
 

@@ -32,8 +32,10 @@ class WAFSystem
     public $HTTPChecker;
     public $MobileChecker;
     public $IFrameChecker;
-    public $ASNChecker;
     public $ASNWhite;
+    public $ASNBlock;
+    public $ASNCaptcha;
+    
 
     public function __construct()
     {
@@ -68,8 +70,10 @@ class WAFSystem
         $this->HTTPChecker = new HTTPChecker($this->Config, $this->Logger);
         $this->MobileChecker = new MobileChecker($this->Config, $this->Logger);
         $this->IFrameChecker = new IFrameChecker($this->Config, $this->Logger);
-        $this->ASNChecker = new ASNChecker($this->Config, $this->Logger);
-        $this->ASNWhite = new ASNChecker($this->Config, $this->Logger, ['modulName'=>'asn_whitelist', 'listName' => 'whitelist_asn', 'action' => 'ALLOW']);
+        $this->ASNWhite = new ASNChecker($this->Config, $this->Logger, ['listName' => 'whitelist_asn', 'action' => 'ALLOW']);
+        $this->ASNBlock = new ASNChecker($this->Config, $this->Logger, ['listName' => 'blacklist_asn', 'action' => 'BLOCK']);
+        $this->ASNCaptcha = new ASNChecker($this->Config, $this->Logger, ['listName' => 'captcha_asn', 'action' => 'CAPTCHA']);
+        
     }
 
     public function run()
@@ -213,9 +217,9 @@ class WAFSystem
         }
 
         # Блокировка ASN
-        if ($this->ASNChecker->enabled) {
-            if ($this->ASNChecker->action == 'BLOCK') {
-                if ($this->ASNChecker->Checking($this->Profile->IP)) {
+        if ($this->ASNBlock->enabled) {
+            if ($this->ASNBlock->action == 'BLOCK') {
+                if ($this->ASNBlock->Checking($this->Profile->IP)) {
                     $this->Logger->log("ASN blocked");
                     $this->Template->showBlockPage();
                 }
@@ -367,9 +371,9 @@ class WAFSystem
         }
 
         # Проверка ASN
-        if ($this->ASNChecker->enabled) {
-            if ($this->ASNChecker->action == 'CAPTCHA') {
-                if ($this->ASNChecker->Checking($this->Profile->IP)) {
+        if ($this->ASNCaptcha->enabled) {
+            if ($this->ASNCaptcha->action == 'CAPTCHA') {
+                if ($this->ASNCaptcha->Checking($this->Profile->IP)) {
                     $this->Logger->log("Show captcha for ASN");
                     $Api->endJSON('captcha');
                 }
