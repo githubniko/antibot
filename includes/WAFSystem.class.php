@@ -24,7 +24,9 @@ class WAFSystem
     public $Template;
     public $IndexBot;
     public $TorChecker;
-    public $RefererChecker;
+    public $RefererCaptcha;
+    public $RefererAllow;
+    public $RefererBlock;
     public $FingerPrint;
     public $GrayList;
     public $HTTPChecker;
@@ -57,7 +59,9 @@ class WAFSystem
         $this->WhiteListIP = new WhiteListIP($this->Config, $this->Logger);
         $this->IndexBot = new IndexBot($this->Config, $this->Profile, $this->Logger);
         $this->RequestChecker = new RequestChecker($this->Config, $this->Logger);
-        $this->RefererChecker = new RefererChecker($this->Config, $this->Logger);
+        $this->RefererAllow = new RefererChecker($this->Config, $this->Logger, ['listName' => 'whitelist_referer', 'action' => 'ALLOW']);
+        $this->RefererBlock = new RefererChecker($this->Config, $this->Logger, ['listName' => 'blacklist_referer', 'action' => 'BLOCK']);
+        $this->RefererCaptcha = new RefererChecker($this->Config, $this->Logger, ['listName' => 'captcha_referer', 'action' => 'CAPTCHA']);
         $this->UserAgentChecker = new UserAgentChecker($this->Config, $this->Logger);
         $this->TorChecker = new TorChecker($this->Config, $this->Logger);
         $this->FingerPrint = new FingerPrint($this->Config, $this->Logger);
@@ -140,16 +144,9 @@ class WAFSystem
             }
         }
 
-        if ($this->RefererChecker->enabled) {
-            $this->Logger->log("REF: " . $this->Profile->Referer);
-            # Пропускаем посетителей с Прямыми заходом
-            if ($this->RefererChecker->isDirect($this->Profile->Referer, 'ALLOW')) {
-                $this->Logger->log("DIRECT allowed");
-                $this->Marker->set();
-                return true;
-            }
-            // Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
-            if ($this->RefererChecker->isReferer($this->Profile->Referer, 'ALLOW')) {
+        # Разрешаенные рефереры
+        if($this->RefererAllow->enabled) {
+            if($this->RefererAllow->isListed($this->Profile->Referer)) {
                 $this->Logger->log("HTTP_REFERER allowed");
                 $this->Marker->set();
                 return true;
@@ -190,6 +187,14 @@ class WAFSystem
         if ($this->UserAgentChecker->enabled) {
             // Валидность User_Agent
             if (!$this->UserAgentChecker->isValid($this->Profile->UserAgent)) {
+                $this->Template->showBlockPage();
+            }
+        }
+
+        # Блокировка Рефереров
+        if($this->RefererBlock->enabled) {
+            if($this->RefererBlock->isListed($this->Profile->Referer)) {
+                $this->Logger->log("HTTP_REFERER blocked");
                 $this->Template->showBlockPage();
             }
         }
@@ -320,18 +325,14 @@ class WAFSystem
             }
         }
 
-
-
         # Показ капчи для Прямых заходов
-        if ($this->RefererChecker->enabled) {
-            if ($this->RefererChecker->isDirect($data['referer'], 'CAPTCHA')) {
-                $this->Logger->log("Show captcha for DIRECT");
-                $Api->endJSON('captcha');
-            }
-            # Показ капчи для Прямых заходов
-            if ($this->RefererChecker->isReferer($data['referer'], 'CAPTCHA')) {
-                $this->Logger->log("Show captcha if there is a REFERRER");
-                $Api->endJSON('captcha');
+        if ($this->RefererCaptcha->enabled) {
+            # Показ капчи для списков
+            if($this->RefererCaptcha->action == 'CAPTCHA') {
+                if($this->RefererCaptcha->isListed($data['referer'])) {
+                    $this->Logger->log("Show captcha if there is a REFERRER");
+                    $Api->endJSON('captcha');
+                }
             }
         }
 
