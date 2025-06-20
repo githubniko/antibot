@@ -11,7 +11,7 @@
 - ASNChecker: секции [asn_checker] и [asn_whilelist] объединены в одну [asn_checker]
 
 ### Fixed
-- 
+-  
 
 ## [0.5.3] - 2025-06-19
 

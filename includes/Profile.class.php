@@ -76,12 +76,12 @@ class Profile
     # генерирует идентификатор пользователя для идентификации в лог-файле
     private function getRayID()
     {
-        return substr(md5($this->salt . $this->Host . $this->IP . $this->UserAgent), 0, 16);
+        return substr(md5($this->salt . $this->IP . $this->UserAgent), 0, 16);
     }
 
     # генерирует идентификатор пользователя для маркера
     private function getRayIDSecret()
     {
-        return substr(md5($this->salt . $this->Host . $this->IP . $this->UserAgent), 16);
+        return substr(md5($this->salt . $this->IP . $this->UserAgent), 16);
     }
 }
