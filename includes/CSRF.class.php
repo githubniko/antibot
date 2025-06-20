@@ -37,23 +37,23 @@ class CSRF
         $this->checkSessionAndCookies();
 
         if (strtoupper($requestMethod) === 'GET') {
-            throw new \Exception('CSRF tokens should not be used in GET requests');
+            throw new \Exception('CSRF-tokens should not be used in GET requests');
         }
 
         // Проверка формата (64 hex-символа для 32 байт)
         if (!preg_match($this->tokenPattern, $csrf_token)) {
-            throw new \Exception('Error: Invalid token format');
+            throw new \Exception('Error: Invalid CSRF-token format');
         }
 
         if (!isset($_SESSION[$this->csrf_token_key][$csrf_token])) {
-            throw new \Exception('Error: Token not found. Possible reasons: cookies disabled, session expired, or token already used');
+            throw new \Exception('Error: CSRF-token not found. Possible reasons: cookies disabled, session expired, or token already used');
         }
 
         $tokenData = $_SESSION[$this->csrf_token_key][$csrf_token];
 
         if ($tokenData['expire'] < time()) {
             unset($_SESSION[$this->csrf_token_key][$csrf_token]);
-            throw new \Exception('Error: Token expired');
+            throw new \Exception('Error: CSRF-token expired');
         }
 
         if ($tokenData['session_id'] !== session_id()) {
