@@ -3,11 +3,11 @@
 ## [0.6.0] - 2025-06-21
 
 ### Added
-- Проверка рефереров по спискам (Allow/Block/Captcha)
+- RefererChecker: Проверка рефереров по спискам (Allow/Block/Captcha)
 - ASNChecker: добавлен список captcha_asn
 
 ### Changed
-- Удалены настройки direct = , referer =. В место них проверки по спискам
+- RefererChecker: Удалены настройки direct = , referer =. В место них проверки по спискам
 - ASNChecker: секции [asn_checker] и [asn_whilelist] объединены в одну [asn_checker]
 
 ### Fixed
