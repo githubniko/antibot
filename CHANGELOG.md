@@ -5,6 +5,7 @@
 ### Added
 - RefererChecker: Проверка рефереров по спискам (Allow/Block/Captcha)
 - ASNChecker: добавлен список captcha_asn
+- RequestChecker: добавлены списки Block/Captcha
 
 ### Changed
 - RefererChecker: Удалены настройки direct = , referer =. В место них проверки по спискам

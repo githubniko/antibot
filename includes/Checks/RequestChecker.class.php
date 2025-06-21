@@ -3,21 +3,37 @@ namespace WAFSystem;
 
 class RequestChecker extends ListBase
 {
-    public $listName = 'whitelist_url';
     public $enabled = true;
     public $action = 'ALLOW';
 
     private $modulName = 'request_checker';
+    public $listName = 'whitelist_uri';
 
-    public function __construct(Config $config, Logger $logger)
+    public function __construct(Config $config, Logger $logger, $params = [])
     {
-        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled, 'исключения для указанных URL');
-        $this->action = $config->init($this->modulName, 'action', $this->action, 'ALLOW - разрешить, SKIP - ничего не делать');
+        $this->Logger = $logger;
 
-        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
-        if (empty($file)) {
+        if (sizeof($params) > 0) {
+            foreach ($params as $key => $value) {
+                if (isset($this->{$key})) {
+                    if (empty($value))
+                        throw new \Exception($key . ' cannot be empty.');
+                    $this->{$key} = $value;
+                }
+            }
+        }
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled, 'исключения для указанных URL');
+
+        $listName = $config->get($this->modulName, $this->listName);
+        $file = ltrim($listName, "/\\");
+        if ($listName === NULL) {
             $file = "lists/" . $this->listName;
-            $config->set($this->modulName, $this->listName, $file);
+            $config->set($this->modulName, $this->listName, $file, 'список');
+        }
+        
+        if(empty($listName)) {
+            $this->enabled = false;
+            return;
         }
 
         parent::__construct($file, $config, $logger);
@@ -44,6 +60,7 @@ EOT;
     protected function Comparison($value1, $value2) 
     {
         $pattern = str_replace('/', '\/', $value1); // Экранируем слеши для регулярки
+        mb_regex_encoding('UTF-8');
         return preg_match("/$pattern/iu", $value2) === 1;
     }
 }

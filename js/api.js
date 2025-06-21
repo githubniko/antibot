@@ -191,6 +191,7 @@ function checkBot(func) {
 			window: getObjectBrowser(window),
 			navigator: getObjectBrowser(navigator),
 			screen: getObjectBrowser(window.screen),
+			location: getObjectBrowser(window.location),
 			fingerPrint: FINGERPRINT,
 		};
 		Object.assign(obj, obj2);

@@ -19,7 +19,9 @@ class WAFSystem
     public $WhiteListIP;
     public $BlackListIP;
     public $UserAgentChecker;
-    public $RequestChecker;
+    public $RequestAllow;
+    public $RequestBlock;
+    public $RequestCaptcha;
     public $Marker;
     public $Template;
     public $IndexBot;
@@ -60,7 +62,9 @@ class WAFSystem
         $this->BlackListIP = new BlackListIP($this->Config, $this->Logger);
         $this->WhiteListIP = new WhiteListIP($this->Config, $this->Logger);
         $this->IndexBot = new IndexBot($this->Config, $this->Profile, $this->Logger);
-        $this->RequestChecker = new RequestChecker($this->Config, $this->Logger);
+        $this->RequestAllow = new RequestChecker($this->Config, $this->Logger, ['listName' => 'whitelist_uri', 'action' => 'ALLOW']);
+        $this->RequestBlock = new RequestChecker($this->Config, $this->Logger, ['listName' => 'blacklist_uri', 'action' => 'BLOCK']);
+        $this->RequestCaptcha = new RequestChecker($this->Config, $this->Logger, ['listName' => 'captcha_uri', 'action' => 'CAPTCHA']);
         $this->RefererAllow = new RefererChecker($this->Config, $this->Logger, ['listName' => 'whitelist_referer', 'action' => 'ALLOW']);
         $this->RefererBlock = new RefererChecker($this->Config, $this->Logger, ['listName' => 'blacklist_referer', 'action' => 'BLOCK']);
         $this->RefererCaptcha = new RefererChecker($this->Config, $this->Logger, ['listName' => 'captcha_referer', 'action' => 'CAPTCHA']);
@@ -129,9 +133,9 @@ class WAFSystem
         }
 
         # Разрешенные URL
-        if ($this->RequestChecker->enabled) {
-            if ($this->RequestChecker->action == 'ALLOW') {
-                if ($this->RequestChecker->isListed($this->Profile->REQUEST_URI)) {
+        if ($this->RequestAllow->enabled) {
+            if ($this->RequestAllow->action == 'ALLOW') {
+                if ($this->RequestAllow->isListed($this->Profile->REQUEST_URI)) {
                     $this->Logger->log("REQUEST_URI allowed");
                     return true;
                 }
@@ -226,6 +230,16 @@ class WAFSystem
             }
         }
 
+        # Блокировка URL
+        if ($this->RequestBlock->enabled) {
+            if ($this->RequestBlock->action == 'BLOCK') {
+                if ($this->RequestBlock->isListed($this->Profile->REQUEST_URI)) {
+                    $this->Logger->log("REQUEST_URI blocked");
+                    $this->Template->showBlockPage();
+                }
+            }
+        }
+
         # Блокировка TOR
         if ($this->TorChecker->enabled) {
             if ($this->TorChecker->action == 'BLOCK') {
@@ -258,8 +272,14 @@ class WAFSystem
             $this->Logger->log("Not FingerPrint");
             $Api->endJSON('block');
         }
-
         $this->Profile->FingerPrint = $data['fingerPrint']; // дополняем профиль посетителя FP
+
+        # Блокировка, если не удалось получить Request_Uri
+        if (!isset($data['location']['pathname']) || !isset($data['location']['search'])) {
+            $this->Logger->log("Not Request_Uri");
+            $Api->endJSON('block');
+        }
+        $this->Profile->REQUEST_URI = $data['location']['pathname'] . $data['location']['search'];
 
         # Вывод в лог значения FP
         if ($this->FingerPrint->enabled)
@@ -375,6 +395,16 @@ class WAFSystem
             if ($this->ASNCaptcha->action == 'CAPTCHA') {
                 if ($this->ASNCaptcha->Checking($this->Profile->IP)) {
                     $this->Logger->log("Show captcha for ASN");
+                    $Api->endJSON('captcha');
+                }
+            }
+        }
+
+        # Блокировка URL
+        if ($this->RequestCaptcha->enabled) {
+            if ($this->RequestCaptcha->action == 'CAPTCHA') {
+                if ($this->RequestCaptcha->isListed($this->Profile->REQUEST_URI)) {
+                    $this->Logger->log("Show captcha for REQUEST_URI");
                     $Api->endJSON('captcha');
                 }
             }
