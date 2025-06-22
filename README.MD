@@ -1,3 +1,5 @@
+Ветка master устарела, используйте ветку dev: https://github.com/githubniko/antibot/tree/dev
+
 # Инструкция
 
 ![1745503945878](images/README/1745503945878.png)
