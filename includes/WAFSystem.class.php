@@ -294,17 +294,11 @@ class WAFSystem
         }
         $this->Profile->REQUEST_URI = $data['location']['pathname'] . $data['location']['search'];
 
-        # Вывод в лог значения FP
-        if ($this->FingerPrint->enabled)
-            $this->Logger->log("FP:  " . $this->Profile->FingerPrint);
-
         # Запрос по событию Закрыл страницу или вкладку
         if ($data['func'] == 'win-close') {
             $this->Logger->log("Closed the verification page");
             $Api->endJSON(''); // возможно тут нужно добавлять пользователя в черный список
         }
-
-        ##### ALLOW #####
 
         # Запрос на установку метки
         if ($data['func'] == 'set-marker' && $Api->isHiddenValue()) {
@@ -312,6 +306,9 @@ class WAFSystem
             $this->Marker->set();
             $Api->endJSON('allow');
         }
+
+        # Вывод в лог значения FP
+        $this->Logger->log("FP:  " . $this->Profile->FingerPrint);
 
         ##### BLOCK #####
 
