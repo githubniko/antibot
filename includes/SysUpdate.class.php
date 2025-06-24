@@ -132,6 +132,7 @@ class SysUpdate
                 'lists',
                 'logs',
                 'cache',
+                'lock',
                 $this->Config->configFileName,
                 basename($zipFile)
             ];
