@@ -37,7 +37,7 @@ class WAFSystem
     public $ASNWhite;
     public $ASNBlock;
     public $ASNCaptcha;
-    
+
 
     public function __construct()
     {
@@ -77,7 +77,6 @@ class WAFSystem
         $this->ASNWhite = new ASNChecker($this->Config, $this->Logger, ['listName' => 'whitelist_asn', 'action' => 'ALLOW']);
         $this->ASNBlock = new ASNChecker($this->Config, $this->Logger, ['listName' => 'blacklist_asn', 'action' => 'BLOCK']);
         $this->ASNCaptcha = new ASNChecker($this->Config, $this->Logger, ['listName' => 'captcha_asn', 'action' => 'CAPTCHA']);
-        
     }
 
     public function run()
@@ -104,6 +103,8 @@ class WAFSystem
 
         if ($this->HTTPChecker->enabled)
             $this->Logger->log("Protocol: " . $this->Profile->HttpVersion);
+
+        $this->Logger->log("REF: " . $this->Profile->Referer);
 
         # БОЛЕЕ ТЯЖЕЛЫЕ ПРОВЕРКИ ДОБАВЛЯЮТСЯ В КОНЕЦ
         ##### ALLOW #####
@@ -153,8 +154,20 @@ class WAFSystem
         }
 
         # Разрешаенные рефереры
-        if($this->RefererAllow->enabled) {
-            if($this->RefererAllow->isListed($this->Profile->Referer)) {
+        if ($this->RefererAllow->enabled) {
+            # Пропускаем посетителей с Прямыми заходом
+            if ($this->RefererAllow->isDirect($this->Profile->Referer)) {
+                $this->Logger->log("DIRECT allowed");
+                $this->Marker->set();
+                return true;
+            }
+            # Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
+            if ($this->RefererAllow->isReferer($this->Profile->Referer)) {
+                $this->Logger->log("REQUEST_URI allowed");
+                $this->Marker->set();
+                return true;
+            }
+            if ($this->RefererAllow->Checking($this->Profile->Referer)) {
                 $this->Logger->log("HTTP_REFERER allowed");
                 $this->Marker->set();
                 return true;
@@ -200,8 +213,8 @@ class WAFSystem
         }
 
         # Блокировка Рефереров
-        if($this->RefererBlock->enabled) {
-            if($this->RefererBlock->isListed($this->Profile->Referer)) {
+        if ($this->RefererBlock->enabled) {
+            if ($this->RefererBlock->Checking($this->Profile->Referer)) {
                 $this->Logger->log("HTTP_REFERER blocked");
                 $this->Template->showBlockPage();
             }
@@ -351,9 +364,19 @@ class WAFSystem
 
         # Показ капчи для Прямых заходов
         if ($this->RefererCaptcha->enabled) {
+            # для посетителей с Прямыми заходом
+            if ($this->RefererCaptcha->isDirect($data['referer'])) {
+                $this->Logger->log("Show captcha for DIRECT");
+                $Api->endJSON('captcha');
+            }
+            # для посетителей с реферером (будут фильтроваться только прямые заходы)
+            if ($this->RefererCaptcha->isReferer($data['referer'])) {
+                $this->Logger->log("Show captcha for REQUEST_URI");
+                $Api->endJSON('captcha');
+            }
             # Показ капчи для списков
-            if($this->RefererCaptcha->action == 'CAPTCHA') {
-                if($this->RefererCaptcha->isListed($data['referer'])) {
+            if ($this->RefererCaptcha->action == 'CAPTCHA') {
+                if ($this->RefererCaptcha->Checking($data['referer'])) {
                     $this->Logger->log("Show captcha if there is a REFERRER");
                     $Api->endJSON('captcha');
                 }
