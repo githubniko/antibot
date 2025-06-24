@@ -131,6 +131,7 @@ class SysUpdate
                 '.gitignore',
                 'lists',
                 'logs',
+                'cache',
                 $this->Config->configFileName,
                 basename($zipFile)
             ];
