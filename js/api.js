@@ -1,3 +1,5 @@
+import * as myModule from './ReplacePage.js';
+
 const head2 = document.getElementById("pSht7");
 const form = document.getElementById("uHkM6");
 const lspinner = document.getElementById("InsTY1");
@@ -44,11 +46,11 @@ function startBanchmark() {
 
 function refresh() {
 	flagCloseWindow = false;
-	
+
 	const currentUrl = new URL(window.location.href);
 	const ref = document.referrer || 'direct';
 
-	if(SAVE_REFERER) {
+	if (SAVE_REFERER) {
 		localStorage.setItem('originalReferrer', ref);
 	}
 
@@ -191,7 +193,7 @@ function checkBot(func) {
 	};
 
 	if (func !== undefined) {
-		obj2 = { // Данные для отправки
+		const obj2 = { // Данные для отправки
 			datetime: {
 				now: visitortime.toISOString(),
 				timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown',
@@ -254,7 +256,13 @@ function checkBot(func) {
 				lspinner.style.display = "none";
 				blockHTTPSecurity.style.display = "none";
 				blockSuccessful.style.display = "block";
-				setTimeout(refresh, 1000);
+
+				if (data.replace_page != undefined && data.replace_page) {
+					myModule.loadPage(window.location.href);
+				} else {
+					setTimeout(refresh, 1000);
+				}
+
 			}
 			else if (data.status == 'block') {
 				setTimeout(pageBlock, 1000);

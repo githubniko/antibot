@@ -11,6 +11,7 @@ class Template
     private $metrika = '101475381';
     private $utm_referrer = false;
     private $save_referer = false;
+    public $replace_page = true;
 
     public function __construct(Config $config, Profile $profile, Logger $logger)
     {
@@ -22,6 +23,7 @@ class Template
         $this->Config->init('main', 'metrika', $this->metrika, 'Код Яндекс Метрики. Можете установить свой код или оставить текущий для сбора данных о ботах нашими специалистами. Пустая строка отключает показ метрики');
         $this->utm_referrer = $this->Config->init('main', 'utm_referrer', $this->utm_referrer, 'вкл/выкл');
         $this->save_referer = $this->Config->init('main', 'save_referer', $this->save_referer, 'вкл/выкл сохраненние referer в localStorage');
+        $this->replace_page = $this->Config->init('main', 'replace_page', $this->replace_page, '[эксперементально] заменяет страницу после прохождения капчки');
     }
 
     # Функция для вывода страницы проверки и ввода капчи

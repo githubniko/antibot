@@ -304,7 +304,7 @@ class WAFSystem
         if ($data['func'] == 'set-marker' && $Api->isHiddenValue()) {
             $this->Logger->log("Successfully passed the captcha");
             $this->Marker->set();
-            $Api->endJSON('allow');
+            $Api->endJSON('allow', ['replace_page' => $this->Template->replace_page]);
         }
 
         # Вывод в лог значения FP
