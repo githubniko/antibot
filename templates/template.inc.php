@@ -921,6 +921,7 @@
         var METRIKA_ID = '<?= $this->Config->get('main', 'metrika', ''); ?>';
         var REMOTE_ADDR = '<?= $this->Profile->IP; ?>';
         var UTM_REFERRER = '<?= $this->utm_referrer; ?>';
+        var SAVE_REFERER = '<?= $this->save_referer; ?>';
         (function() {
             // Показываем favicon если есть
             fetch('/favicon.ico')

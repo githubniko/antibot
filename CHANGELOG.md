@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.2] - 2025-06-28
+
+### Added
+- Передача referer через utm_referrer
+- Сохранение referer в localStorage в переменную originalReferrer
+
+### Changed
+- Исключен "Tag found" из логирования, для сокращении длины лог-файла
+
+
 ## [0.6.1] - 2025-06-24
 
 ### Changed

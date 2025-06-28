@@ -99,21 +99,21 @@ class WAFSystem
             return true;
         }
 
+        # Проверка куки маркера
+        if ($this->Marker->isValid()) {
+            return true;
+        }
+
         $this->Logger->log("" . $this->Profile->REQUEST_URI);
 
         if ($this->HTTPChecker->enabled)
             $this->Logger->log("Protocol: " . $this->Profile->HttpVersion);
 
-        $this->Logger->log("REF: " . $this->Profile->Referer);
+        if ($this->RefererAllow->enabled || $this->RefererBlock->enabled || $this->RefererCaptcha->enabled)
+            $this->Logger->log("REF: " . $this->Profile->Referer);
 
         # БОЛЕЕ ТЯЖЕЛЫЕ ПРОВЕРКИ ДОБАВЛЯЮТСЯ В КОНЕЦ
         ##### ALLOW #####
-
-        # Проверка куки маркера
-        if ($this->Marker->isValid()) {
-            $this->Logger->log("Tag found");
-            return true;
-        }
 
         # Разрешенные IP
         if ($this->WhiteListIP->enabled) {

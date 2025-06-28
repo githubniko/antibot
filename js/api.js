@@ -46,11 +46,14 @@ function refresh() {
 	flagCloseWindow = false;
 	
 	const currentUrl = new URL(window.location.href);
+	const ref = document.referrer || 'direct';
+
+	if(SAVE_REFERER) {
+		localStorage.setItem('originalReferrer', ref);
+	}
 
 	// Передаем referrer через utm_referrer
 	if (UTM_REFERRER) {
-		const ref = document.referrer || 'direct';
-
 		// Удаляем служебные параметры антибота (если есть)
 		//currentUrl.searchParams.delete('awaf_checked');
 
