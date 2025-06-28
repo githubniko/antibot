@@ -124,6 +124,7 @@ class SysUpdate
 
         // Удаляем старую версию (если есть)
         if (is_dir($baseDir)) {
+            // Исключения
             $exclude = [
                 '.',
                 '..',
@@ -132,9 +133,8 @@ class SysUpdate
                 'lists',
                 'logs',
                 'cache',
-                'lock',
-                $this->Config->configFileName,
-                basename($zipFile)
+                $this->Config->configFileName, // config.ini
+                basename($zipFile) // архив
             ];
             $this->removeDirectory($baseDir, $exclude);
         }
@@ -178,8 +178,8 @@ class SysUpdate
         if (!is_dir($dir)) return;
 
         $files = array_diff(
-            scandir($dir), // исключения
-            $exclude
+            scandir($dir),
+            $exclude // исключения
         );
         foreach ($files as $file) {
             $path = $dir . '/' . $file;
@@ -190,7 +190,7 @@ class SysUpdate
             }
         }
 
-        if ($dir != dirname($this->Config->BasePath)) {
+        if (realpath($dir) != realpath($this->Config->BasePath)) {
             rmdir($dir);
         }
     }
