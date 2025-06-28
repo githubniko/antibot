@@ -44,7 +44,23 @@ function startBanchmark() {
 
 function refresh() {
 	flagCloseWindow = false;
-	window.location.href = window.location.href;
+	
+	const currentUrl = new URL(window.location.href);
+
+	// Передаем referrer через utm_referrer
+	if (UTM_REFERRER) {
+		const ref = document.referrer || 'direct';
+
+		// Удаляем служебные параметры антибота (если есть)
+		//currentUrl.searchParams.delete('awaf_checked');
+
+		// Добавляем ref, только если его ещё нет
+		if (!currentUrl.searchParams.has('utm_referrer')) {
+			currentUrl.searchParams.set('utm_referrer', encodeURIComponent(ref));
+		}
+	}
+
+	window.location.href = currentUrl.toString();
 }
 function pageBlock() {
 	flagCloseWindow = false;
@@ -322,13 +338,12 @@ function ymc(metrika, ip) {
  * Проверяет на включенные куки
  * @returns 
  */
-function сheckCookie() 
-{
-    document.cookie = "testcookie=1; SameSite=Lax; path=/";
-    const cookiesEnabled = document.cookie.includes("testcookie=");
-    document.cookie = "testcookie=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-    
-    return cookiesEnabled;
+function сheckCookie() {
+	document.cookie = "testcookie=1; SameSite=Lax; path=/";
+	const cookiesEnabled = document.cookie.includes("testcookie=");
+	document.cookie = "testcookie=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+
+	return cookiesEnabled;
 }
 
 
@@ -336,7 +351,7 @@ if (METRIKA_ID != '') {
 	ymc(METRIKA_ID, REMOTE_ADDR);
 }
 
-if(!сheckCookie()) {
+if (!сheckCookie()) {
 	displayNone();
 	noscript = document.querySelectorAll('noscript');
 	const div = document.createElement('div');

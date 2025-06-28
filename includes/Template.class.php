@@ -9,6 +9,7 @@ class Template
     private $Profile;
     private $Logger;
     private $metrika = '101475381';
+    private $utm_referrer = false;
 
     public function __construct(Config $config, Profile $profile, Logger $logger)
     {
@@ -16,8 +17,9 @@ class Template
         $this->Profile = $profile;
         $this->Logger = $logger;
 
-        $config->init('main', 'header404', false, 'отдает на заглушку 404 заголовок');
-        $config->init('main', 'metrika', $this->metrika, 'Код Яндекс Метрики. Можете установить свой код или оставить текущий для сбора данных о ботах нашими специалистами. Пустая строка отключает показ метрики');
+        $this->Config->init('main', 'header404', false, 'отдает на заглушку 404 заголовок');
+        $this->Config->init('main', 'metrika', $this->metrika, 'Код Яндекс Метрики. Можете установить свой код или оставить текущий для сбора данных о ботах нашими специалистами. Пустая строка отключает показ метрики');
+        $this->utm_referrer = $this->Config->init('main', 'utm_referrer', $this->utm_referrer, 'вкл/выкл');
     }
 
     # Функция для вывода страницы проверки и ввода капчи
