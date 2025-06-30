@@ -100,7 +100,7 @@ abstract class ListBase
      */
     protected function formatEntry($value, $comment)
     {
-        return $value . (empty($comment) ? '' : " # " . date("Y-m-d H:i:s") . ' ' . trim($comment)) . PHP_EOL;
+        return $value . (empty($comment) ? '' : " # " . date("Y-m-d H:i:s") . ' ' . trim($comment));
     }
 
     /**
@@ -175,15 +175,25 @@ abstract class ListBase
     /**
      * Метод записи в конец листа
      */
-    protected function saveEntry($value)
-    {
-        $file = fopen($this->absolutePath, 'a');
-        if (flock($file, LOCK_EX)) {
-            fwrite($file, $value);
-            flock($file, LOCK_UN);
+    protected function saveEntry($value) {
+    $file = fopen($this->absolutePath, 'a+'); // Открываем для чтения и записи
+    if (flock($file, LOCK_EX)) {
+        // Проверяем последний символ файла
+        fseek($file, -1, SEEK_END);
+        $fileSize = ftell($file);
+        
+        if ($fileSize > 0) { // Если файл не пустой
+            $lastChar = fread($file, 1);
+            if ($lastChar != "\n") {
+                fwrite($file, PHP_EOL); // Добавляем перенос, если его нет
+            }
         }
-        fclose($file);
+        
+        fwrite($file, $value); // Пишем саму запись
+        flock($file, LOCK_UN);
     }
+    fclose($file);
+}
 
     /**
      * Извлекает значение из строки. Удаляет комментарии 
