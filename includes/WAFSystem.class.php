@@ -259,7 +259,13 @@ class WAFSystem
 
         ##### ЗАКРЫВАЮЩИЕ ПРАВИЛА #####
 
-        # Исключения
+        # Показ капчи для списков
+        if ($this->RefererCaptcha->action == 'CAPTCHA') {
+            if ($this->RefererCaptcha->Checking($this->Profile->Referer)) {
+                $this->Logger->log("REQUEST_URI captcha");
+                return false;
+            }
+        }
         # Пропускаем посетителей с реферером
         if ($this->RefererAllow->isReferer($this->Profile->Referer)) {
             $this->Logger->log("REQUEST_URI allowed");
