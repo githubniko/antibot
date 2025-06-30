@@ -161,12 +161,6 @@ class WAFSystem
                 $this->Marker->set();
                 return true;
             }
-            # Пропускаем посетителей с реферером (будут фильтроваться только прямые заходы)
-            if ($this->RefererAllow->isReferer($this->Profile->Referer)) {
-                $this->Logger->log("REQUEST_URI allowed");
-                $this->Marker->set();
-                return true;
-            }
             if ($this->RefererAllow->Checking($this->Profile->Referer)) {
                 $this->Logger->log("HTTP_REFERER allowed");
                 $this->Marker->set();
@@ -261,6 +255,21 @@ class WAFSystem
                     $this->Template->showBlockPage();
                 }
             }
+        }
+
+        ##### ЗАКРЫВАЮЩИЕ ПРАВИЛА #####
+
+        # Исключения
+        # Пропускаем посетителей с реферером
+        if ($this->RefererAllow->isReferer($this->Profile->Referer)) {
+            $this->Logger->log("REQUEST_URI allowed");
+            $this->Marker->set();
+            return true;
+        }
+        # Блокировка посетителей с реферером
+        if ($this->RefererBlock->isReferer($this->Profile->Referer)) {
+            $this->Logger->log("REQUEST_URI blocked");
+            $this->Template->showBlockPage();
         }
 
         return false;

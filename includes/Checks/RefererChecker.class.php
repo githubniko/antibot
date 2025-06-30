@@ -29,7 +29,7 @@ class RefererChecker extends ListBase
 
         $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
         $this->direct = $config->init($this->modulName, 'direct', $this->direct, 'ALLOW - разрешить прямые заходы, CAPTCHA - капча, SKIP - пропустить правило');
-        $this->referer = $config->init($this->modulName, 'referer', $this->referer, 'ALLOW - разрешить при наличии реферера, CAPTCHA - капча, SKIP - пропустить правило');
+        $this->referer = $config->init($this->modulName, 'referer', $this->referer, 'ALLOW - разрешить все реферера, кроме списков; BLOCK - блокировать всех, кроме списков; CAPTCHA - капча; SKIP - пропустить правило');
         $this->HTTP_HOST = $config->HTTP_HOST;
 
         $listName = $config->get($this->modulName, $this->listName);
