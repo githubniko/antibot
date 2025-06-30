@@ -383,13 +383,13 @@ class WAFSystem
             }
             # для посетителей с реферером (будут фильтроваться только прямые заходы)
             if ($this->RefererCaptcha->isReferer($data['referer'])) {
-                $this->Logger->log("Show captcha for REQUEST_URI");
+                $this->Logger->log("Show captcha for REFERRER");
                 $Api->endJSON('captcha');
             }
             # Показ капчи для списков
             if ($this->RefererCaptcha->action == 'CAPTCHA') {
                 if ($this->RefererCaptcha->Checking($data['referer'])) {
-                    $this->Logger->log("Show captcha if there is a REFERRER");
+                    $this->Logger->log("Show captcha to list REFERRER");
                     $Api->endJSON('captcha');
                 }
             }
