@@ -17,37 +17,37 @@ class Lock
      * @var string Путь к файлу блокировки
      */
     private $lockFilePath;
-    
+
     /**
      * @var resource|null Хэндл файла блокировки
      */
     private $lockHandle = null;
-    
+
     /**
      * @var int Счетчик вложенных блокировок
      */
     private $lockCount = 0;
-    
+
     /**
      * @var int PID текущего процесса
      */
     private $pid;
-    
+
     /**
      * @var bool Использовать ли блокирующий режим
      */
     private $isBlocking;
-    
+
     /**
      * @var int Максимальное время ожидания в секундах
      */
     private $maxWait;
-    
+
     /**
      * @var int Время последней блокировки
      */
     private $lastLockTime = 0;
-    
+
     /**
      * @var int Время жизни блокировки (сек) после которого считается зависшей
      */
@@ -66,7 +66,7 @@ class Lock
         $this->pid = getmypid();
         $this->isBlocking = $isBlocking;
         $this->maxWait = $maxWait;
-        
+
         // Создаем директорию для lock-файла если не существует
         $dir = dirname($this->lockFilePath);
         if (!is_dir($dir)) {
@@ -85,14 +85,14 @@ class Lock
     {
         $startTime = microtime(true);
         $timeoutMs = $timeout * 1000000;
-        
+
         while ((microtime(true) - $startTime) * 1000000 < $timeoutMs) {
             if (!$this->isLockedByOtherProcess()) {
                 return true;
             }
             usleep($checkInterval);
         }
-        
+
         return false;
     }
 
@@ -131,7 +131,7 @@ class Lock
                 ftruncate($this->lockHandle, 0);
                 fwrite($this->lockHandle, (string)$this->pid);
                 fflush($this->lockHandle);
-                
+
                 $this->lockCount = 1;
                 $this->lastLockTime = time();
                 return true;
@@ -206,7 +206,7 @@ class Lock
         // Проверяем время последней модификации
         $lockTime = filemtime($this->lockFilePath);
         $currentTime = time();
-        
+
         // Если блокировка "зависла" (старше threshold) - очищаем
         if ($currentTime - $lockTime > $this->staleLockThreshold) {
             @unlink($this->lockFilePath);
@@ -234,15 +234,22 @@ class Lock
         if (empty($pid) || !is_numeric($pid)) {
             return false;
         }
-        
-        // Для Linux
+
+        // Пробуем posix_kill(), если доступна
         if (function_exists('posix_kill')) {
             return posix_kill($pid, 0);
         }
-        
-        // Для Windows
-        exec("tasklist /FI \"PID eq $pid\" 2>NUL", $output);
-        return !empty($output) && strpos(implode('', $output), (string)$pid) !== false;
+
+        // Если posix_kill() недоступна, используем exec
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            // Windows: проверяем через tasklist
+            exec("tasklist /FI \"PID eq $pid\" 2>NUL", $output);
+            return !empty($output) && strpos(implode('', $output), (string)$pid) !== false;
+        } else {
+            // Linux: проверяем через ps или kill -0
+            exec("ps -p $pid 2>/dev/null", $output, $returnCode);
+            return $returnCode === 0 && count($output) > 1;
+        }
     }
 
     /**
