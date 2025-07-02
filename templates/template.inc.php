@@ -829,6 +829,80 @@
                 color: #ffa299
             }
         }
+                /* Стили для слайдера */
+.slider-wrapper {
+    width: 100%;
+    margin: 30px 0 15px;
+    padding: 10px 0;
+    text-align: center;
+}
+
+.slider-container {
+    width: 300px;
+    margin: 0 auto;
+    transition: opacity 0.5s ease;
+}
+
+.slider-track {
+    width: 100%;
+    height: 40px;
+    background: #eee;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    margin: 15px 0;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.slider-thumb {
+    width: 40px;
+    height: 40px;
+    background: #4CAF50;
+    border-radius: 50%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    border: 2px solid #fff;
+}
+
+.slider-progress {
+    height: 100%;
+    background: #8BC34A;
+    width: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: width 0.1s ease;
+    border-radius: 20px;
+}
+
+.slider-text {
+    margin-top: 10px;
+    user-select: none;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Темная тема для слайдера */
+body.theme-dark .slider-track {
+    background: #444;
+}
+
+body.theme-dark .slider-thumb {
+    background: #4693ff;
+    border-color: #333;
+}
+
+body.theme-dark .slider-progress {
+    background: #1a73e8;
+}
+
+body.theme-dark .slider-text {
+    color: #d9d9d9;
+}
     </style>
 </head>
 
@@ -837,67 +911,9 @@
         <div class="main-content">
             <h1 class="zone-name-title h1"><?= $_SERVER['SERVER_NAME'] ?></h1>
             <p id="pSht7" class="h2 spacer-bottom">Проверяем, человек ли вы. Это может занять несколько секунд.</p>
-            <div id="uHkM6" style="display: none;">
-                <div style="max-width: 300px; height: 65px;">
-                    <div id="content">
-                        <div id="ihOWn1" style="display: grid;">
-                            <div class="cb-c" role="alert" style="display: flex;">
-                                <label class="cb-lb"><input type="checkbox" id="uiEr3"><span class="cb-i"></span><span class="cb-lb-t">Подтвердите, что вы человек</span></label>
-                            </div>
-                        </div>
-                        <div id="verifying" class="cb-container" style="display: none;">
-                            <div class="spinner-container">
-                                <svg id="spinner-i" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="unspun">
-                                    <line x1="15" x2="15" y1="1.5" y2="5.5" class="circle"></line>
-                                    <line x1="24.5459" x2="24.5459" y1="5.45405" y2="10.45405" transform="rotate(45 24.5459 5.45405)"
-                                        class="circle"></line>
-                                    <line x1="28.5" x2="28.5" y1="15" y2="20" transform="rotate(90 28.5 15)" class="circle"></line>
-                                    <line x1="24.5459" x2="24.5459" y1="24.546" y2="29.546" transform="rotate(135 24.5459 24.546)"
-                                        class="circle"></line>
-                                    <line x1="15" x2="15" y1="28.5" y2="33.5" transform="rotate(180 15 28.5)" class="circle"></line>
-                                    <line x1="5.4541" x2="5.4541" y1="24.5459" y2="29.5459" transform="rotate(-135 5.4541 24.5459)"
-                                        class="circle"></line>
-                                    <line x1="1.5" x2="1.5" y1="15" y2="20" transform="rotate(-90 1.5 15)" class="circle"></line>
-                                    <line x1="5.45408" x2="5.45408" y1="5.45404" y2="10.45404" transform="rotate(-45 5.45408 5.45404)" class="circle"></line>
-                                </svg>
-                            </div>
-                            <div id="verifying-msg"><span id="verifying-text">Идет проверка...</span><br>
-                                <div id="error-overrun" class="error-message" style="display: none;"><span id="fr-overrun">Stuck here?</span><a href="#refresh" id="fr-overrun-link">Send Feedback</a></div>
-                            </div>
-                        </div>
-                        <div id="fail" class="cb-container" role="alert" style="display: none;">
-                            <svg id="fail-i" viewBox="0 0 30 30" aria-hidden="true" fill="none">
-                                <circle class="failure-circle" cx="15" cy="15" r="15" fill="none"></circle>
-                                <path class="failure-cross"
-                                    d="M15.9288 16.2308H13.4273L13.073 7H16.2832L15.9288 16.2308ZM14.6781 19.1636C15.1853 19.1636 15.5918 19.3129 15.8976 19.6117C16.2103 19.9105 16.3666 20.2927 16.3666 20.7583C16.3666 21.2169 16.2103 21.5956 15.8976 21.8944C15.5918 22.1932 15.1853 22.3425 14.6781 22.3425C14.1778 22.3425 13.7713 22.1932 13.4586 21.8944C13.1529 21.5956 13 21.2169 13 20.7583C13 20.2997 13.1529 19.921 13.4586 19.6222C13.7713 19.3164 14.1778 19.1636 14.6781 19.1636Z">
-                                </path>
-                            </svg>
-                            <div id="failure-msg"><span id="fail-text">Сбой</span>
-                                <div id="having-trouble-message" class="error-message"><span id="fr-helper">Проблемы?</span><a href="javascript:location.reload();"
-                                        id="fr-helper-link">Refresh</a></div>
-                            </div>
-                        </div>
-                        <div id="expired" class="cb-container" role="alert" style="display: none;">
-                            <svg id="expired-i" viewBox="0 0 30 30" aria-hidden="true">
-                                <circle class="expired-circle" cx="15" cy="15" r="15"></circle>
-                                <path class="expired-p1" d="M15.3125 6H13V16.7184L19.2438 23.2108L20.9088 21.6094L15.3125 15.7877V6Z"></path>
-                            </svg>
-                            <div id="expiry-msg">
-                                <p id="expired-text">Сессия устарела<span id="full-stop-expired-text">. </span><a href="#refresh" id="expired-refresh-link">Обновить</a></p>
-                            </div>
-                        </div>
-                        <div id="timeout" class="cb-container" role="alert" style="display: none;">
-                            <svg id="timeout-i" viewBox="0 0 30 30" aria-hidden="true">
-                                <circle class="timeout-circle" cx="15" cy="15" r="15"></circle>
-                                <path class="timeout-p1" d="M15.3125 6H13V16.7184L19.2438 23.2108L20.9088 21.6094L15.3125 15.7877V6Z"></path>
-                            </svg>
-                            <div id="timeout-msg">
-                                <p id="timeout-text">Время истекло<span id="full-stop-timeout-text">. </span><a href="#refresh" id="timeout-refresh-link">Обновить</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Контейнер для капчи (будет заполнен динамически) -->
+            <div id="captcha-container"></div>
+            
             <div id="InsTY1" class="spacer loading-spinner" style="display: block; visibility: visible;">
                 <div class="lds-ring">
                     <div></div>
@@ -911,7 +927,8 @@
             <div id="tWuBw3" style="display: none;">
                 <div id="challenge-success-text" class="h2">Проверка выполнена успешно</div>
                 <div class="core-msg spacer">Ожидание ответа <?= $_SERVER['SERVER_NAME'] ?>...</div>
-            </div><noscript>
+            </div>
+            <noscript>
                 <div class="h2"><span id="challenge-error-text">Enable JavaScript and cookies to continue</span></div>
             </noscript>
         </div>
@@ -922,13 +939,14 @@
         var REMOTE_ADDR = '<?= $this->Profile->IP; ?>';
         var UTM_REFERRER = '<?= $this->utm_referrer; ?>';
         var SAVE_REFERER = '<?= $this->save_referer; ?>';
+        var CAPTCHA_TYPE = '<?= $this->Config->get('main', 'captcha_type', 'checkbox'); ?>';
+
         (function() {
             // Показываем favicon если есть
             fetch('/favicon.ico')
                 .then(response => {
                     if (response.ok) {
                         const h1 = document.querySelector('h1');
-
                         const img = document.createElement('img');
                         img.src = '/favicon.ico';
                         img.className = 'heading-favicon';
@@ -936,12 +954,218 @@
                         h1.insertBefore(img, h1.firstChild);
                     }
                 })
-                .catch(() => {}); // Игнорируем ошибки
+                .catch(() => {});
 
+            // Инициализация капчи
+            initCaptcha();
+            
             var cpo = document.createElement('script');
-            cpo.src = '<?= $this->Config->ANTIBOT_PATH . 'js/api.js?' . filemtime($this->Config->DOCUMENT_ROOT . $this->Config->ANTIBOT_PATH . 'js/api.js'); ?>';
+            cpo.src = HTTP_ANTIBOT_PATH + 'js/api.js?' + Date.now();
             document.getElementsByTagName('head')[0].appendChild(cpo);
         }());
+
+        function initCaptcha() {
+            const container = document.getElementById('captcha-container');
+            
+            if (CAPTCHA_TYPE === 'slider') {
+                // Создаем слайдер капчу
+                container.innerHTML = `
+                    <div id="uHkM6" style="max-width: 300px; height: auto;">
+                        <div class="slider-wrapper" id="slider-wrapper">
+                            <div class="slider-container" id="slider-captcha">
+                                <h3>Потяните слайдер вправо, чтобы продолжить</h3>
+                                <div class="slider-track">
+                                    <div class="slider-progress"></div>
+                                    <div class="slider-thumb" id="slider-thumb"></div>
+                                </div>
+                                <p class="slider-text">→ Передвиньте ползунок →</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                initSliderCaptcha();
+            } else {
+                // Создаем чекбокс капчу (по умолчанию)
+                container.innerHTML = `
+                    <div id="uHkM6" style="display: none;">
+                        <div style="max-width: 300px; height: 65px;">
+                            <div id="content">
+                                <div id="ihOWn1" style="display: grid;">
+                                    <div class="cb-c" role="alert" style="display: flex;">
+                                        <label class="cb-lb"><input type="checkbox" id="uiEr3"><span class="cb-i"></span><span class="cb-lb-t">Подтвердите, что вы человек</span></label>
+                                    </div>
+                                </div>
+                                <div id="verifying" class="cb-container" style="display: none;">
+                                    <div class="spinner-container">
+                                        <svg id="spinner-i" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="unspun">
+                                            <!-- SVG элементы спиннера -->
+                                        </svg>
+                                    </div>
+                                    <div id="verifying-msg"><span id="verifying-text">Идет проверка...</span><br>
+                                        <div id="error-overrun" class="error-message" style="display: none;"><span id="fr-overrun">Stuck here?</span><a href="#refresh" id="fr-overrun-link">Send Feedback</a></div>
+                                    </div>
+                                </div>
+                                <div id="fail" class="cb-container" role="alert" style="display: none;">
+                                    <svg id="fail-i" viewBox="0 0 30 30" aria-hidden="true" fill="none">
+                                        <!-- SVG элементы ошибки -->
+                                    </svg>
+                                    <div id="failure-msg"><span id="fail-text">Сбой</span>
+                                        <div id="having-trouble-message" class="error-message"><span id="fr-helper">Проблемы?</span><a href="javascript:location.reload();" id="fr-helper-link">Refresh</a></div>
+                                    </div>
+                                </div>
+                                <div id="expired" class="cb-container" role="alert" style="display: none;">
+                                    <svg id="expired-i" viewBox="0 0 30 30" aria-hidden="true">
+                                        <!-- SVG элементы истекшей сессии -->
+                                    </svg>
+                                    <div id="expiry-msg">
+                                        <p id="expired-text">Сессия устарела<span id="full-stop-expired-text">. </span><a href="#refresh" id="expired-refresh-link">Обновить</a></p>
+                                    </div>
+                                </div>
+                                <div id="timeout" class="cb-container" role="alert" style="display: none;">
+                                    <svg id="timeout-i" viewBox="0 0 30 30" aria-hidden="true">
+                                        <!-- SVG элементы таймаута -->
+                                    </svg>
+                                    <div id="timeout-msg">
+                                        <p id="timeout-text">Время истекло<span id="full-stop-timeout-text">. </span><a href="#refresh" id="timeout-refresh-link">Обновить</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                initCheckboxCaptcha();
+                document.getElementById('uHkM6').style.display = 'block';
+            }
+        }
+
+        function initSliderCaptcha() {
+            const wrapper = document.getElementById('slider-wrapper');
+            const thumb = document.getElementById('slider-thumb');
+            const track = document.querySelector('.slider-track');
+            const progress = document.querySelector('.slider-progress');
+            const captcha = document.getElementById('slider-captcha');
+            const loadingSpinner = document.getElementById('InsTY1');
+            const successMessage = document.getElementById('tWuBw3');
+            let isDragging = false;
+
+            // Рандомный угол наклона
+            const angle = (Math.random() * 10 + 20) * (Math.random() > 0.5 ? 1 : -1);
+            wrapper.style.transform = `rotate(${angle}deg)`;
+
+            // Начальная позиция
+            let startX = 0;
+            let thumbPosition = 0;
+            const maxPosition = track.offsetWidth - thumb.offsetWidth;
+
+            // Обработчики для мыши
+            thumb.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX - thumb.getBoundingClientRect().left;
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                let newPosition = e.clientX - track.getBoundingClientRect().left - startX;
+                newPosition = Math.max(0, Math.min(maxPosition, newPosition));
+                
+                thumb.style.left = newPosition + 'px';
+                thumbPosition = newPosition;
+                
+                const percent = Math.round((newPosition / maxPosition) * 100);
+                progress.style.width = percent + '%';
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                const percent = Math.round((thumbPosition / maxPosition) * 100);
+                if (percent >= 90) {
+                    onVerificationSuccess();
+                } else {
+                    resetSlider();
+                }
+            });
+
+            // Обработчики для тач-устройств
+            thumb.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                startX = e.touches[0].clientX - thumb.getBoundingClientRect().left;
+                e.preventDefault();
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                let newPosition = e.touches[0].clientX - track.getBoundingClientRect().left - startX;
+                newPosition = Math.max(0, Math.min(maxPosition, newPosition));
+                
+                thumb.style.left = newPosition + 'px';
+                thumbPosition = newPosition;
+                
+                const percent = Math.round((newPosition / maxPosition) * 100);
+                progress.style.width = percent + '%';
+            });
+
+            document.addEventListener('touchend', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                const percent = Math.round((thumbPosition / maxPosition) * 100);
+                if (percent >= 90) {
+                    onVerificationSuccess();
+                } else {
+                    resetSlider();
+                }
+            });
+
+            function resetSlider() {
+                thumb.style.left = '0';
+                progress.style.width = '0';
+                thumbPosition = 0;
+            }
+
+            function onVerificationSuccess() {
+                captcha.style.opacity = '0';
+                captcha.style.transform = 'translateY(-20px)';
+                captcha.style.transition = 'all 0.5s ease';
+                
+                loadingSpinner.style.display = 'block';
+                
+                setTimeout(() => {
+                    captcha.style.display = 'none';
+                    loadingSpinner.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        checkBot('set-marker');
+                    }, 1000);
+                }, 500);
+            }
+        }
+
+        function initCheckboxCaptcha() {
+            const checkbox = document.getElementById('uiEr3');
+            const verifying = document.getElementById('verifying');
+            const loadingSpinner = document.getElementById('InsTY1');
+            const successMessage = document.getElementById('tWuBw3');
+
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    verifying.style.display = 'grid';
+                    
+                    setTimeout(() => {
+                        verifying.style.display = 'none';
+                        successMessage.style.display = 'block';
+                        
+                        setTimeout(() => {
+                            checkBot('set-marker');
+                        }, 1000);
+                    }, 2000);
+                }
+            });
+        }
     </script>
     <div class="footer" role="contentinfo">
         <div class="footer-inner">
