@@ -1,9 +1,7 @@
-*.log
 *.cache
+*.log
 *.ini
-/lists/*
-blacklist
-whitelist
-wl_request_url.rules
-useragent.rules
-vars.inc.php
+*.lock
+lists/*
+logs/*
+cache/*
