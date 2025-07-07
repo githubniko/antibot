@@ -49,7 +49,8 @@ class RefererChecker extends ListBase
      */
     public function isDirect($referer)
     {
-        return $this->direct == $this->action && empty($referer); // если реф пуст или содержит локальный домен
+        return $this->direct == $this->action
+            && (empty($referer) || mb_eregi("^http(s*):\/\/" . $this->HTTP_HOST, $referer)); // если реф пуст или содержит локальный домен
     }
 
     /**
