@@ -152,7 +152,7 @@ class Api
                 || ($this->WAFSystem->IndexBot->enabled && $this->WAFSystem->IndexBot->isIndexbot($client_ip))
             )
         ) {
-            $this->WAFSystem->BlackLiskIP->add($this->WAFSystem->Profile->IP, $message);
+            $this->WAFSystem->BlackListIP->add($this->WAFSystem->Profile->IP, $message);
         }
     }
 }
