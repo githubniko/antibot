@@ -53,7 +53,7 @@ function refresh() {
 	}
 
 	// Передаем referrer через utm_referrer
-	if (UTM_REFERRER) {
+	if (UTM_REFERRER && ref != 'direct') {
 		// Удаляем служебные параметры антибота (если есть)
 		//currentUrl.searchParams.delete('awaf_checked');
 
