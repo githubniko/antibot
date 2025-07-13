@@ -133,6 +133,69 @@ class WAFSystem
             }
         }
 
+        # Разрешенные поисковые боты
+        if ($this->IndexBot->enabled) {
+            if ($this->IndexBot->Checking($clientIp)) {
+                $this->Logger->log("Indexing robot");
+                return true;
+            }
+        }
+
+        ##### BLOCK #####
+        # ПРАВИЛО НЕ БУДЕТ СРАБАТЫВАТЬ, ЕСЛИ У ПОСЕТИТЕЛЯ УСТАНОВЛЕНА МЕТКА
+        # НУЖНО РЕАЛИЗОВАТЬ МЕХАНИЗМ СБРОСА МЕТКИ ДЛЯ КОНКРЕТНОГО ПОСЕТИТЕЛЯ
+
+        # Блокировка IPv6
+        if ($this->BlackListIP->enabled) {
+            if ($this->BlackListIP->ipv6 == 'BLOCK') {
+                if ($this->BlackListIP->isIPv6($this->Profile->IP)) {
+                    $this->Logger->log("IPv6 blocked");
+                    $this->Template->showBlockPage();
+                }
+            }
+        }
+
+        # Блокировка HTTP протоколов
+        if ($this->HTTPChecker->enabled) {
+            if ($this->HTTPChecker->action == 'BLOCK') {
+                if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
+                    $this->Logger->log("Version HTTP blocked");
+                    if ($this->HTTPChecker->addBlacklistIP) {
+                        $this->BlackListIP->add($clientIp, $this->Profile->HttpVersion);
+                    }
+                    $this->Template->showBlockPage();
+                }
+            }
+        }
+
+        # Блокировка IP
+        if ($this->BlackListIP->enabled) {
+            if ($this->BlackListIP->isListed($clientIp)) {
+                $this->Logger->log("IP address found on blacklist: $clientIp");
+                $this->Template->showBlockPage();
+            }
+        }
+
+        # Блокировка ASN
+        if ($this->ASNBlock->enabled) {
+            if ($this->ASNBlock->action == 'BLOCK') {
+                if ($this->ASNBlock->Checking($this->Profile->IP)) {
+                    $this->Logger->log("ASN blocked");
+                    $this->Template->showBlockPage();
+                }
+            }
+        }
+
+        # Блокировка TOR
+        if ($this->TorChecker->enabled) {
+            if ($this->TorChecker->action == 'BLOCK') {
+                if ($this->TorChecker->isTor($this->Profile->IP)) {
+                    $this->Logger->log("TOR blocked");
+                    $this->Template->showBlockPage();
+                }
+            }
+        }
+
         # Разрешенные URL
         if ($this->RequestAllow->enabled) {
             if ($this->RequestAllow->action == 'ALLOW') {
@@ -168,36 +231,6 @@ class WAFSystem
             }
         }
 
-        # Разрешенные поисковые боты
-        if ($this->IndexBot->enabled) {
-            if ($this->IndexBot->Checking($clientIp)) {
-                $this->Logger->log("Indexing robot");
-                return true;
-            }
-        }
-
-        ##### BLOCK #####
-
-        # Блокировка IPv6
-        if ($this->BlackListIP->enabled) {
-            if ($this->BlackListIP->ipv6 == 'BLOCK') {
-                if ($this->BlackListIP->isIPv6($this->Profile->IP)) {
-                    $this->Logger->log("IPv6 blocked");
-                    $this->Template->showBlockPage();
-                }
-            }
-        }
-
-        # Блокировка IP
-        # ПРАВИЛО НЕ БУДЕТ СРАБАТЫВАТЬ, ЕСЛИ У ПОСЕТИТЕЛЯ УСТАНОВЛЕНА МЕТКА
-        # НУЖНО РЕАЛИЗОВАТЬ МЕХАНИЗМ СБРОСА МЕТКИ ДЛЯ КОНКРЕТНОГО ПОСЕТИТЕЛЯ
-        if ($this->BlackListIP->enabled) {
-            if ($this->BlackListIP->isListed($clientIp)) {
-                $this->Logger->log("IP address found on blacklist: $clientIp");
-                $this->Template->showBlockPage();
-            }
-        }
-
         # Проверка User-Agent
         if ($this->UserAgentChecker->enabled) {
             // Валидность User_Agent
@@ -214,44 +247,11 @@ class WAFSystem
             }
         }
 
-        # Блокировка HTTP протоколов
-        if ($this->HTTPChecker->enabled) {
-            if ($this->HTTPChecker->action == 'BLOCK') {
-                if ($this->HTTPChecker->Checking($this->Profile->HttpVersion)) {
-                    $this->Logger->log("Version HTTP blocked");
-                    if ($this->HTTPChecker->addBlacklistIP) {
-                        $this->BlackListIP->add($clientIp, $this->Profile->HttpVersion);
-                    }
-                    $this->Template->showBlockPage();
-                }
-            }
-        }
-
-        # Блокировка ASN
-        if ($this->ASNBlock->enabled) {
-            if ($this->ASNBlock->action == 'BLOCK') {
-                if ($this->ASNBlock->Checking($this->Profile->IP)) {
-                    $this->Logger->log("ASN blocked");
-                    $this->Template->showBlockPage();
-                }
-            }
-        }
-
         # Блокировка URL
         if ($this->RequestBlock->enabled) {
             if ($this->RequestBlock->action == 'BLOCK') {
                 if ($this->RequestBlock->isListed($this->Profile->REQUEST_URI)) {
                     $this->Logger->log("REQUEST_URI blocked");
-                    $this->Template->showBlockPage();
-                }
-            }
-        }
-
-        # Блокировка TOR
-        if ($this->TorChecker->enabled) {
-            if ($this->TorChecker->action == 'BLOCK') {
-                if ($this->TorChecker->isTor($this->Profile->IP)) {
-                    $this->Logger->log("TOR blocked");
                     $this->Template->showBlockPage();
                 }
             }
