@@ -13,21 +13,33 @@ class UserAgentChecker extends ListBase
     private $maxLength = 512;
     
 
-    public function __construct(Config $config, Logger $logger)
+    public function __construct(Config $config, Logger $logger, $params = [])
     {
-        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
-        $this->action = $config->init($this->modulName, 'action', $this->action, 'ALLOW - разрешить, SKIP - ничего не делать');
-
-        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
-        if (empty($file)) {
-            $file = "lists/" . $this->listName;
-            $config->set($this->modulName, $this->listName, $file);
+        if (sizeof($params) > 0) {
+            foreach ($params as $key => $value) {
+                if (isset($this->{$key})) {
+                    if (empty($value))
+                        throw new \Exception($key . ' cannot be empty.');
+                    $this->{$key} = $value;
+                }
+            }
         }
         
+        $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
+        $this->action = $config->init($this->modulName, 'action', $this->action, 'ALLOW - разрешить, SKIP - ничего не делать');
         $this->minLength = $config->init($this->modulName, 'min_length', $this->minLength, 'минимальная длина user-agent');
         $this->maxLength = $config->init($this->modulName, 'max_length', $this->maxLength, 'максимальная длина user-agent');
 
-        parent::__construct($file, $config, $logger);
+        $listName = $config->get($this->modulName, $this->listName);
+        $file = ltrim($listName, "/\\");
+        if ($listName === NULL) {
+            $file = "lists/" . $this->listName;
+            $config->set($this->modulName, $this->listName, $file, 'список');
+        }
+
+        if (!empty($listName)) { // если лист включен, то загружаем или созаем его 
+            parent::__construct($file, $config, $logger);
+        }
     }
 
     protected function createDefaultFileContent()
@@ -70,5 +82,13 @@ EOT;
         }
 
         return true;
+    }
+
+    public function Checking($rerefer)
+    {
+        if (empty($this->listName)) // возвращаем false, если лист выключен
+            return false;
+
+        return $this->isListed($rerefer);
     }
 }

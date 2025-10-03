@@ -19,6 +19,8 @@ class WAFSystem
     public $WhiteListIP;
     public $BlackListIP;
     public $UserAgentChecker;
+    public $UserAgentCaptcha;
+    public $UserAgentBlock;
     public $RequestAllow;
     public $RequestBlock;
     public $RequestCaptcha;
@@ -69,6 +71,8 @@ class WAFSystem
         $this->RefererBlock = new RefererChecker($this->Config, $this->Logger, ['listName' => 'blacklist_referer', 'action' => 'BLOCK']);
         $this->RefererCaptcha = new RefererChecker($this->Config, $this->Logger, ['listName' => 'captcha_referer', 'action' => 'CAPTCHA']);
         $this->UserAgentChecker = new UserAgentChecker($this->Config, $this->Logger);
+        $this->UserAgentCaptcha = new UserAgentChecker($this->Config, $this->Logger, ['listName' => 'captcha_useragent', 'action' => 'CAPTCHA']);
+        $this->UserAgentBlock = new UserAgentChecker($this->Config, $this->Logger, ['listName' => 'blacklist_useragent', 'action' => 'BLOCK']);
         $this->TorChecker = new TorChecker($this->Config, $this->Logger);
         $this->FingerPrint = new FingerPrint($this->Config, $this->Logger);
         $this->HTTPChecker = new HTTPChecker($this->Config, $this->Logger);
@@ -239,6 +243,15 @@ class WAFSystem
             }
         }
 
+        # Блокировка User-Agent
+        if ($this->UserAgentBlock->enabled) {
+            // Валидность User_Agent
+            if ($this->UserAgentBlock->Checking($this->Profile->UserAgent)) {
+                $this->Logger->log("UserAgent blocked");
+                $this->Template->showBlockPage();
+            }
+        }
+
         # Блокировка Рефереров
         if ($this->RefererBlock->enabled) {
             if ($this->RefererBlock->Checking($this->Profile->Referer)) {
@@ -371,6 +384,14 @@ class WAFSystem
                     $this->Logger->log("IPv6 captcha");
                     $Api->endJSON('captcha');
                 }
+            }
+        }
+
+        # Показ капчи для User-Agent
+        if ($this->UserAgentCaptcha->enabled) {
+            if ($this->UserAgentCaptcha->Checking($this->Profile->UserAgent)) {
+                $this->Logger->log("Show captcha for UserAgent");
+                $Api->endJSON('captcha');
             }
         }
 
