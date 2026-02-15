@@ -211,6 +211,11 @@ class PageCache
         foreach ($data['headers'] as $value)
             header($value);
 
+        // Уведомляем браузер о кешировании
+        header("Cache-Control: public, max-age=" . $this->cacheTime . ", must-revalidate");
+        header("Last-Modified: " . gmdate('D, d M Y H:i:s', $data['expires']) . " GMT");
+        header_remove('Pragma');
+
         return $data['content'];
     }
 
@@ -279,7 +284,7 @@ class PageCache
         if (empty($content))
             return ""; // Сразу выходим, чтобы не насиловать систему
 
-        if(!$this->setCache($content))
+        if (!$this->setCache($content))
             return null;
 
         return $content;
