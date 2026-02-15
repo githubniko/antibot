@@ -1,7 +1,6 @@
 <?php
 if (PHP_SAPI !== 'cli') { // не вкл. защиту для CRON и локального запуска php
 
-
     $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
 
     if (
@@ -14,7 +13,9 @@ if (PHP_SAPI !== 'cli') { // не вкл. защиту для CRON и локал
 
         // Инициализация и запуск системы
         try {
-            $antiBot = new \WAFSystem\WAFSystem();
+            $antiBot = new \WAFSystem\WAFSystem(); // Инициализация системы защиты
+            $pageCache = new \WAFSystem\PageCache($antiBot); // Инициализация модуля кеширования
+
             if ($antiBot->enabled) {
                 $antiBot->IFrameChecker->HeaderBlock(); // блокировка отображения в IFrame
 
@@ -23,6 +24,16 @@ if (PHP_SAPI !== 'cli') { // не вкл. защиту для CRON и локал
 
                 $antiBot->run();
             }
+
+            if ($pageCache->enabled) {
+                $content = $pageCache->Open(); // Загрузка страницы через модуль кеширования
+                if (is_null($content))
+                    $antiBot->Template->showBlockPage();
+
+                echo $content;
+                exit;
+            }
+            include $_SERVER["DOCUMENT_ROOT"] . "/index.php.origin";
         } catch (Exception $e) {
             error_log("AntiBot system failed: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
