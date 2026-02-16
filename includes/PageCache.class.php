@@ -18,6 +18,7 @@ class PageCache
     private $WAFSystem;
 
     private $driver;
+    private $keyCache = ""; // ключ созданный из URI
     public $enabled = false;
 
     private $configFile = "cache.ini";
@@ -65,6 +66,8 @@ class PageCache
 
         $allowedParams = $this->Config->init('main', 'allowed_params', [], " Разрешенные параметры, остальные будут отбрасываться, через запятую");
         $this->allowedParams = is_array($allowedParams) ? $allowedParams : [$allowedParams];
+
+        $this->generateCacheKey();
     }
 
     /**
@@ -94,7 +97,7 @@ class PageCache
 
     /**
      * Генерирует имя файла кэша на основе URL
-     * @return string
+     * @return void
      */
     private function generateCacheKey()
     {
@@ -171,9 +174,7 @@ class PageCache
         }
 
         // Создаем хеш от URL
-        $hash = md5($domain . $path);
-
-        return $hash;
+        $this->keyCache = md5($domain . $path);
     }
 
     /**
@@ -186,13 +187,7 @@ class PageCache
             return false;
         }
 
-        try {
-            $key = $this->generateCacheKey();
-        } catch (\Exception $e) {
-            return false;
-        }
-
-        $data = $this->driver->get($key);
+        $data = $this->driver->get($this->keyCache);
 
         if ($data === false) {
             return false; // Нет записи в кэше
@@ -239,18 +234,12 @@ class PageCache
             }
         }
 
-        try {
-            $key = $this->generateCacheKey();
-        } catch (\Exception $e) {
-            return false;
-        }
-
         $date = [
             'headers' => $headers,
             'content' => base64_encode($content),
             'expires' => time() + $this->cacheTime,
         ];
-        return $this->driver->set($key, $date, $this->cacheTime);
+        return $this->driver->set($this->keyCache, $date, $this->cacheTime);
     }
 
     /**
