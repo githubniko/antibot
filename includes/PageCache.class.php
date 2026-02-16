@@ -216,7 +216,7 @@ class PageCache
         header("Last-Modified: " . gmdate('D, d M Y H:i:s', $data['expires']) . " GMT");
         header_remove('Pragma');
 
-        return $data['content'];
+        return base64_decode($data['content']);
     }
 
     /**
@@ -247,7 +247,7 @@ class PageCache
 
         $date = [
             'headers' => $headers,
-            'content' => $content,
+            'content' => base64_encode($content),
             'expires' => time() + $this->cacheTime,
         ];
         return $this->driver->set($key, $date, $this->cacheTime);
