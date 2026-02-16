@@ -261,9 +261,7 @@ class PageCache
     {
         // Проверяем наличие кэша
         if ($cachedContent = $this->getCache()) {
-            // Отправляем заголовки
             header("X-Cache: HIT");
-
             echo $cachedContent;
             exit;
         }
@@ -273,19 +271,32 @@ class PageCache
             throw new \RuntimeException("Original index file not found: " . $fileInclude);
         }
 
-        // Начинаем буферизацию
-        ob_start();
-        include $fileInclude;
-        $content = ob_get_clean();
+        $content = "";
+        ob_start(function ($buffer) use (&$content) {
+            $content .= $buffer;
+            return '';
+        }, 0);
 
-        // Отправляем заголовки
-        header('X-Cache: MISS');
+        // На случай если внутри include есть выводы exit/die()
+        register_shutdown_function(function () use (&$content) {
+            while (ob_get_level() > 0)
+                ob_end_clean();
+
+            header('X-Cache: MISS');
+            $this->setCache($content);
+            echo $content;
+        });
+
+        include $fileInclude;
+        ob_end_clean();
+
+        header('X-Cache: MISS'); // Отправляем заголовки
 
         if (empty($content))
             return ""; // Сразу выходим, чтобы не насиловать систему
 
         $this->setCache($content);
 
-        return $content;
+        echo $content;
     }
 }
