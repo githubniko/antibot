@@ -284,8 +284,7 @@ class PageCache
         if (empty($content))
             return ""; // Сразу выходим, чтобы не насиловать систему
 
-        if (!$this->setCache($content))
-            return null;
+        $this->setCache($content);
 
         return $content;
     }

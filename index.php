@@ -27,8 +27,8 @@ if (PHP_SAPI !== 'cli') { // не вкл. защиту для CRON и локал
 
             if ($pageCache->enabled) {
                 $content = $pageCache->Open(); // Загрузка страницы через модуль кеширования
-                if (is_null($content))
-                    $antiBot->Template->showBlockPage();
+                // if (is_null($content))
+                //     $antiBot->Template->showBlockPage();
 
                 echo $content;
                 exit;
