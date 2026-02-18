@@ -61,7 +61,36 @@ class PageCache
         );
         $this->excludeUrls = is_array($excludeUrls) ? $excludeUrls : [$excludeUrls];
 
-        $clearParams = $this->Config->init('main', 'clear_params', ['utm_*',], " Очистить параметры, через запятую");
+        $clearParams = $this->Config->init('main', 'clear_params', [
+            'utm_source',
+            'utm_medium',
+            'utm_campaign',
+            'utm_term',
+            'utm_content',
+            'gclid',
+            'fbclid',
+            'msclkid',
+            'ttclid',
+            'twclid',
+            'yclid',
+            'ysclid',
+            'dclid',
+            'gbraid',
+            'wbraid',
+            'rdap_cid',
+            'rdt_cid',
+            'mc_cid',
+            'mc_eid',
+            '_hsenc',
+            '_hsmi',
+            'hsa_cam',
+            'mkt_tok',
+            'igshid',
+            'epik',
+            'li_fat_id',
+            'tracking',
+            'ymdsj_com'
+        ], " Параметры для Очистки, через запятую");
         $this->clearParams = is_array($clearParams) ? $clearParams : [$clearParams];
 
         $allowedParams = $this->Config->init('main', 'allowed_params', [], " Разрешенные параметры, остальные будут отбрасываться, через запятую");
