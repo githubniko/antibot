@@ -202,6 +202,9 @@ class PageCache
             return false;
         }
 
+        if (empty($data['content']))
+            return false; // Нет контента, вероятно это Location
+
         // Восстанавливаем заголовки
         foreach ($data['headers'] as $value)
             header($value);
@@ -257,7 +260,7 @@ class PageCache
         $pattern = '/^(' . implode('|', array_map('preg_quote', $whitelist)) . ')/i';
         $headers = preg_grep($pattern, $headers_list);
 
-        return array_values($headers); 
+        return array_values($headers);
     }
 
     /**
