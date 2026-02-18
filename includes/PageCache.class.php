@@ -209,7 +209,7 @@ class PageCache
         // Уведомляем браузер о кешировании
         header("Cache-Control: public, max-age=" . $this->cacheTime . ", must-revalidate");
         header("Last-Modified: " . gmdate('D, d M Y H:i:s', $data['expires']) . " GMT");
-        header_remove('Pragma');
+        header_remove("Pragma");
 
         return base64_decode($data['content']);
     }
@@ -220,26 +220,44 @@ class PageCache
      */
     private function setCache($content)
     {
-        if (!$this->shouldCache()) {
-            return;
-        }
+        if (!$this->shouldCache()) return "";
 
-        // Вытаскиваем заголовки
-        $headers = [];
-        $headers_list = headers_list();
-        if (sizeof($headers_list) > 0) {
-            foreach ($headers_list as $header) {
-                if (strpos($header, "X-Cache:") === false) // Искл. заголовок кеша
-                    $headers[] = $header;
-            }
-        }
+        // Не кешировать пустой контент, т.к. скорее всего это редирект
+        if (empty($content)) return "";
 
         $date = [
-            'headers' => $headers,
+            'domain' => $this->WAFSystem->Profile->Host,
+            'uri' => $this->WAFSystem->Profile->REQUEST_URI,
+            'headers' => $this->getHeaders(),
             'content' => base64_encode($content),
             'expires' => time() + $this->cacheTime,
         ];
+
         return $this->driver->set($this->keyCache, $date, $this->cacheTime);
+    }
+
+    /**
+     * Получает заголовки с фильтрацией чувствительных данных
+     */
+    private function getHeaders()
+    {
+        // Белый список - только эти заголовки кешируем
+        $whitelist = [
+            'Content-Type:',
+            'Cache-Control:',
+            'Content-Encoding:',
+            'Content-Language:',
+        ];
+
+        $headers_list = headers_list();
+        if (empty($headers_list)) {
+            return [];
+        }
+
+        $pattern = '/^(' . implode('|', array_map('preg_quote', $whitelist)) . ')/i';
+        $headers = preg_grep($pattern, $headers_list);
+
+        return array_values($headers); 
     }
 
     /**
@@ -249,7 +267,8 @@ class PageCache
     public function Open()
     {
         // Проверяем наличие кэша
-        if ($cachedContent = $this->getCache()) {
+        $cachedContent = $this->getCache();
+        if ($cachedContent !== false) {
             header("X-Cache: HIT");
             echo $cachedContent;
             exit;
