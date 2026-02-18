@@ -57,7 +57,7 @@ class PageCache
                 'admin/',
                 'login/'
             ],
-            "URL для исключения из кэширования, через запятую"
+            "Исключить из кэша, если URI содержит значение"
         );
         $this->excludeUrls = is_array($excludeUrls) ? $excludeUrls : [$excludeUrls];
 
@@ -90,7 +90,7 @@ class PageCache
             'li_fat_id',
             'tracking',
             'ymdsj_com'
-        ], " Параметры для Очистки, через запятую");
+        ], " Параметры для Очистки (строка или регулярое выражение)");
         $this->clearParams = is_array($clearParams) ? $clearParams : [$clearParams];
 
         $allowedParams = $this->Config->init('main', 'allowed_params', [], " Разрешенные параметры, остальные будут отбрасываться, через запятую");
