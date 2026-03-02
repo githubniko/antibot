@@ -324,7 +324,7 @@ class PageCache
 
             header('X-Cache: MISS');
             $this->setCache($content);
-            echo $content;
+            return $content;
         });
 
         include $fileInclude;
@@ -337,6 +337,6 @@ class PageCache
 
         $this->setCache($content);
 
-        echo $content;
+        return $content;
     }
 }

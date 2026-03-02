@@ -26,7 +26,7 @@ if (PHP_SAPI !== 'cli') { // не вкл. защиту для CRON и локал
             }
 
             if ($pageCache->enabled) {
-                $pageCache->Open(); // Загрузка страницы через модуль кеширования
+                echo $pageCache->Open(); // Загрузка страницы через модуль кеширования
             } else {
                 include $_SERVER["DOCUMENT_ROOT"] . "/index.php.origin";
             }
