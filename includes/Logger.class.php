@@ -10,7 +10,7 @@ class Logger
     private $logBasePath;
     private $logFile;
     private $debugEnabled;
-    private $rayIDGenerator;
+    private $logLevel = "INFO";
 
     public function __construct(Config $config, Profile $profile)
     {
@@ -18,6 +18,7 @@ class Logger
         $this->profile = $profile;
 
         $this->config->init('main', 'debug', true);
+        $this->logLevel = $this->config->init('logs', 'log_level', $this->logLevel, 'INFO или DEBUG');
         $this->config->init('logs', 'log_file', 'logs/antibot.log');
         $this->config->init('logs', 'max_size', 10, 'Максимальный размер, MB');
         $this->config->init('logs', 'rotate', 7, 'Количество файлов ротации');
@@ -60,7 +61,7 @@ class Logger
     public function log($message, $context = [])
     {
         $fullMessage = $message;
-        if (!empty($context)) {
+        if ($this->logLevel == "DEBUG" && !empty($context)) {
             $fullMessage .= " | " . json_encode($context, JSON_UNESCAPED_UNICODE);
         }
         $this->logMessage($fullMessage);

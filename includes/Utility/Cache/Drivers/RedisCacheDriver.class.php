@@ -74,7 +74,7 @@ class RedisCacheDriver implements CacheDriverInterface
         }
     }
 
-    public function set($key, array $data, $ttl)
+    public function set($key, array $data)
     {
         if (!$this->isAvailable()) {
             return false;
@@ -83,7 +83,6 @@ class RedisCacheDriver implements CacheDriverInterface
         try {
             return $this->redis->setex(
                 $this->prefix . $key,
-                $ttl,
                 json_encode($data)
             );
         } catch (\Exception $e) {

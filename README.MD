@@ -79,7 +79,9 @@ php_value auto_prepend_file ".../antibot/index.php"
 Разместите следующий код в верхней части сайта (в `<head>`):
 
 ```
+<!-- AWAF Tags -->
 <script type="text/javascript" src="/antibot/js/tags.js"></script>
+<!-- End AWAF Tags -->
 ```
 
 ### 3. Укажите идентификатор счетчика

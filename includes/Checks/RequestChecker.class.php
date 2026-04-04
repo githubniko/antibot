@@ -41,7 +41,6 @@ class RequestChecker extends ListBase
 
     protected function createDefaultFileContent()
     {
-        $faviconLine = ($this->action == 'ALLOW') ? 'favicon.ico' : '';
         $defaultContent = <<<EOT
 # {$this->listName}
 # Список исключений по REQUEST_URI
@@ -53,7 +52,6 @@ class RequestChecker extends ListBase
 # ^/admin/ - только если начинается с /admin/
 # \.(css|js|png)$ - файлы с указанными расширениями
 # /admin/.*\.json$ # Админские JSON-запросы
-{$faviconLine}
 
 EOT;
         return $defaultContent;

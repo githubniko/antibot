@@ -1337,7 +1337,7 @@
     <div id="ni-error-details" class="ni-error-details-wrapper">
       <div class="ni-wrapper ni-header ni-error-overview">
         <h1 data-translate="block_headline">Извините, вы были заблокированы.</h1>
-        <h2 class="ni-subheadline"><span data-translate="unable_to_access">Вы не можете получить доступ к</span> <?= $_SERVER['SERVER_NAME'] ?>
+        <h2 class="ni-subheadline"><span data-translate="unable_to_access">Вы не можете получить доступ к</span> <?= $this->Config->SERVER_NAME_NORMALIZE ?>
         </h2>
       </div><!-- /.header -->
 
@@ -1411,7 +1411,7 @@
                         const img = document.createElement('img');
                         img.src = '/favicon.ico';
                         img.className = 'heading-favicon';
-                        img.alt = lang['icon'] + ' <?= $_SERVER['SERVER_NAME'] ?>';
+                        img.alt = lang['icon'] + ' <?= $this->Config->SERVER_NAME_NORMALIZE ?>';
                         h1.insertBefore(img, h1.firstChild);
                     }
                 })

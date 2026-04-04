@@ -2,9 +2,10 @@
 if (PHP_SAPI !== 'cli') { // не вкл. защиту для CRON и локального запуска php
 
     $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+    $file_name = pathinfo($request_uri, PATHINFO_FILENAME);
 
     if (
-        pathinfo($request_uri, PATHINFO_FILENAME) != 'xhr'
+        $file_name != 'xhr' && $file_name != 'favicon'
         && !isset($isInclude)
     ) { // нужно для совместимости с подключением через .htaccess
         $isInclude = true; // блокирует повторное подключение (совместимость с подключением через .htaccess)
@@ -13,7 +14,7 @@ if (PHP_SAPI !== 'cli') { // не вкл. защиту для CRON и локал
 
         // Инициализация и запуск системы
         try {
-            $antiBot = new \WAFSystem\WAFSystem(); // Инициализация системы защиты
+            $antiBot = \WAFSystem\WAFSystem::getInstance(); // Инициализация системы защиты
             $pageCache = new \WAFSystem\PageCache($antiBot); // Инициализация модуля кеширования
 
             if ($antiBot->enabled) {

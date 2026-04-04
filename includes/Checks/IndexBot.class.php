@@ -47,8 +47,16 @@ class IndexBot extends ListBase
 
     protected function validate($domain)
     {
+        // Проверка на домен
         $pattern = '/^(?!\-)(?:[a-zA-Z\d\-]{0,62}[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/';
-        return preg_match($pattern, $domain);
+        if(preg_match($pattern, $domain))
+            return true;
+
+        // Проверка на IP-адрес
+        if(filter_var($domain, FILTER_VALIDATE_IP) !== false)
+            return true;
+        
+        return false;
     }
 
     protected function createDefaultFileContent()

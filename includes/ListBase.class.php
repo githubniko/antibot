@@ -52,7 +52,7 @@ abstract class ListBase
         $this->Lock->Lock();
         try {
             if (!$this->validate($value)) {
-                $this->Logger->log("Error: The value '$value' failed validation", [static::class]);
+                $this->Logger->log("Error: The value `$value` failed validation", [static::class]);
                 return;
             }
 
@@ -64,7 +64,7 @@ abstract class ListBase
             $entry = $this->formatEntry($value, $comment);
             $this->saveEntry($entry);
 
-            $this->Logger->logMessage("Value added to list: " . $value . " (" . $this->path . ")");
+            $this->Logger->logMessage("Added to list: " . $value . " (" . $this->path . ")");
         } finally {
             $this->Lock->Unlock();
         }
@@ -124,7 +124,7 @@ abstract class ListBase
                 $lineValue = $this->extractFromLine($line);
                 if (!empty($lineValue)) {
                     if ($this->Comparison($lineValue, $value)) {
-                        $this->Logger->log("Value found in list: " . $lineValue . " (" . $this->path . ")", [static::class]);
+                        $this->Logger->log("Found in list: `" . $lineValue . "` (" . $this->path . ")", [static::class]);
                         return true;
                     }
                 }

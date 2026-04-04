@@ -16,8 +16,12 @@ class Config
     public $HTTP_HOST;
     public $HTTPS;
     public $configFileName;
+    public $SERVER_NAME;
+    public $SERVER_NAME_NORMALIZE;
+
     private $configFile;
     private $useBooleanAsOnOff = true;
+
 
     private function __construct($documentRoot, $antibotPath, $nameFile)
     {
@@ -25,19 +29,21 @@ class Config
         $this->ANTIBOT_PATH = $antibotPath;
         $this->configFileName = $nameFile;
         $this->HTTP_HOST = getenv("HTTP_HOST");
+        $this->SERVER_NAME = $_SERVER['SERVER_NAME'];
+        $this->SERVER_NAME_NORMALIZE = \Utility\Domain::normalizeDomain($this->SERVER_NAME);
         if (isset($_SERVER['HTTPS'])) {
             $this->HTTPS =  $_SERVER['HTTPS'] === 'on' ? true : false;
         } else {
             $this->HTTPS = isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] === 'https' ? true : null;
         }
 
-        
+
         $this->BasePath = rtrim($documentRoot, "/\\") . '/' . ltrim($antibotPath, "/\\");
         $this->CachePath = $this->BasePath . 'cache/';
         $this->configFile = $this->BasePath . $this->configFileName;
-        $this->Lock = new Lock($this->CachePath . 'lock/.' . pathinfo($this->configFileName, PATHINFO_FILENAME) .'.lock');
+        $this->Lock = new Lock($this->CachePath . 'lock/.' . pathinfo($this->configFileName, PATHINFO_FILENAME) . '.lock');
 
-        if(!is_dir($this->CachePath)) {
+        if (!is_dir($this->CachePath)) {
             mkdir($this->CachePath, 0755, true);
         }
 
@@ -57,7 +63,7 @@ class Config
         if ($nameFile === null) {
             $nameFile = 'config.ini';
         }
-        
+
 
         $key = md5($documentRoot . $antibotPath . $nameFile);
 
@@ -144,7 +150,7 @@ class Config
     {
         if (preg_match('/^["\'](.*)["\']$/', $value, $matches)) {
             # для массивов
-            if(preg_match('/\,/', $matches[1])) {
+            if (preg_match('/\,/', $matches[1])) {
                 $str = str_replace(' ', '', $matches[1]);
                 return explode(',', $str);
             }

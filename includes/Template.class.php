@@ -33,7 +33,7 @@ class Template
     }
 
     # Функция для вывода страницы проверки и ввода капчи
-    function showCaptcha()
+    function showVerificationPage()
     {
         if ($this->Config->get('main', 'header404')) {
             header("HTTP/1.0 404 Not Found");
@@ -45,6 +45,7 @@ class Template
         
         $this->Logger->log("Displaying the verification page");
 
+        $wafsystem = \WAFSystem\WAFSystem::getInstance();
         require $this->Config->BasePath . "templates/template.inc.php";
         exit;
     }

@@ -81,9 +81,9 @@ class RefererChecker extends ListBase
 # ^$ # прямые заходы
 # .+ # все рефереры
 # ^http://
-# или g..le.com
-# *.yandex
-# *.mail.ru
+# или g..gle\.com
+# .*\.yandex
+# .*\.mail\.ru
 
 EOT;
         return $defaultContent;
