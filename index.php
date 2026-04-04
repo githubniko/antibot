@@ -26,10 +26,17 @@ if (PHP_SAPI !== 'cli') { // не вкл. защиту для CRON и локал
                 $antiBot->run();
             }
 
+            $fileInclude = $_SERVER["DOCUMENT_ROOT"] . "/index.php.origin";
+            if (!file_exists($fileInclude)) {
+                echo "Original index file not found: " . $fileInclude;
+                header("HTTP/1.1 500 Internal Server Error");
+                exit;
+            }
+
             if ($pageCache->enabled) {
                 echo $pageCache->Open(); // Загрузка страницы через модуль кеширования
             } else {
-                include $_SERVER["DOCUMENT_ROOT"] . "/index.php.origin";
+                include $fileInclude;
             }
         } catch (Exception $e) {
             error_log("AntiBot system failed: " . $e->getMessage());
