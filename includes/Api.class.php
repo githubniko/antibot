@@ -108,7 +108,8 @@ class Api
         }
 
         if ($status == 'block') {
-            header("HTTP/1.0 403 Forbidden");
+            // Если расскомментировать, то редирект не сработает
+           // header("HTTP/1.0 403 Forbidden");
         }
 
         if ($status != 'fail' && $status != 'no_csrf') { // не выдавать ключь для ошибки или данных без ключа
