@@ -6,58 +6,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 include "includes/autoload.php";
 
-function verifyTurnstileToken($secretKey, $token, $remoteIp = '')
-{
-    if ($secretKey === '' || $token === '') {
-        return false;
-    }
-
-    $payload = [
-        'secret' => $secretKey,
-        'response' => $token
-    ];
-
-    if (!empty($remoteIp)) {
-        $payload['remoteip'] = $remoteIp;
-    }
-
-    $postData = http_build_query($payload);
-    $responseBody = false;
-
-    if (function_exists('curl_init')) {
-        $ch = curl_init('https://challenges.cloudflare.com/turnstile/v0/siteverify');
-        curl_setopt_array($ch, [
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $postData,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 8,
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded']
-        ]);
-        $responseBody = curl_exec($ch);
-        curl_close($ch);
-    } else {
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
-                'content' => $postData,
-                'timeout' => 8
-            ]
-        ]);
-        $responseBody = @file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false, $context);
-    }
-
-    if ($responseBody === false) {
-        return false;
-    }
-
-    $decoded = json_decode($responseBody, true);
-    return is_array($decoded) && isset($decoded['success']) && $decoded['success'] === true;
-}
-
 // Не кешировать
 header('Pragma: no-cache');
 header('Expires: Thu, 18 Aug 1994 05:00:00 GMT');
@@ -121,24 +69,6 @@ try {
 
         // Запрос на установку метки
         else if ($data['func'] == $antiBot->Marker->getNameMarker() && $Api->isHiddenValue()) {
-            $captchaType = $antiBot->Config->get('main', 'captcha_type', 'checkbox');
-            if ($captchaType === 'turnstile') {
-                $turnstileToken = '';
-                if (isset($data['turnstile_token'])) {
-                    $turnstileToken = trim((string)$data['turnstile_token']);
-                } elseif (isset($data['turnstileToken'])) {
-                    $turnstileToken = trim((string)$data['turnstileToken']);
-                } elseif (isset($data['cf-turnstile-response'])) {
-                    $turnstileToken = trim((string)$data['cf-turnstile-response']);
-                }
-
-                $turnstileSecretKey = trim((string)$antiBot->Config->init('turnstile', 'secret_key', '', 'Secret key Cloudflare Turnstile (server-side verification)'));
-                if (!verifyTurnstileToken($turnstileSecretKey, $turnstileToken, $antiBot->Profile->IP)) {
-                    $antiBot->Logger->log("Turnstile server-side verification failed");
-                    $Api->endJSON('fail', ['message' => 'turnstile_verification_failed']);
-                }
-            }
-
             $antiBot->Logger->log("Successfully passed the captcha");
             $antiBot->Marker->set();
             $Api->endJSON('allow');

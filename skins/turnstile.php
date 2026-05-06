@@ -1,4 +1,84 @@
 <?
+function verifyTurnstileToken($secretKey, $token, $remoteIp = '')
+{
+    if ($secretKey === '' || $token === '') {
+        return false;
+    }
+
+    $payload = [
+        'secret' => $secretKey,
+        'response' => $token
+    ];
+
+    if (!empty($remoteIp)) {
+        $payload['remoteip'] = $remoteIp;
+    }
+
+    $postData = http_build_query($payload);
+    $responseBody = false;
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init('https://challenges.cloudflare.com/turnstile/v0/siteverify');
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $postData,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 8,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded']
+        ]);
+        $responseBody = curl_exec($ch);
+        curl_close($ch);
+    } else {
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+                'content' => $postData,
+                'timeout' => 8
+            ]
+        ]);
+        $responseBody = @file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false, $context);
+    }
+
+    if ($responseBody === false) {
+        return false;
+    }
+
+    $decoded = json_decode($responseBody, true);
+    return is_array($decoded) && isset($decoded['success']) && $decoded['success'] === true;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $Api = \WAFSystem\Api::getInstance($antiBot);
+    $data = $Api->getData();
+
+    if (isset($data['func']) && $data['func'] == $antiBot->Marker->getNameMarker() && $Api->isHiddenValue()) {
+        $turnstileToken = '';
+        if (isset($data['turnstile_token'])) {
+            $turnstileToken = trim((string)$data['turnstile_token']);
+        } elseif (isset($data['turnstileToken'])) {
+            $turnstileToken = trim((string)$data['turnstileToken']);
+        } elseif (isset($data['cf-turnstile-response'])) {
+            $turnstileToken = trim((string)$data['cf-turnstile-response']);
+        }
+
+        $turnstileSecretKey = trim((string)$antiBot->Config->get('turnstile', 'secret_key', ''));
+        if (!verifyTurnstileToken($turnstileSecretKey, $turnstileToken, $antiBot->Profile->IP)) {
+            $antiBot->Logger->log("Turnstile server-side verification failed");
+            $Api->endJSON('fail', ['message' => 'turnstile_verification_failed']);
+        }
+
+        $antiBot->Logger->log("Successfully passed the captcha");
+        $antiBot->Marker->set();
+        $Api->endJSON('allow');
+    }
+
+    $Api->endJSON('fail', ["message" => "`" . (isset($data['func']) ? $data['func'] : '') . "` not found"]);
+}
+
 $nonce = \Utility\GenerateRandomName::genKey(17);
 $verifyFuncName = \Utility\GenerateRandomName::genFuncName();
 $turnstileLoadFunc = \Utility\GenerateRandomName::genFuncName();
@@ -181,7 +261,7 @@ $language = isset($langMap[$language]) ? $language : "en";
                 return;
             }
 
-            xhr.open('POST', HTTP_ANTIBOT_PATH + 'xhr.php', true);
+            xhr.open('POST', HTTP_ANTIBOT_PATH + 'xhr.php?skin=turnstile&csrf=' + encodeURIComponent(CSRF), true);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.onload = async function() {
                 if (xhr.status < 200 || xhr.status >= 300) {
