@@ -101,32 +101,42 @@ utm_referrer = Off ; отключает альтернативный метод 
 
 ## Капча Turnstile (Cloudflare)
 
-Turnstile — это невидимая или интерактивная CAPTCHA от Cloudflare, которая не требует от пользователя решения задач вроде "выберите светофоры". Она работает в фоне и пропускает реальных пользователей автоматически. На данный момент капча работает в режиме виджета и не проводит дополнительную валидацию результатов.
+Turnstile — это CAPTCHA от Cloudflare, которая проверяет посетителя с минимальным участием пользователя.  
+В проекте проверка работает с серверной валидацией токена: клиентская и серверная логика находятся в `skins/turnstile.php`.
 
-### 1. Получите ключи Turnstile
+### 1. Включите тип капчи Turnstile
 
-Перейдите на [dash.cloudflare.com](https://dash.cloudflare.com/) → **Turnstile** → **Add site** и получите: Site Key (публичный).
-
-### 2. Вставьте Site Key в файл капчи
-
-Откройте файл `skins/turnstile.php` и укажите ваш публичный ключ:
-
-```php
-$turnstileSiteKey = "ваш_site_key_здесь";
-```
-
-### 4. Переключите тип капчи
-
-В том же файле `config.ini` в секции `[main]` установите:
+В `config.ini` задайте:
 
 ```ini
 [main]
-captcha_type = "turnstile"
+captcha_type = "turnstile" ; Тип капчи: checkbox, slider, slider_rotate, slider_zsay, animals, turnstile
 ```
 
-Доступные значения `captcha_type`: `checkbox`, `slider`, `slider_rotate`, `slider_zsay`, `animals`, `turnstile`.
+После включения `captcha_type = "turnstile"` откройте `index.php` антибота (например, `https://ваш_сайт/antibot/`) — при инициализации система создаст/использует секцию `[turnstile]`.
 
-После сохранения изменений капча Turnstile будет отображаться вместо стандартной.
+### 2. Укажите ключи Cloudflare
+
+Перейдите на [dash.cloudflare.com](https://dash.cloudflare.com/) → **Turnstile** → **Add site** и получите:
+- `site_key` (публичный)
+- `secret_key` (секретный, только для сервера)
+
+Добавьте ключи в `config.ini`:
+
+```ini
+[turnstile]
+site_key = "ваш_site_key"
+secret_key = "ваш_secret_key"
+```
+
+### 3. Как это работает
+
+- `site_key` используется в виджете в `skins/turnstile.php`;
+- токен отправляется в `skins/turnstile.php` через `xhr.php?skin=turnstile`;
+- `secret_key` используется только на сервере для запроса в Cloudflare `siteverify`;
+- при успешной проверке устанавливается marker и посетитель получает доступ.
+
+Официальная документация Cloudflare Turnstile: [https://developers.cloudflare.com/turnstile/get-started/](https://developers.cloudflare.com/turnstile/get-started/)
 
 ## Обновление
 

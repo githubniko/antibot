@@ -52,10 +52,31 @@ function verifyTurnstileToken($secretKey, $token, $remoteIp = '')
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $Api = \WAFSystem\Api::getInstance($antiBot);
-    $data = $Api->getData();
+    $sendJson = function ($status, $func = '', $extra = []) {
+        header('Content-type: application/json; charset=utf-8');
+        $res = [
+            'func' => $func,
+            'status' => $status,
+            'csrf_token' => isset($_REQUEST['csrf']) ? (string)$_REQUEST['csrf'] : ''
+        ];
+        if (!empty($extra)) {
+            $res = array_merge($res, $extra);
+        }
+        echo json_encode($res);
+        exit;
+    };
 
-    if (isset($data['func']) && $data['func'] == $antiBot->Marker->getNameMarker() && $Api->isHiddenValue()) {
+    $rawInput = file_get_contents('php://input');
+    $data = json_decode($rawInput, true);
+    if (!is_array($data)) {
+        $antiBot->Logger->log("Turnstile JSON-data is empty");
+        $sendJson('fail', '', ['message' => 'invalid_json']);
+    }
+
+    $func = isset($data['func']) ? (string)$data['func'] : '';
+    $hiddenOk = isset($_SESSION['rndname']) && $_SESSION['rndname'] === true;
+
+    if ($func === $antiBot->Marker->getNameMarker() && $hiddenOk) {
         $turnstileToken = '';
         if (isset($data['turnstile_token'])) {
             $turnstileToken = trim((string)$data['turnstile_token']);
@@ -68,15 +89,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $turnstileSecretKey = trim((string)$antiBot->Config->get('turnstile', 'secret_key', ''));
         if (!verifyTurnstileToken($turnstileSecretKey, $turnstileToken, $antiBot->Profile->IP)) {
             $antiBot->Logger->log("Turnstile server-side verification failed");
-            $Api->endJSON('fail', ['message' => 'turnstile_verification_failed']);
+            $sendJson('fail', $func, ['message' => 'turnstile_verification_failed']);
         }
 
         $antiBot->Logger->log("Successfully passed the captcha");
+        unset($_SESSION['rndname']);
         $antiBot->Marker->set();
-        $Api->endJSON('allow');
+        $sendJson('allow', $func);
     }
 
-    $Api->endJSON('fail', ["message" => "`" . (isset($data['func']) ? $data['func'] : '') . "` not found"]);
+    $sendJson('fail', $func, ["message" => "`" . $func . "` not found"]);
 }
 
 $nonce = \Utility\GenerateRandomName::genKey(17);
