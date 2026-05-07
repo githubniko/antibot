@@ -18,7 +18,11 @@ class Template
         $this->Logger = $logger;
 
         $this->Config->init('main', 'header404', false, 'отдает на заглушку 404 заголовок');        
-        $this->skin_captcha = $this->Config->init('main', 'captcha_type', $this->skin_captcha, 'Тип капчи: checkbox, slider, slider_rotate, slider_zsay, animals');
+        $this->skin_captcha = $this->Config->init('main', 'captcha_type', $this->skin_captcha, 'Тип капчи: checkbox, slider, slider_rotate, slider_zsay, animals, turnstile');
+        if ($this->skin_captcha === 'turnstile') {
+            $this->Config->init('turnstile', 'site_key', '', 'Site key Cloudflare Turnstile');
+            $this->Config->init('turnstile', 'secret_key', '', 'Secret key Cloudflare Turnstile (server-side verification)');
+        }
         $this->utm_referrer = $this->Config->init('main', 'utm_referrer', $this->utm_referrer, 'вкл/выкл');
         $this->save_referer = $this->Config->init('main', 'save_referer', $this->save_referer, 'вкл/выкл сохраненние referer в localStorage');
 
