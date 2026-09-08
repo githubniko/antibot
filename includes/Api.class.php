@@ -173,11 +173,11 @@ class Api
     /**
      * Блокирует айпи, если его нет в белых списках и других правилах исключения
      */
-    private function BlockIP($client_ip, $message)
+    public function BlockIP($client_ip, $message)
     {
         if (
             !($this->WAFSystem->WhiteListIP->isListed($client_ip)
-                || ($this->WAFSystem->IndexBot->enabled && $this->WAFSystem->IndexBot->isIndexbot($client_ip))
+                || ($this->WAFSystem->IndexBot->enabled && $this->WAFSystem->IndexBot->Checking($client_ip))
             )
         ) {
             $this->WAFSystem->BlackListIP->add($this->WAFSystem->Profile->IP, $message);
