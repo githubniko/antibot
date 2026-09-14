@@ -7,3 +7,4 @@ RedirectMatch 404 \.cache$
 RedirectMatch 404 /cache
 RedirectMatch 404 /(README|CHANGELOG|LICENSE)\.md
 RedirectMatch 404 /VERSION
+RedirectMatch 404 /cron.php
