@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.5] - 2026-09-14
+
+### Added
+- Добавлен механизм очистик cache
+- - Добавлена новая капча: greenzone
+
+### Deleted
+- Удален PTR googleusercontent.com
+
+### Fixed
+- Fix BAS BlockIP path
+
 ## [0.7.4] - 2026-04-04
 
 ### Added
