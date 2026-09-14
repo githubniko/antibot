@@ -6,7 +6,7 @@ use Exception;
 
 class Marker
 {
-    const COOKIE_PREF = 'aw_';
+    const COOKIE_KEY = 'aw_marker';
 
     private $Config;
     private $profile;
@@ -51,22 +51,21 @@ class Marker
             $time = time() + $this->expireDays * 86400;
 
         $cookie_value = $this->profile->RayID;
-        $cookie_key = self::COOKIE_PREF . $this->profile->RayIDSecret;
 
         if ($this->storageType == "awsession") {
             $Session = \WAFSystem\WAFSystem::getInstance()->Session;
-            $Session->set($cookie_key, $cookie_value, $time);
+            $Session->set(self::COOKIE_KEY, $cookie_value, $time);
 
         } else {
             if (version_compare(PHP_VERSION, '7.3.0') >= 0) {
-                setcookie($cookie_key, $cookie_value, [
+                setcookie(self::COOKIE_KEY, $cookie_value, [
                     'expires' => $time,
                     'path' => '/',
                     'httponly' => true,
                     'secure' => isset($_SERVER['HTTPS'])
                 ]);
             } else {
-                setcookie($cookie_key, $cookie_value, time() + $this->expireDays * 24 * 3600, "/");
+                setcookie(self::COOKIE_KEY, $cookie_value, time() + $this->expireDays * 24 * 3600, "/");
             }
         }
 
@@ -81,15 +80,14 @@ class Marker
 
     function isValid()
     {
-        $cookie_key = self::COOKIE_PREF . $this->profile->RayIDSecret;
         if ($this->storageType == "awsession") {
             $Session = \WAFSystem\WAFSystem::getInstance()->Session;
-            if(!is_null($Session->get($cookie_key))) {
+            if(!is_null($Session->get(self::COOKIE_KEY))) {
                 return true;
             }
                 
         } else {
-            if (isset($_COOKIE[$cookie_key])) {
+            if (isset($_COOKIE[self::COOKIE_KEY])) {
                 return true;
             }
         }
