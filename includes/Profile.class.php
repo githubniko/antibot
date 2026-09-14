@@ -41,8 +41,11 @@ class Profile
         $this->UserAgent = isset($_SERVER['HTTP_USER_AGENT']) ? mb_substr($_SERVER['HTTP_USER_AGENT'], 0, 512) : '';
         $this->Referer = isset($_SERVER['HTTP_REFERER']) ? mb_substr($_SERVER['HTTP_REFERER'], 0, 512) : '';
         $this->REQUEST_URI = isset($_SERVER['REQUEST_URI']) ? mb_substr($_SERVER['REQUEST_URI'], 0, 512) : '';
-        $this->Language = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? mb_substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en';
-        $this->LangAttr = isset($this->languageMap[$this->Language]) ? $this->languageMap[$this->Language] : "en-US";
+
+        $language = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? mb_substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en';
+        $this->Language = isset($this->languageMap[$language]) ? $language : "en";
+        $this->LangAttr = $this->languageMap[$this->Language];
+
 
         $this->isIPv6 = filter_var($this->IP, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
         $this->isMobile = isset($_SERVER['HTTP_SEC_CH_UA_MOBILE']) ? ($_SERVER['HTTP_SEC_CH_UA_MOBILE'] === '?1' ? true : false) : null; // если null, то далее определяем по косвенным признакам

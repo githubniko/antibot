@@ -4,13 +4,14 @@
 
 ### Added
 - Добавлен механизм очистик cache
-- - Добавлена новая капча: greenzone
+- Добавлена новая капча: greenzone
 
 ### Deleted
 - Удален PTR googleusercontent.com
 
 ### Fixed
 - Fix BAS BlockIP path
+- Решена проблема с интерфейсом, если язык отличается от ru/en/zh
 
 ## [0.7.4] - 2026-04-04
 
