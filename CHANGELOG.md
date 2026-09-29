@@ -5,6 +5,7 @@
 ### Added
 - Добавлен механизм очистик cache
 - Добавлена новая капча: greenzone
+- Добавлена настройка `logs.ignore_ip` для отключения логирования указанных IP-адресов
 
 ### Deleted
 - Удален PTR googleusercontent.com
