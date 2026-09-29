@@ -37,14 +37,14 @@ class Api
 
         if (empty($this->data)) {
             $message = "Error: JSON-data is empty";
-            $this->WAFSystem->Logger->log($message, [static::class]);
+            $this->WAFSystem->Logger->log($message, [get_class($this)]);
             $this->WAFSystem->GrayList->add($client_ip, $message);
             $this->endJSON('fail');
         }
 
         if (!isset($this->data['func'])) {
             $message = "Error: Param 'func' not found";
-            $this->WAFSystem->Logger->log($message, [static::class]);
+            $this->WAFSystem->Logger->log($message, [get_class($this)]);
             $this->WAFSystem->GrayList->add($client_ip, $message);
             $this->endJSON('fail');
         }
@@ -72,7 +72,7 @@ class Api
             $this->CSRF->validCSRF($this->data['csrf_token']);
         } catch (Exception $e) {
             $message = $e->getMessage();
-            $this->WAFSystem->Logger->log($message, [static::class, $this->data]);
+            $this->WAFSystem->Logger->log($message, [get_class($this), $this->data]);
             $this->WAFSystem->GrayList->add($client_ip, $message);
             $this->endJSON('fail', ['message' => $message]);
         }
@@ -93,7 +93,7 @@ class Api
         $res = ['status' => $status];
         if (!session_id()) {
             $res = "Critical error: Session session_start() not started.";
-            $this->WAFSystem->Logger->log($res, [static::class]);
+            $this->WAFSystem->Logger->log($res, [get_class($this)]);
             echo json_encode($res);
             exit;
         }

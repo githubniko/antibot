@@ -99,11 +99,15 @@ class Curl
 
 
 
-            return $response;
-        } finally {
             if (is_resource($ch)) {
                 curl_close($ch);
             }
+            return $response;
+        } catch (\Exception $e) {
+            if (is_resource($ch)) {
+                curl_close($ch);
+            }
+            throw $e;
         }
     }
 

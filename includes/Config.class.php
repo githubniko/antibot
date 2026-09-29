@@ -293,9 +293,11 @@ class Config
             }
 
             chmod($this->configFile, 0644);
-        } finally {
+        } catch (\Exception $e) {
             $this->Lock->Unlock();
+            throw $e;
         }
+        $this->Lock->Unlock();
     }
 
     public function getAll()

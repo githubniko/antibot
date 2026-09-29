@@ -37,7 +37,7 @@ abstract class ListBase
     public function isListed($value)
     {
         if (!$this->validate($value)) {
-            $this->Logger->log("Error: The value '$value' failed validation", [static::class]);
+            $this->Logger->log("Error: The value '$value' failed validation", [get_class($this)]);
             return false;
         }
 
@@ -52,12 +52,13 @@ abstract class ListBase
         $this->Lock->Lock();
         try {
             if (!$this->validate($value)) {
-                $this->Logger->log("Error: The value `$value` failed validation", [static::class]);
+                $this->Logger->log("Error: The value `$value` failed validation", [get_class($this)]);
+                $this->Lock->Unlock();
                 return;
             }
 
-
             if ($this->isListed($value)) {
+                $this->Lock->Unlock();
                 return;
             }
 
@@ -65,9 +66,11 @@ abstract class ListBase
             $this->saveEntry($entry);
 
             $this->Logger->logMessage("Added to list: " . $value . " (" . $this->path . ")");
-        } finally {
+        } catch (\Exception $e) {
             $this->Lock->Unlock();
+            throw $e;
         }
+        $this->Lock->Unlock();
     }
 
     /**
@@ -78,7 +81,7 @@ abstract class ListBase
         $arr = [];
         $file = fopen($this->absolutePath, 'r');
         if (!$file) {
-            $this->Logger->logMessage("Error reading file: " . $this->absolutePath, [static::class]);
+            $this->Logger->logMessage("Error reading file: " . $this->absolutePath, [get_class($this)]);
             return false;
         }
 
@@ -89,9 +92,11 @@ abstract class ListBase
                     array_push($arr, $lineValue);
                 }
             }
-        } finally {
+        } catch (\Exception $e) {
             fclose($file);
+            throw $e;
         }
+        fclose($file);
         return $arr;
     }
 
@@ -109,13 +114,13 @@ abstract class ListBase
     protected function checkInList($value)
     {
         if (!is_file($this->absolutePath)) {
-            $this->Logger->log("Critical error: file list not found, check parameters " . $this->listName, [static::class]);
+            $this->Logger->log("Critical error: file list not found, check parameters " . $this->listName, [get_class($this)]);
             return false;
         }
 
         $file = fopen($this->absolutePath, 'r');
         if (!$file) {
-            $this->Logger->logMessage("Error reading file: " . $this->absolutePath, [static::class]);
+            $this->Logger->logMessage("Error reading file: " . $this->absolutePath, [get_class($this)]);
             return false;
         }
 
@@ -124,14 +129,17 @@ abstract class ListBase
                 $lineValue = $this->extractFromLine($line);
                 if (!empty($lineValue)) {
                     if ($this->Comparison($lineValue, $value)) {
-                        $this->Logger->log("Found in list: `" . $lineValue . "` (" . $this->path . ")", [static::class]);
+                        $this->Logger->log("Found in list: `" . $lineValue . "` (" . $this->path . ")", [get_class($this)]);
+                        fclose($file);
                         return true;
                     }
                 }
             }
-        } finally {
+        } catch (\Exception $e) {
             fclose($file);
+            throw $e;
         }
+        fclose($file);
 
         return false;
     }
@@ -158,9 +166,11 @@ abstract class ListBase
 
                 $this->eventInitListFile();
             }
-        } finally {
+        } catch (\Exception $e) {
             $this->Lock->Unlock();
+            throw $e;
         }
+        $this->Lock->Unlock();
     }
 
     /**

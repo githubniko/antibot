@@ -38,7 +38,7 @@ class IndexBot extends ListBase
         try {
             $hostname = $this->Dns->getHostByAddr($client_ip); // Выполняем обратный DNS-запрос
         } catch (\Exception $e) {
-            $this->Logger->log($e->getMessage(), [static::class]);
+            $this->Logger->log($e->getMessage(), [get_class($this)]);
             throw new Exception($e->getMessage());
         }
         $this->Logger->log('PTR: ' . $hostname);
@@ -100,7 +100,7 @@ EOT;
                 // Выполняем прямой DNS-запрос в зависимости от типа IP
                 $resolvedRecords = $this->Dns->getRecord($hostname, $this->Profile->isIPv6 ? DNS_AAAA : DNS_A);
             } catch (\Exception $e) {
-                $this->Logger->log($e->getMessage(), [static::class]);
+                $this->Logger->log($e->getMessage(), [get_class($this)]);
                 throw new Exception($e->getMessage());
             }
 

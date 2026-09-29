@@ -14,7 +14,7 @@ class SQLiteWrapper
     {
         if (!class_exists('SQLite3')) {
             $msg = 'SQLite3 PHP extension is not loaded';
-            $this->Logger->log($msg, static::class);
+            $this->Logger->log($msg, get_class($this));
             throw new \Exception($msg);
         }
 

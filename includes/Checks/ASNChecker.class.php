@@ -73,12 +73,12 @@ class ASNChecker extends ListBase
 
     protected function eventInitListFile()
     {
-        $this->Logger->log("Create database $this->dbPath", static::class);
+        $this->Logger->log("Create database $this->dbPath", get_class($this));
         if ($this->Lock->Lock()) {
             try {
                 if (!is_file($this->dbPath)) {
                     $msg = 'Failed to create database. Check folder permissions: ' . $this->cachePath;
-                    $this->Logger->log($msg, static::class);
+                    $this->Logger->log($msg, get_class($this));
                     throw new \Exception($msg);
                 }
 
@@ -105,9 +105,11 @@ class ASNChecker extends ListBase
                 # Устанавливаем одинаковое время модификации
 
                 touch($this->absolutePath, filemtime($this->dbPath));
-            } finally {
+            } catch (\Exception $e) {
                 $this->Lock->Unlock();
+                throw $e;
             }
+            $this->Lock->Unlock();
         }
     }
 
@@ -133,22 +135,22 @@ EOT;
 
         if ($this->validate($ip) === false) {
             $msg = "Not valid ip address";
-            $this->Logger->log($msg, static::class);
+            $this->Logger->log($msg, get_class($this));
             throw new \Exception($msg);
         }
         $updateTimeDB = filemtime($this->dbPath);
         $updateTimeList = filemtime($this->absolutePath);
         if ($updateTimeDB === false)
-            $this->Logger->log("Error getting filetime (" . $this->dbPath . ")", static::class);
+            $this->Logger->log("Error getting filetime (" . $this->dbPath . ")", get_class($this));
 
         if ($updateTimeList === false)
-            $this->Logger->log("Error getting filetime (" . $this->absolutePath . ")", static::class);
+            $this->Logger->log("Error getting filetime (" . $this->absolutePath . ")", get_class($this));
 
         if ($updateTimeList > $updateTimeDB) { // обновляем базу, если изменился список ASN
-            $this->Logger->log("ASN list modified (" . $this->path . ")", static::class);
+            $this->Logger->log("ASN list modified (" . $this->path . ")", get_class($this));
             $this->updateCacheDB();
         } elseif (time() - $updateTimeDB > $this->updateTime) { // если кеш устарел
-            $this->Logger->log("Cache ASN outdated", static::class);
+            $this->Logger->log("Cache ASN outdated", get_class($this));
             $this->updateCacheDB();
         }
 
@@ -168,7 +170,7 @@ EOT;
 
     private function updateCacheDB()
     {
-        $this->Logger->log("Start ASN update from: " . $this->url, static::class);
+        $this->Logger->log("Start ASN update from: " . $this->url, get_class($this));
         if ($this->Lock->Lock()) {
             try {
                 $countASN = $countNetwork = 0;
@@ -182,7 +184,7 @@ EOT;
                 if (sizeof($arr) > 0) {
                     foreach ($arr as $value) {
                         if (!\Utility\Network::validateASN($value)) {
-                            $this->Logger->log("Invalid value ASN: $value", static::class);
+                            $this->Logger->log("Invalid value ASN: $value", get_class($this));
                             continue;
                         }
 
@@ -199,7 +201,7 @@ EOT;
                             # Вносим данные в кеш-базу
                             $obj = json_decode($res);
                             if ($obj === null || !isset($obj->prefixes)) {
-                                $this->Logger->log("Invalid JSON or missing 'subnets' in response: $res", static::class);
+                                $this->Logger->log("Invalid JSON or missing 'subnets' in response: $res", get_class($this));
                                 continue;
                             }
 
@@ -233,19 +235,19 @@ EOT;
                         }
                     }
                 }
-                $this->Logger->log("Update database, ASN: " . $countASN . " Networks: " . $countNetwork, static::class);
+                $this->Logger->log("Update database, ASN: " . $countASN . " Networks: " . $countNetwork, get_class($this));
                 if ($countASN > 0 || $countNetwork > 0) {
-                    $this->Logger->log("" . implode(", ", $arrASN) . "\n" . implode("\n", $arrNetwork), static::class);
+                    $this->Logger->log("" . implode(", ", $arrASN) . "\n" . implode("\n", $arrNetwork), get_class($this));
                 }
             } catch (\Exception $e) {
-                $this->Logger->log("Error update database: " . $e->getMessage(), static::class);
-            } finally {
-                # Устанавливаем такое же время модификации как и файл листа
-                $new_time = filemtime($this->dbPath);
-                touch($this->absolutePath, $new_time, $new_time);
-
-                $this->Lock->Unlock();
+                $this->Logger->log("Error update database: " . $e->getMessage(), get_class($this));
             }
+
+            # Устанавливаем такое же время модификации как и файл листа
+            $new_time = filemtime($this->dbPath);
+            touch($this->absolutePath, $new_time, $new_time);
+
+            $this->Lock->Unlock();
         }
     }
 

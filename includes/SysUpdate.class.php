@@ -30,20 +30,20 @@ class SysUpdate
         if ($this->enabled === true) {
             $lock = new Lock($this->Config->BasePath . '.sysupgrade.lock');
             $lock->Lock();
-            $this->Logger->log("Start upgrade", [static::class]);
+            $this->Logger->log("Start upgrade", [get_class($this)]);
             if ($this->isUpdate()) {
-                $this->Logger->log("Found new version", [static::class]);
+                $this->Logger->log("Found new version", [get_class($this)]);
 
                 if ($this->Update()) {
-                    $this->Logger->log("Updated successfully", [static::class]);
+                    $this->Logger->log("Updated successfully", [get_class($this)]);
                     $this->Config->set('sysupdate', 'lastupdate', date('Y-m-d H:i:s'));
                 } else {
-                    $this->Logger->log("Update error, please try again", [static::class]);
+                    $this->Logger->log("Update error, please try again", [get_class($this)]);
                 }
             }
             $this->Config->set('sysupdate', 'enabled', 'Off');
             $this->Config->set('sysupdate', 'version', file_get_contents($this->Config->BasePath . 'VERSION'));
-            $this->Logger->log("End upgrade", [static::class]);
+            $this->Logger->log("End upgrade", [get_class($this)]);
             $lock->Unlock();
         }
     }
@@ -61,13 +61,13 @@ class SysUpdate
         $response = curl_exec($ch);
 
         if (!$response) {
-            $this->Logger->log("Не удалось получить данные из GitHub API.", [static::class]);
+            $this->Logger->log("Не удалось получить данные из GitHub API.", [get_class($this)]);
             return null;
         }
 
         $commitData = json_decode($response, true);
         if (json_last_error() !== JSON_ERROR_NONE || !isset($commitData['commit']['committer']['date'])) {
-            $this->Logger->log($commitData['message'], [static::class]);
+            $this->Logger->log($commitData['message'], [get_class($this)]);
             return null;
         }
 
@@ -101,23 +101,23 @@ class SysUpdate
         $zipContent = $curl->fetch(is_file($zipFile) ? $zipFile : $zipUrl);
 
         if ($zipContent === false) {
-            $this->Logger->log("Не удалось скачать архив с GitHub.", [static::class]);
+            $this->Logger->log("Не удалось скачать архив с GitHub.", [get_class($this)]);
             return false;
         }
 
         if (file_put_contents($zipFile, $zipContent) === false) {
-            $this->Logger->log("Не удалось сохранить архив.", [static::class]);
+            $this->Logger->log("Не удалось сохранить архив.", [get_class($this)]);
             return false;
         }
 
         if (!class_exists('ZipArchive')) {
-            $this->Logger->log("Требуется расширение ZipArchive.", [static::class]);
+            $this->Logger->log("Требуется расширение ZipArchive.", [get_class($this)]);
             return false;
         }
 
         $zip = new \ZipArchive();
         if ($zip->open($zipFile) !== true) {
-            $this->Logger->log("Не удалось открыть архив.", [static::class]);
+            $this->Logger->log("Не удалось открыть архив.", [get_class($this)]);
             return false;
         }
 
@@ -160,7 +160,13 @@ class SysUpdate
                     if ($stream !== false) {
                         file_put_contents($filePath, $stream);
                     }
-                } finally {
+                } catch (\Exception $e) {
+                    if (is_resource($stream)) {
+                        fclose($stream);
+                    }
+                    throw $e;
+                }
+                if (is_resource($stream)) {
                     fclose($stream);
                 }
             }
@@ -185,7 +191,7 @@ class SysUpdate
 
         $lines = file($ignoreFile, FILE_IGNORE_NEW_LINES);
         if ($lines === false) {
-            $this->Logger->log("Не удалось прочитать .ignoreupdate.", [static::class]);
+            $this->Logger->log("Не удалось прочитать .ignoreupdate.", [get_class($this)]);
             return [];
         }
 

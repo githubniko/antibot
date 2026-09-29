@@ -11,6 +11,7 @@ class Logger
     private $logFile;
     private $debugEnabled;
     private $logLevel = "INFO";
+    private $ignoreIP = array();
 
     public function __construct(Config $config, Profile $profile)
     {
@@ -22,6 +23,12 @@ class Logger
         $this->config->init('logs', 'log_file', 'logs/antibot.log');
         $this->config->init('logs', 'max_size', 10, 'Максимальный размер, MB');
         $this->config->init('logs', 'rotate', 7, 'Количество файлов ротации');
+        $this->ignoreIP = $this->normalizeIPList($this->config->init(
+            'logs',
+            'ignore_ip',
+            '',
+            $this->getIgnoreIPComment()
+        ));
 
         $this->debugEnabled = $this->config->get('main', 'debug', true);
 
@@ -45,6 +52,10 @@ class Logger
             return;
         }
 
+        if ($this->shouldIgnoreIP()) {
+            return;
+        }
+
         if (is_file($this->logFile) && !is_writable($this->logFile)) {
             error_log("The logfile is not writable: " . $this->logFile);
             return;
@@ -65,6 +76,89 @@ class Logger
             $fullMessage .= " | " . json_encode($context, JSON_UNESCAPED_UNICODE);
         }
         $this->logMessage($fullMessage);
+    }
+
+    /**
+     * Проверяет, нужно ли пропустить логирование для IP текущего посетителя.
+     * @return bool
+     */
+    private function shouldIgnoreIP()
+    {
+        $ip = trim((string)$this->profile->IP);
+        return $ip !== '' && in_array($ip, $this->ignoreIP, true);
+    }
+
+    /**
+     * Преобразует строку или массив IP-адресов в уникальный валидный список.
+     * @param string|array $value
+     * @return array
+     */
+    private function normalizeIPList($value)
+    {
+        if (is_array($value)) {
+            $items = $value;
+        } else {
+            $value = trim((string)$value);
+            if ($value === '') {
+                return array();
+            }
+            $items = preg_split('/[\s,;]+/', $value, -1, PREG_SPLIT_NO_EMPTY);
+        }
+
+        $ips = array();
+        foreach ($items as $item) {
+            $ip = trim((string)$item);
+            if ($ip !== '' && filter_var($ip, FILTER_VALIDATE_IP) !== false) {
+                $ips[$ip] = true;
+            }
+        }
+
+        return array_keys($ips);
+    }
+
+    /**
+     * Формирует комментарий к параметру ignore_ip с примером IP из DNS домена.
+     * @return string
+     */
+    private function getIgnoreIPComment()
+    {
+        $comment = 'IP-адреса, для которых не писать записи в лог, через запятую.';
+        $localIP = $this->getHostIPList();
+        if (!empty($localIP)) {
+            $comment .= ' DNS IP сайта: ignore_ip = "' . implode(',', $localIP) . '"';
+        } else {
+            $comment .= ' Локальные IP сайта можно определить DNS-запросом домена, как в WhiteListIP.';
+        }
+        return $comment;
+    }
+
+    /**
+     * Возвращает A/AAAA адреса текущего HTTP host.
+     * @return array
+     */
+    private function getHostIPList()
+    {
+        $host = isset($this->profile->Host) ? trim((string)$this->profile->Host) : '';
+        if ($host === '') {
+            return array();
+        }
+
+        $records = @dns_get_record($host, DNS_A + DNS_AAAA);
+        if (!is_array($records) || empty($records)) {
+            return array();
+        }
+
+        $ips = array();
+        foreach ($records as $record) {
+            if (isset($record['type']) && $record['type'] === 'A' && !empty($record['ip'])) {
+                $ips[$record['ip']] = true;
+            }
+            if (isset($record['type']) && $record['type'] === 'AAAA' && !empty($record['ipv6'])) {
+                $ips[$record['ipv6']] = true;
+            }
+        }
+
+        return array_keys($ips);
     }
 
     /**

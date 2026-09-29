@@ -40,7 +40,7 @@ class TorChecker extends ListBase
         try {
             $defaultContent = $this->DownloadList();
         } catch (\Exception $e) {
-            $this->Logger->log($e->getMessage(), [static::class]);
+            $this->Logger->log($e->getMessage(), [get_class($this)]);
             return "";
         }
 
@@ -74,16 +74,19 @@ class TorChecker extends ListBase
             ) {
                 $this->Lock->Lock();
                 try {
-                    if (empty($this->createDefaultFileContent())) {
+                    $defaultContent = $this->createDefaultFileContent();
+                    if (empty($defaultContent)) {
                         throw new Exception("error download list");
                     }
                     $this->saveListFile();
-                } finally {
+                } catch (\Exception $e) {
                     $this->Lock->Unlock();
+                    throw $e;
                 }
+                $this->Lock->Unlock();
             }
         } catch (\Exception $e) {
-            $this->Logger->log("HTTP method error: " . $e->getMessage(), [static::class]);
+            $this->Logger->log("HTTP method error: " . $e->getMessage(), [get_class($this)]);
             $new_time = time();
             touch($this->absolutePath, $new_time, $new_time); // изменяем время файла, чтобы не было частых обращений к серверу списков
         }
@@ -116,29 +119,28 @@ class TorChecker extends ListBase
         $originalTimeout = ini_get('default_socket_timeout');
         ini_set('default_socket_timeout', $timeout);
 
+        $reversedIp = implode('.', array_reverse(explode('.', $ip)));
+        $dnsQuery = $reversedIp . '.dnsel.torproject.org';
+
+        $cacheDir = $this->Config->CachePath . 'dnstor';
+        $driver = new \Cache\FileCacheDriver($cacheDir);
+        $Dns = new \Cache\DnsCache($driver);
+
         try {
-            $reversedIp = implode('.', array_reverse(explode('.', $ip)));
-            $dnsQuery = $reversedIp . '.dnsel.torproject.org';
+            $records = $Dns->getRecord($dnsQuery, DNS_A);
 
-            $cacheDir = $this->Config->CachePath . 'dnstor';
-            $driver = new \Cache\FileCacheDriver($cacheDir);
-            $Dns = new \Cache\DnsCache($driver);
-
-            try {
-                $records = $Dns->getRecord($dnsQuery, DNS_A);
-
-                if (!empty($records) && isset($records[0]['ip']) && $records[0]['ip'] === '127.0.0.2') {
-                    return true;
-                }
-            } catch (\Exception $e) {
-                throw $e;
-                // throw new Exception("Error: DNS is not available ");
+            if (!empty($records) && isset($records[0]['ip']) && $records[0]['ip'] === '127.0.0.2') {
+                ini_set('default_socket_timeout', $originalTimeout);
+                return true;
             }
-
-            return false;
-        } finally {
+        } catch (\Exception $e) {
             ini_set('default_socket_timeout', $originalTimeout);
+            throw $e;
+            // throw new Exception("Error: DNS is not available ");
         }
+
+        ini_set('default_socket_timeout', $originalTimeout);
+        return false;
     }
 
     /**
