@@ -161,12 +161,12 @@ class SysUpdate
                         file_put_contents($filePath, $stream);
                     }
                 } catch (\Exception $e) {
-                    if (is_resource($stream)) {
+                    if ($stream !== false) {
                         fclose($stream);
                     }
                     throw $e;
                 }
-                if (is_resource($stream)) {
+                if ($stream !== false) {
                     fclose($stream);
                 }
             }

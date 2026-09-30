@@ -1,4 +1,4 @@
-<?
+<?php
 $nonce = \Utility\GenerateRandomName::genKey(17);
 $funcName = \Utility\GenerateRandomName::genFuncName();
 $tagCheckbox = Utility\GenerateRandomName::genFuncName(4, 6);

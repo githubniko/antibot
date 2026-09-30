@@ -1,4 +1,4 @@
-<?
+<?php
 $wafsystem = \WAFSystem\WAFSystem::getInstance();
 ?><!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="<?php echo $wafsystem->Profile->LangAttr ?>"> <![endif]-->
 <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="<?php echo $wafsystem->Profile->LangAttr ?>"> <![endif]-->

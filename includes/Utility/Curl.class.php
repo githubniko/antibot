@@ -61,6 +61,10 @@ class Curl
         }
 
         $ch = curl_init();
+        if ($ch === false) {
+            throw new \RuntimeException("Failed to initialize curl");
+        }
+
         $verboseStream = fopen('php://temp', 'w+');
         curl_setopt($ch, CURLOPT_VERBOSE, true);
         curl_setopt($ch, CURLOPT_STDERR, $verboseStream);
@@ -99,12 +103,12 @@ class Curl
 
 
 
-            if (is_resource($ch)) {
+            if ($ch !== false) {
                 curl_close($ch);
             }
             return $response;
         } catch (\Exception $e) {
-            if (is_resource($ch)) {
+            if ($ch !== false) {
                 curl_close($ch);
             }
             throw $e;

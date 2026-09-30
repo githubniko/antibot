@@ -1,4 +1,4 @@
-<?
+<?php
 $tagID = Utility\GenerateRandomName::genFuncName(4, 6);
 $wafsystem = \WAFSystem\WAFSystem::getInstance();
 ?><html lang="<?php echo $wafsystem->Profile->LangAttr ?>" dir="ltr">
@@ -515,7 +515,7 @@ $wafsystem = \WAFSystem\WAFSystem::getInstance();
         }
 
         function loadModules() {
-            <?
+            <?php
             echo $wafsystem->FingerPrint->enabled ? "loadScript('js/fp.min.js?" . filemtime($wafsystem->Config->DOCUMENT_ROOT . $wafsystem->Config->ANTIBOT_PATH . "js/fp.min.js") . "', initFingerPrint);" : '';
             echo $wafsystem->FPSChecker->enabled ? "loadScript('js/frame_rate.js?" . filemtime($wafsystem->Config->DOCUMENT_ROOT . $wafsystem->Config->ANTIBOT_PATH . "js/frame_rate.js") . "', callbackFrameRate);" : '';
             ?>

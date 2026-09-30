@@ -1,4 +1,4 @@
-<?
+<?php
 $nonce = \Utility\GenerateRandomName::genKey(17);
 $funcName = \Utility\GenerateRandomName::genFuncName();
 $funcNameSucc = Utility\GenerateRandomName::genFuncName(4, 6);
