@@ -23,12 +23,18 @@ class Logger
         $this->config->init('logs', 'log_file', 'logs/antibot.log');
         $this->config->init('logs', 'max_size', 10, 'Максимальный размер, MB');
         $this->config->init('logs', 'rotate', 7, 'Количество файлов ротации');
-        $this->ignoreIP = $this->normalizeIPList($this->config->init(
-            'logs',
-            'ignore_ip',
-            '',
-            $this->getIgnoreIPComment()
-        ));
+        $ignoreIP = $this->config->get('logs', 'ignore_ip');
+        if ($ignoreIP === NULL) {
+            $hostIPs = $this->getHostIPList();
+            $defaultIPs = $this->normalizeIPList(array_merge(array('127.0.0.1'), $hostIPs));
+            $ignoreIP = $this->config->init(
+                'logs',
+                'ignore_ip',
+                implode(',', $defaultIPs),
+                $this->getIgnoreIPComment($hostIPs)
+            );
+        }
+        $this->ignoreIP = $this->normalizeIPList($ignoreIP);
 
         $this->debugEnabled = $this->config->get('main', 'debug', true);
 
@@ -120,10 +126,9 @@ class Logger
      * Формирует комментарий к параметру ignore_ip с примером IP из DNS домена.
      * @return string
      */
-    private function getIgnoreIPComment()
+    private function getIgnoreIPComment($localIP)
     {
-        $comment = 'IP-адреса, для которых не писать записи в лог, через запятую.';
-        $localIP = $this->getHostIPList();
+        $comment = 'IP-адреса, для которых не писать записи в лог, через запятую. Пустое значение отключает фильтрацию.';
         if (!empty($localIP)) {
             $comment .= ' DNS IP сайта: ignore_ip = "' . implode(',', $localIP) . '"';
         } else {
@@ -149,8 +154,6 @@ class Logger
         }
 
         $ips = array();
-        $ips['127.0.0.1'] = true;
-        
         foreach ($records as $record) {
             if (isset($record['type']) && $record['type'] === 'A' && !empty($record['ip'])) {
                 $ips[$record['ip']] = true;
