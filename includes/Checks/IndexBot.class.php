@@ -20,21 +20,28 @@ class IndexBot extends ListBase
 
         $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled, 'пропускать поисковых ботов');
 
-        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
-        if (empty($file)) {
-            $file = "lists/" . $this->listName;
-            $config->set($this->modulName, $this->listName, $file);
+        $fileName = $config->get($this->modulName, $this->listName);
+        if ($fileName === NULL) {
+            $fileName = "lists/" . $this->listName;
+            $config->set($this->modulName, $this->listName, $fileName, 'список');
+        }
+        $fileName = ltrim($fileName, "/\\");
+        if (empty($fileName)) { // Пустой путь отключает проверку по списку.
+            $this->enabled = false;
+            return;
         }
 
         $cacheDir = $config->CachePath . 'dns';
         $driver = new \Cache\FileCacheDriver($cacheDir);
         $this->Dns = new \Cache\DnsCache($driver);
-        parent::__construct($file, $config, $logger);
+        parent::__construct($fileName, $config, $logger);
     }
 
     # Функция проверяет ip на индексирующего бота
     public function Checking($client_ip)
     {
+        if (!$this->enabled) return false;
+
         try {
             $hostname = $this->Dns->getHostByAddr($client_ip); // Выполняем обратный DNS-запрос
         } catch (\Exception $e) {

@@ -36,6 +36,10 @@ abstract class ListBase
      */
     public function isListed($value)
     {
+        if ($this->absolutePath === null) {
+            return false;
+        }
+
         if (!$this->validate($value)) {
             $this->Logger->log("Error: The value '$value' failed validation", [get_class($this)]);
             return false;
@@ -49,6 +53,10 @@ abstract class ListBase
      */
     public function add($value, $comment = '')
     {
+        if ($this->absolutePath === null) {
+            return;
+        }
+
         $this->Lock->Lock();
         try {
             if (!$this->validate($value)) {
@@ -78,6 +86,10 @@ abstract class ListBase
      */
     public function readToArray()
     {
+        if ($this->absolutePath === null) {
+            return [];
+        }
+
         $arr = [];
         $file = fopen($this->absolutePath, 'r');
         if (!$file) {

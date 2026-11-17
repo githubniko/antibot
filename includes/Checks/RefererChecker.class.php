@@ -32,16 +32,18 @@ class RefererChecker extends ListBase
         $this->referer = $config->init($this->modulName, 'referer', $this->referer, 'ALLOW - разрешить все реферера, кроме списков; BLOCK - блокировать всех, кроме списков; CAPTCHA - капча; SKIP - пропустить правило');
         $this->HTTP_HOST = $config->HTTP_HOST;
 
-        $listName = $config->get($this->modulName, $this->listName);
-        $file = ltrim($listName, "/\\");
-        if ($listName === NULL) {
-            $file = "lists/" . $this->listName;
-            $config->set($this->modulName, $this->listName, $file, 'список');
+        $fileName = $config->get($this->modulName, $this->listName);
+        if ($fileName === NULL) {
+            $fileName = "lists/" . $this->listName;
+            $config->set($this->modulName, $this->listName, $fileName, 'список');
+        }
+        $fileName = ltrim($fileName, "/\\");
+        if (empty($fileName)) { // Пустой путь отключает проверку по списку.
+            $this->enabled = false;
+            return;
         }
 
-        if (!empty($listName)) { // если лист включен, то загружаем или созаем его 
-            parent::__construct($file, $config, $logger);
-        }
+        parent::__construct($fileName, $config, $logger);
     }
 
     /**
@@ -49,6 +51,8 @@ class RefererChecker extends ListBase
      */
     public function isDirect($referer)
     {
+        if (!$this->enabled) return false;
+
         return $this->direct == $this->action
             && (empty($referer) || mb_eregi("^http(s*):\/\/" . $this->HTTP_HOST, $referer)); // если реф пуст или содержит локальный домен
     }
@@ -58,6 +62,8 @@ class RefererChecker extends ListBase
      */
     public function isReferer($referer)
     {
+        if (!$this->enabled) return false;
+
         return
             $this->referer == $this->action
             && (!empty($referer) && !mb_eregi("^http(s*):\/\/" . $this->HTTP_HOST, $referer)); // если реф не пуст и содержит чужой домен

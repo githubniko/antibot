@@ -1,4 +1,5 @@
 <?php
+
 namespace WAFSystem;
 
 class UserAgentChecker extends ListBase
@@ -6,11 +7,11 @@ class UserAgentChecker extends ListBase
     protected $listName = 'whitelist_useragent';
 
     public $enabled = true;
-    
+
     private $modulName = 'useragent_checker';
     private $minLength = 5;
     private $maxLength = 512;
-    
+
 
     public function __construct(Config $config, Logger $logger, $params = [])
     {
@@ -23,21 +24,22 @@ class UserAgentChecker extends ListBase
                 }
             }
         }
-        
+
         $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
         $this->minLength = $config->init($this->modulName, 'min_length', $this->minLength, 'минимальная длина user-agent');
         $this->maxLength = $config->init($this->modulName, 'max_length', $this->maxLength, 'максимальная длина user-agent');
 
-        $listName = $config->get($this->modulName, $this->listName);
-        $file = ltrim($listName, "/\\");
-        if ($listName === NULL) {
-            $file = "lists/" . $this->listName;
-            $config->set($this->modulName, $this->listName, $file, 'список');
+        $fileName = $config->get($this->modulName, $this->listName);
+        if ($fileName === NULL) {
+            $fileName = "lists/" . $this->listName;
+            $config->set($this->modulName, $this->listName, $fileName, 'список');
         }
-
-        if (!empty($listName)) { // если лист включен, то загружаем или созаем его 
-            parent::__construct($file, $config, $logger);
+        $fileName = ltrim($fileName, "/\\");
+        if (empty($fileName)) { // Пустой путь отключает проверку по списку.
+            $this->enabled = false;
+            return;
         }
+        parent::__construct($fileName, $config, $logger);
     }
 
     protected function createDefaultFileContent()

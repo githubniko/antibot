@@ -20,13 +20,18 @@ class FingerPrint extends ListBase
 
         // $this->Config->init('checks', 'fingerprint', true, 'блокировка по FingerPrint');
 
-        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
-        if (empty($file)) {
-            $file = "lists/" . $this->listName;
-            $config->set($this->modulName, $this->listName, $file);
+        $fileName = $config->get($this->modulName, $this->listName);
+        if ($fileName === NULL) {
+            $fileName = "lists/" . $this->listName;
+            $config->set($this->modulName, $this->listName, $fileName, 'список');
+        }
+        $fileName = ltrim($fileName, "/\\");
+        if (empty($fileName)) { // Пустой путь отключает проверку по списку.
+            $this->enabled = false;
+            return;
         }
 
-        parent::__construct($file, $config, $logger);
+        parent::__construct($fileName, $config, $logger);
     }
 
     public function Checking($fp)

@@ -24,19 +24,18 @@ class RequestChecker extends ListBase
         }
         $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled, 'исключения для указанных URL');
 
-        $listName = $config->get($this->modulName, $this->listName);
-        $file = ltrim($listName, "/\\");
-        if ($listName === NULL) {
-            $file = "lists/" . $this->listName;
-            $config->set($this->modulName, $this->listName, $file, 'список');
+        $fileName = $config->get($this->modulName, $this->listName);
+        if ($fileName === NULL) {
+            $fileName = "lists/" . $this->listName;
+            $config->set($this->modulName, $this->listName, $fileName, 'список');
         }
-        
-        if(empty($listName)) {
+        $fileName = ltrim($fileName, "/\\");
+        if (empty($fileName)) { // Пустой путь отключает проверку по списку.
             $this->enabled = false;
             return;
         }
 
-        parent::__construct($file, $config, $logger);
+        parent::__construct($fileName, $config, $logger);
     }
 
     protected function createDefaultFileContent()

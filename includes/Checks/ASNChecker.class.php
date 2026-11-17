@@ -35,14 +35,13 @@ class ASNChecker extends ListBase
 
         $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
 
-        $listName = $config->get($this->modulName, $this->listName); // запрашивает путь к файлу со списком
-        $file = ltrim($listName, "/\\");
-        if ($listName === NULL) { // Если в конфиге нет параметра, то создаем
-            $file = "lists/" . $this->listName;
-            $config->set($this->modulName, $this->listName, $file, 'список');
+        $fileName = $config->get($this->modulName, $this->listName);
+        if ($fileName === NULL) {
+            $fileName = "lists/" . $this->listName;
+            $config->set($this->modulName, $this->listName, $fileName, 'список');
         }
-
-        if (empty($listName)) { // Если параметр пуст, то отключаем проверку по списку
+        $fileName = ltrim($fileName, "/\\");
+        if (empty($fileName)) { // Пустой путь отключает проверку по списку.
             $this->enabled = false;
             return;
         }
@@ -62,7 +61,7 @@ class ASNChecker extends ListBase
 
         $this->db = new \Utility\SQLiteWrapper($this->dbPath, $logger);
 
-        parent::__construct($file, $config, $logger);
+        parent::__construct($fileName, $config, $logger);
 
         # если файл удален внучную и таблица стерлась, то создаем заново
         $tableCheck = $this->db->query("SELECT name FROM sqlite_master WHERE name='ip_asn_v4' OR name='ip_asn_v6'");
@@ -131,6 +130,8 @@ EOT;
 
     public function Checking($ip)
     {
+        if (!$this->enabled) return false;
+
         $this->Lock->waitForUnlock(); // ждем разрешение класса блокировки процесса
 
         if ($this->validate($ip) === false) {

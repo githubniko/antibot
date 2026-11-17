@@ -12,13 +12,18 @@ class WhiteListIP extends ListBase
     {
         $this->enabled = $config->init($this->modulName, 'enabled', $this->enabled);
 
-        $file = ltrim($config->get($this->modulName, $this->listName, ''), "/\\");
-        if (empty($file)) {
-            $file = "lists/" . $this->listName;
-            $config->set($this->modulName, $this->listName, $file, 'белый список');
+        $fileName = $config->get($this->modulName, $this->listName);
+        if ($fileName === NULL) {
+            $fileName = "lists/" . $this->listName;
+            $config->set($this->modulName, $this->listName, $fileName, 'белый список');
+        }
+        $fileName = ltrim($fileName, "/\\");
+        if (empty($fileName)) { // Пустой путь отключает проверку по списку.
+            $this->enabled = false;
+            return;
         }
 
-        parent::__construct($file, $config, $logger);
+        parent::__construct($fileName, $config, $logger);
     }
 
     protected function eventInitListFile()
