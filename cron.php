@@ -32,11 +32,17 @@ $configError = null;
 if (!is_file($configFile) || !is_readable($configFile)) {
     $configError = "Конфигурация недоступна; очистка сессий отменена: $configFile";
 } else {
-    $settings = @parse_ini_file($configFile, true, INI_SCANNER_RAW);
-    if ($settings === false) {
-        $configError = "Не удалось разобрать конфигурацию; очистка сессий отменена: $configFile";
-    } else {
-        $days = isset($settings['cookie']['expire_days']) ? $settings['cookie']['expire_days'] : '30';
+    require_once dirname($scriptPath) . '/includes/Lock.class.php';
+    require_once dirname($scriptPath) . '/includes/Utility/Domain.class.php';
+    require_once dirname($scriptPath) . '/includes/Config.class.php';
+    // Config использует SERVER_NAME, которого обычно нет в CLI.
+    $hadServerName = isset($_SERVER['SERVER_NAME']);
+    if (!$hadServerName) $_SERVER['SERVER_NAME'] = '';
+    set_error_handler('cleanupConfigError');
+    try {
+        $config = \WAFSystem\Config::getInstance(dirname($scriptPath), '/', 'config.ini');
+        // Только get(): не добавляем параметры и не перезаписываем файл.
+        $days = $config->get('cookie', 'expire_days', 30);
         if (!is_scalar($days) || !preg_match('/^[0-9]+$/', (string)$days)
             || (float)$days <= 0 || (float)$days > PHP_INT_MAX / 86400) {
             $configError = 'Некорректное cookie.expire_days; очистка сессий отменена.';
@@ -44,6 +50,11 @@ if (!is_file($configFile) || !is_readable($configFile)) {
             $sessionMinutes = (int)$days * 1440;
             $targetDirs['sessid'] = $sessionMinutes;
         }
+    } catch (\Exception $e) {
+        $configError = 'Не удалось прочитать конфигурацию; очистка сессий отменена: ' . $e->getMessage();
+    } finally {
+        restore_error_handler();
+        if (!$hadServerName) unset($_SERVER['SERVER_NAME']);
     }
 }
 
@@ -64,6 +75,13 @@ foreach ($targetDirs as $dirName => $minutes) {
 echo sprintf("Удалено файлов: %d; каталогов: %d; пропущено: %d; ошибок: %d\n",
     $stats['files'], $stats['directories'], $stats['skipped'], $stats['errors']);
 exit($stats['errors'] > 0 ? 1 : 0);
+
+/** Ошибки чтения Config не должны приводить к очистке с неверным сроком. */
+function cleanupConfigError($severity, $message, $file, $line)
+{
+    if (!(error_reporting() & $severity)) return false;
+    throw new \ErrorException($message, 0, $severity, $file, $line);
+}
 
 function cleanupError($message, &$stats)
 {
