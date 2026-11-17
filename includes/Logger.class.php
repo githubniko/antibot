@@ -31,7 +31,7 @@ class Logger
                 'logs',
                 'ignore_ip',
                 implode(',', $defaultIPs),
-                $this->getIgnoreIPComment($hostIPs)
+                $this->getIgnoreIPComment()
             );
         }
         $this->ignoreIP = $this->normalizeIPList($ignoreIP);
@@ -123,18 +123,12 @@ class Logger
     }
 
     /**
-     * Формирует комментарий к параметру ignore_ip с примером IP из DNS домена.
+     * Формирует комментарий к параметру ignore_ip.
      * @return string
      */
-    private function getIgnoreIPComment($localIP)
+    private function getIgnoreIPComment()
     {
-        $comment = 'IP-адреса, для которых не писать записи в лог, через запятую. Пустое значение отключает фильтрацию.';
-        if (!empty($localIP)) {
-            $comment .= ' DNS IP сайта: ignore_ip = "' . implode(',', $localIP) . '"';
-        } else {
-            $comment .= ' Локальные IP сайта можно определить DNS-запросом домена, как в WhiteListIP.';
-        }
-        return $comment;
+        return 'IP-адреса, для которых не писать записи в лог, через запятую.';
     }
 
     /**
