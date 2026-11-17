@@ -15,6 +15,12 @@ if ($scriptPath === false)
 $cahceDir = '/cache/';
 $baseDir = dirname($scriptPath). $cahceDir;
 
+// Не допускаем перенаправление всего дерева кэша через симлинк.
+if (is_link(rtrim($baseDir, '/'))) {
+    fwrite(STDERR, "Ошибка: каталог cache является символической ссылкой.\n");
+    exit(1);
+}
+
 // Массив с именами целевых папок
 $targetDirs = array(
     'dns',
@@ -24,6 +30,11 @@ $targetDirs = array(
 foreach ($targetDirs as $dirName) {
     $fullPath = $baseDir . $dirName;
     
+    if (is_link($fullPath)) {
+        fwrite(STDERR, "Пропущена символическая ссылка: $fullPath\n");
+        continue;
+    }
+
     // Проверяем, существует ли директория
     if (is_dir($fullPath)) {
         // Удаляем файлы старше 24 часов (1440 минут)
@@ -42,6 +53,10 @@ foreach ($targetDirs as $dirName) {
  */
 function deleteOldFiles($directory, $minutes)
 {
+    if (is_link($directory)) {
+        return;
+    }
+
     $cutoffTime = time() - ($minutes * 60);
     
     // Открываем директорию
@@ -54,6 +69,9 @@ function deleteOldFiles($directory, $minutes)
         }
         
         $filePath = $directory . '/' . $item;
+        if (is_link($filePath)) {
+            continue;
+        }
         
         // Если это файл и он старше заданного времени
         if (is_file($filePath) && filemtime($filePath) < $cutoffTime) {
