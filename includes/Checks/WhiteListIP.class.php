@@ -28,6 +28,7 @@ class WhiteListIP extends ListBase
 
     protected function eventInitListFile()
     {
+        $this->add("127.0.0.1");
         $resolvedRecords = dns_get_record($_SERVER["HTTP_HOST"], DNS_A + DNS_AAAA);
 
         // Проверяем, совпадает ли исходный IP с одним из разрешенных

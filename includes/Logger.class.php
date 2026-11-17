@@ -149,6 +149,8 @@ class Logger
         }
 
         $ips = array();
+        $ips['127.0.0.1'] = true;
+        
         foreach ($records as $record) {
             if (isset($record['type']) && $record['type'] === 'A' && !empty($record['ip'])) {
                 $ips[$record['ip']] = true;
